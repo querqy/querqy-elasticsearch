@@ -1,9 +1,11 @@
 package querqy.elasticsearch.query;
 
 import static org.elasticsearch.index.query.AbstractQueryBuilder.DEFAULT_BOOST;
+import static querqy.lucene.rewrite.SearchFieldsAndBoosting.*;
 
 import org.elasticsearch.common.ParseField;
 import querqy.lucene.QuerySimilarityScoring;
+import querqy.lucene.rewrite.SearchFieldsAndBoosting;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -75,4 +77,40 @@ public interface RequestUtils {
 
         }
     }
+
+    static FieldBoostModel paramToFieldBoostModel(final String paramValue, final ParseField field) {
+        if (paramValue == null) {
+            return null;
+        } else {
+            switch (paramValue) {
+                case "prms":
+                    return FieldBoostModel.PRMS;
+                case "fixed":
+                    return FieldBoostModel.FIXED;
+                // TODO: can we handle FieldBoostModel.NONE?;
+                default:
+                    throw new IllegalArgumentException("Invalid value for " + field.getPreferredName() + ": " +
+                            paramValue);
+            }
+        }
+    }
+
+    static Optional<String> fieldBoostModelToString(final FieldBoostModel fieldBoostModel) {
+        if (fieldBoostModel == null) {
+            return Optional.empty();
+        }
+        switch(fieldBoostModel) {
+            case FIXED:
+                return Optional.of("fixed"); // FIXME: use constants
+            case PRMS:
+                return Optional.of("prms"); // FIXME: use constants
+            // TODO: can we handle FieldBoostModel.NONE?;
+            default:
+                throw new IllegalStateException("fieldBoostModel set to unknown value: " +
+                        fieldBoostModel);
+
+        }
+    }
+
+
 }

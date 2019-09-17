@@ -1,5 +1,7 @@
 package querqy.elasticsearch.query;
 
+import static querqy.elasticsearch.query.RequestUtils.fieldBoostModelToString;
+import static querqy.elasticsearch.query.RequestUtils.paramToFieldBoostModel;
 import static querqy.elasticsearch.query.RequestUtils.paramToQueryFieldsAndBoosting;
 import static querqy.elasticsearch.query.RequestUtils.paramToQuerySimilarityScoring;
 
@@ -16,6 +18,8 @@ import org.elasticsearch.index.query.QueryShardContext;
 import querqy.elasticsearch.QuerqyProcessor;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.QuerySimilarityScoring;
+import querqy.lucene.rewrite.SearchFieldsAndBoosting;
+import querqy.lucene.rewrite.SearchFieldsAndBoosting.FieldBoostModel;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -23,20 +27,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder> {
 
     public static final String NAME = "querqy";
 
-    private static final ParseField FIELD_TIE_BREAKER = new ParseField("tie_breaker");
-    private static final ParseField FIELD_MINIMUM_SHOULD_MATCH = new ParseField("minimum_should_match");
-
-    private static final ParseField FIELD_QUERY_FIELDS = new ParseField("query_fields");
-    private static final ParseField FIELD_REWRITERS = new ParseField("rewriters");
-    private static final ParseField FIELD_GENERATED_QUERY_FIELDS = new ParseField("generated_query_fields");
-
     private static final ParseField FIELD_MATCHING_QUERY = new ParseField("matching_query");
     private static final ParseField FIELD_BOOSTING_QUERIES = new ParseField("boosting_queries");
+
+    private static final ParseField FIELD_TIE_BREAKER = new ParseField("tie_breaker");
+    private static final ParseField FIELD_MINIMUM_SHOULD_MATCH = new ParseField("minimum_should_match");
+    private static final ParseField FIELD_QUERY_FIELDS = new ParseField("query_fields");
+    private static final ParseField FIELD_FIELD_BOOST_MODEL = new ParseField("field_boost_model");
+    private static final ParseField FIELD_GENERATED_QUERY_FIELDS = new ParseField("generated_query_fields");
+
+    private static final ParseField FIELD_REWRITERS = new ParseField("rewriters");
 
 
 
@@ -48,6 +54,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         declareStandardFields(PARSER);
         PARSER.declareFloat(QuerqyQueryBuilder::setTieBreaker, FIELD_TIE_BREAKER);
         PARSER.declareString(QuerqyQueryBuilder::setMinimumShouldMatch, FIELD_MINIMUM_SHOULD_MATCH);
+        PARSER.declareString(QuerqyQueryBuilder::setFieldBoostModel, FIELD_FIELD_BOOST_MODEL);
         PARSER.declareStringArray(QuerqyQueryBuilder::setQueryFieldsAndBoostings, FIELD_QUERY_FIELDS);
         PARSER.declareStringArray(QuerqyQueryBuilder::setRewriters, FIELD_REWRITERS);
         PARSER.declareStringArray(QuerqyQueryBuilder::setGeneratedQueryFieldsAndBoostings,
@@ -65,6 +72,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     private Map<String, Float> generatedQueryFieldsAndBoostings;
     private BoostingQueries boostingQueries = null;
     private MatchingQuery matchingQuery = null;
+    private FieldBoostModel fieldBoostModel = null;
 
 
     private QuerqyProcessor querqyProcessor;
@@ -97,10 +105,16 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         }
 
         minimumShouldMatch = in.readOptionalString();
-        rewriters = in.readStringList();
+
         tieBreaker = in.readOptionalFloat();
 
+        final String strFieldBoostModel = in.readOptionalString();
+        fieldBoostModel = strFieldBoostModel == null
+                ? null : FieldBoostModel.valueOf(strFieldBoostModel);
+
         boostingQueries = in.readOptionalWriteable(BoostingQueries::new);
+
+        rewriters = in.readStringList();
     }
 
     @Override
@@ -118,15 +132,18 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         }
 
         out.writeOptionalString(minimumShouldMatch);
-        out.writeStringCollection(rewriters);
         out.writeOptionalFloat(tieBreaker);
+        out.writeOptionalString(fieldBoostModel == null ? null : fieldBoostModel.name());
         out.writeOptionalWriteable(boostingQueries);
+
+        out.writeStringCollection(rewriters);
     }
 
     @Override
     protected void doXContent(final XContentBuilder builder, final Params params) throws IOException {
         builder.startObject(NAME);
         printBoostAndQueryName(builder);
+
         builder.field(FIELD_MATCHING_QUERY.getPreferredName(), matchingQuery);
 
         builder.field(FIELD_QUERY_FIELDS.getPreferredName(), queryFields);
@@ -143,6 +160,21 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
             builder.field(FIELD_MINIMUM_SHOULD_MATCH.getPreferredName(), minimumShouldMatch);
         }
 
+        if (tieBreaker != null) {
+            builder.field(FIELD_TIE_BREAKER.getPreferredName(), tieBreaker);
+        }
+
+        if (fieldBoostModel != null) {
+            final Optional<String> strFieldBoostModel = fieldBoostModelToString(fieldBoostModel);
+            if (strFieldBoostModel.isPresent()) {
+                builder.field(FIELD_FIELD_BOOST_MODEL.getPreferredName(), strFieldBoostModel);
+            }
+        }
+
+        if (boostingQueries != null) {
+            builder.field(FIELD_BOOSTING_QUERIES.getPreferredName(), boostingQueries);
+        }
+
         if (rewriters != null) {
 
             builder.startArray(FIELD_REWRITERS.getPreferredName());
@@ -152,14 +184,6 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
             }
 
             builder.endArray();
-        }
-
-        if (tieBreaker != null) {
-            builder.field(FIELD_TIE_BREAKER.getPreferredName(), tieBreaker);
-        }
-
-        if (boostingQueries != null) {
-            builder.field(FIELD_BOOSTING_QUERIES.getPreferredName(), boostingQueries);
         }
 
         builder.endObject();
@@ -214,14 +238,15 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
                 && Objects.equals(this.minimumShouldMatch, other.minimumShouldMatch)
                 && Objects.equals(this.rewriters, other.rewriters)
                 && Objects.equals(this.tieBreaker, other.tieBreaker)
+                && Objects.equals(this.fieldBoostModel, other.fieldBoostModel)
                 && Objects.equals(this.boostingQueries, other.boostingQueries)
                 ;
     }
 
     @Override
     protected int doHashCode() {
-        return Objects.hash(matchingQuery, queryFields,
-                generatedQueryFieldsAndBoostings, minimumShouldMatch, rewriters, tieBreaker, boostingQueries);
+        return Objects.hash(matchingQuery, queryFields, generatedQueryFieldsAndBoostings, minimumShouldMatch,
+                rewriters, tieBreaker, fieldBoostModel, boostingQueries);
     }
 
     /**
@@ -300,5 +325,11 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         this.minimumShouldMatch = minimumShouldMatch;
     }
 
+    public Optional<FieldBoostModel> getFieldBoostModel() {
+        return Optional.ofNullable(fieldBoostModel);
+    }
 
+    public void setFieldBoostModel(final String fieldBoostModel) {
+        this.fieldBoostModel = paramToFieldBoostModel(fieldBoostModel, FIELD_FIELD_BOOST_MODEL);
+    }
 }

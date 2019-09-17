@@ -210,7 +210,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Optional<Float> getUserQueryWeight() {
-        return Optional.empty();
+        return queryBuilder.getMatchingQuery().getWeight();
     }
 
 
@@ -309,10 +309,9 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
 
     }
 
-
     @Override
     public Optional<SearchFieldsAndBoosting.FieldBoostModel> getFieldBoostModel() {
-        return Optional.empty();
+        return queryBuilder.getFieldBoostModel();
     }
 
     /**
