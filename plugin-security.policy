@@ -1,0 +1,10 @@
+grant {
+  permission java.security.SecurityPermission "createAccessControlContext";
+
+  permission java.security.SecurityPermission "putProviderProperty.BC";
+  permission java.security.SecurityPermission "insertProvider";
+  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+  permission java.lang.RuntimePermission "getClassLoader";
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+  permission java.lang.RuntimePermission "accessClassInPackage.sun.java2d.cmm.kcms";
+};
