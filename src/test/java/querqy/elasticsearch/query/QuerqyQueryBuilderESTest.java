@@ -163,7 +163,7 @@ public class QuerqyQueryBuilderESTest extends AbstractQueryTestCase<QuerqyQueryB
         final QuerqyQueryBuilder writeQuerqyQueryBuilder = new QuerqyQueryBuilder(querqyProcessor);
         writeQuerqyQueryBuilder.setMatchingQuery(new MatchingQuery("query string", "on"));
         writeQuerqyQueryBuilder.setQueryFieldsAndBoostings(Arrays.asList("f1^0.4", "f2^3.0"));
-        writeQuerqyQueryBuilder.setGeneratedQueryFieldsAndBoostings(Arrays.asList("f3^0.2", "f4^3.2"));
+        writeQuerqyQueryBuilder.setGenerated(new Generated(Arrays.asList("f3^0.2", "f4^3.2")));
         writeQuerqyQueryBuilder.setMinimumShouldMatch("2<-25% 9<-3");
         writeQuerqyQueryBuilder.setRewriters(Arrays.asList("common1", "wordbreak"));
         writeQuerqyQueryBuilder.setTieBreaker(0.7f);
@@ -199,7 +199,7 @@ public class QuerqyQueryBuilderESTest extends AbstractQueryTestCase<QuerqyQueryB
         final QuerqyQueryBuilder writeQuerqyQueryBuilder = new QuerqyQueryBuilder(querqyProcessor);
         writeQuerqyQueryBuilder.setMatchingQuery(new MatchingQuery("query string", "on"));
         writeQuerqyQueryBuilder.setQueryFieldsAndBoostings(Arrays.asList("f1^0.4", "f2^3.0"));
-        writeQuerqyQueryBuilder.setGeneratedQueryFieldsAndBoostings(Arrays.asList("f3^0.2", "f4^3.2"));
+        writeQuerqyQueryBuilder.setGenerated(new Generated(Arrays.asList("f3^0.2", "f4^3.2")));
         writeQuerqyQueryBuilder.setMinimumShouldMatch("2<-25% 9<-3");
         writeQuerqyQueryBuilder.setRewriters(Arrays.asList("common1", "wordbreak"));
         writeQuerqyQueryBuilder.setTieBreaker(0.7f);
@@ -238,7 +238,7 @@ public class QuerqyQueryBuilderESTest extends AbstractQueryTestCase<QuerqyQueryB
 
         assertEquals(builder1.getMatchingQuery(), builder2.getMatchingQuery());
         assertEquals(builder1.getQueryFieldsAndBoostings(), builder2.getQueryFieldsAndBoostings());
-        assertEquals(builder1.getGeneratedQueryFieldsAndBoostings(), builder2.getGeneratedQueryFieldsAndBoostings());
+        assertEquals(builder1.getGenerated(), builder2.getGenerated());
         assertEquals(builder1.getMinimumShouldMatch(), builder2.getMinimumShouldMatch());
         assertEquals(builder1.getRewriters(), builder2.getRewriters());
         assertEquals(builder1.getTieBreaker(), builder2.getTieBreaker());

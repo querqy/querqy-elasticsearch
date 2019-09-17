@@ -5,7 +5,6 @@ import static querqy.lucene.PhraseBoosting.makePhraseFieldsBoostQuery;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.similarities.Similarity;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.lucene.search.Queries;
 import org.elasticsearch.common.xcontent.XContentHelper;
@@ -14,6 +13,7 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryShardContext;
 import querqy.elasticsearch.query.BoostingQueries;
+import querqy.elasticsearch.query.Generated;
 import querqy.elasticsearch.query.PhraseBoosts;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.query.RewrittenQueries;
@@ -129,7 +129,6 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
     @Override
     public Optional<QuerySimilarityScoring> getUserQuerySimilarityScoring() {
         return queryBuilder.getMatchingQuery().getSimilarityScoring();
-        //return Optional.ofNullable(queryBuilder.getUserQuerySimilarityScoring());
     }
 
     @Override
@@ -163,8 +162,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Map<String, Float> getGeneratedQueryFieldsAndBoostings() {
-        final Map<String, Float> generatedQueryFieldsAndBoostings = queryBuilder.getGeneratedQueryFieldsAndBoostings();
-        return generatedQueryFieldsAndBoostings == null ? Collections.emptyMap() : generatedQueryFieldsAndBoostings;
+        return queryBuilder.getGenerated().map(Generated::getQueryFieldsAndBoostings).orElse(Collections.emptyMap());
     }
 
     @Override
@@ -184,7 +182,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
 
     @Override
     public Optional<Float> getTiebreaker() {
-        return Optional.ofNullable(queryBuilder.getTieBreaker());
+        return queryBuilder.getTieBreaker();
     }
 
     /**
@@ -216,7 +214,12 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
 
     @Override
     public Optional<Float> getGeneratedFieldBoost() {
-        return Optional.empty();
+        final Optional<Generated> generated = queryBuilder.getGenerated();
+        if (generated.isPresent()) {
+            return generated.get().getFieldBoostFactor();
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override

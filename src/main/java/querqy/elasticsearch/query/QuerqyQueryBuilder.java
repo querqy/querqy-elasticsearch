@@ -3,7 +3,6 @@ package querqy.elasticsearch.query;
 import static querqy.elasticsearch.query.RequestUtils.fieldBoostModelToString;
 import static querqy.elasticsearch.query.RequestUtils.paramToFieldBoostModel;
 import static querqy.elasticsearch.query.RequestUtils.paramToQueryFieldsAndBoosting;
-import static querqy.elasticsearch.query.RequestUtils.paramToQuerySimilarityScoring;
 
 import org.apache.lucene.search.Query;
 import org.elasticsearch.common.ParseField;
@@ -17,13 +16,10 @@ import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryShardContext;
 import querqy.elasticsearch.QuerqyProcessor;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
-import querqy.lucene.QuerySimilarityScoring;
-import querqy.lucene.rewrite.SearchFieldsAndBoosting;
 import querqy.lucene.rewrite.SearchFieldsAndBoosting.FieldBoostModel;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,12 +31,12 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
 
     private static final ParseField FIELD_MATCHING_QUERY = new ParseField("matching_query");
     private static final ParseField FIELD_BOOSTING_QUERIES = new ParseField("boosting_queries");
+    private static final ParseField FIELD_GENERATED = new ParseField("generated");
 
     private static final ParseField FIELD_TIE_BREAKER = new ParseField("tie_breaker");
     private static final ParseField FIELD_MINIMUM_SHOULD_MATCH = new ParseField("minimum_should_match");
     private static final ParseField FIELD_QUERY_FIELDS = new ParseField("query_fields");
     private static final ParseField FIELD_FIELD_BOOST_MODEL = new ParseField("field_boost_model");
-    private static final ParseField FIELD_GENERATED_QUERY_FIELDS = new ParseField("generated_query_fields");
 
     private static final ParseField FIELD_REWRITERS = new ParseField("rewriters");
 
@@ -57,8 +53,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         PARSER.declareString(QuerqyQueryBuilder::setFieldBoostModel, FIELD_FIELD_BOOST_MODEL);
         PARSER.declareStringArray(QuerqyQueryBuilder::setQueryFieldsAndBoostings, FIELD_QUERY_FIELDS);
         PARSER.declareStringArray(QuerqyQueryBuilder::setRewriters, FIELD_REWRITERS);
-        PARSER.declareStringArray(QuerqyQueryBuilder::setGeneratedQueryFieldsAndBoostings,
-                FIELD_GENERATED_QUERY_FIELDS);
+        PARSER.declareObject(QuerqyQueryBuilder::setGenerated, Generated.PARSER, FIELD_GENERATED);
         PARSER.declareObject(QuerqyQueryBuilder::setMatchingQuery, MatchingQuery.PARSER, FIELD_MATCHING_QUERY);
         PARSER.declareObject(QuerqyQueryBuilder::setBoostingQueries, BoostingQueries.PARSER, FIELD_BOOSTING_QUERIES);
     }
@@ -68,12 +63,13 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     private String minimumShouldMatch;
     private Map<String, Float> queryFieldsAndBoostings;
     private List<String> queryFields;
-    private List<String> rewriters = Collections.emptyList();
-    private Map<String, Float> generatedQueryFieldsAndBoostings;
-    private BoostingQueries boostingQueries = null;
-    private MatchingQuery matchingQuery = null;
     private FieldBoostModel fieldBoostModel = null;
 
+    private Generated generated = null;
+    private BoostingQueries boostingQueries = null;
+    private MatchingQuery matchingQuery = null;
+
+    private List<String> rewriters = Collections.emptyList();
 
     private QuerqyProcessor querqyProcessor;
 
@@ -92,27 +88,17 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         this.querqyProcessor = querqyProcessor;
 
         matchingQuery = new MatchingQuery(in);
+        boostingQueries = in.readOptionalWriteable(BoostingQueries::new);
+        generated = in.readOptionalWriteable(Generated::new);
 
         queryFields = in.readStringList();
         setQueryFieldsAndBoostings(queryFields);
-
-        final int numGeneratedFields = in.readInt();
-        if (numGeneratedFields > 0) {
-            generatedQueryFieldsAndBoostings = new HashMap<>(numGeneratedFields);
-            for (int i = 0; i < numGeneratedFields; i++) {
-                generatedQueryFieldsAndBoostings.put(in.readString(), in.readFloat());
-            }
-        }
-
         minimumShouldMatch = in.readOptionalString();
-
         tieBreaker = in.readOptionalFloat();
 
         final String strFieldBoostModel = in.readOptionalString();
         fieldBoostModel = strFieldBoostModel == null
                 ? null : FieldBoostModel.valueOf(strFieldBoostModel);
-
-        boostingQueries = in.readOptionalWriteable(BoostingQueries::new);
 
         rewriters = in.readStringList();
     }
@@ -120,21 +106,13 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     @Override
     protected void doWriteTo(final StreamOutput out) throws IOException {
         matchingQuery.writeTo(out);
+        out.writeOptionalWriteable(boostingQueries);
+        out.writeOptionalWriteable(generated);
+
         out.writeStringCollection(queryFields);
-
-        final int numFields = generatedQueryFieldsAndBoostings == null ? 0 : generatedQueryFieldsAndBoostings.size();
-        out.writeInt(numFields);
-        if (numFields > 0) {
-            for (Map.Entry<String, Float> entry : generatedQueryFieldsAndBoostings.entrySet()) {
-                out.writeString(entry.getKey());
-                out.writeFloat(entry.getValue());
-            }
-        }
-
         out.writeOptionalString(minimumShouldMatch);
         out.writeOptionalFloat(tieBreaker);
         out.writeOptionalString(fieldBoostModel == null ? null : fieldBoostModel.name());
-        out.writeOptionalWriteable(boostingQueries);
 
         out.writeStringCollection(rewriters);
     }
@@ -145,16 +123,15 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         printBoostAndQueryName(builder);
 
         builder.field(FIELD_MATCHING_QUERY.getPreferredName(), matchingQuery);
+        if (boostingQueries != null) {
+            builder.field(FIELD_BOOSTING_QUERIES.getPreferredName(), boostingQueries);
+        }
+
+        if (generated != null) {
+            builder.field(FIELD_GENERATED.getPreferredName(), generated);
+        }
 
         builder.field(FIELD_QUERY_FIELDS.getPreferredName(), queryFields);
-
-        if (generatedQueryFieldsAndBoostings != null && !generatedQueryFieldsAndBoostings.isEmpty()) {
-            builder.startArray(FIELD_GENERATED_QUERY_FIELDS.getPreferredName());
-            for (final Map.Entry<String, Float> fieldEntry : generatedQueryFieldsAndBoostings.entrySet()) {
-                builder.value(fieldEntry.getKey() + "^" + fieldEntry.getValue());
-            }
-            builder.endArray();
-        }
 
         if (minimumShouldMatch != null) {
             builder.field(FIELD_MINIMUM_SHOULD_MATCH.getPreferredName(), minimumShouldMatch);
@@ -171,9 +148,6 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
             }
         }
 
-        if (boostingQueries != null) {
-            builder.field(FIELD_BOOSTING_QUERIES.getPreferredName(), boostingQueries);
-        }
 
         if (rewriters != null) {
 
@@ -234,7 +208,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         return (this.matchingQuery == other.matchingQuery
                 || (this.matchingQuery != null && this.matchingQuery.equals(other.matchingQuery)))
                 && Objects.equals(this.queryFields, other.queryFields)
-                && Objects.equals(this.generatedQueryFieldsAndBoostings, other.generatedQueryFieldsAndBoostings)
+                && Objects.equals(this.generated, other.generated)
                 && Objects.equals(this.minimumShouldMatch, other.minimumShouldMatch)
                 && Objects.equals(this.rewriters, other.rewriters)
                 && Objects.equals(this.tieBreaker, other.tieBreaker)
@@ -245,7 +219,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
 
     @Override
     protected int doHashCode() {
-        return Objects.hash(matchingQuery, queryFields, generatedQueryFieldsAndBoostings, minimumShouldMatch,
+        return Objects.hash(matchingQuery, queryFields, generated, minimumShouldMatch,
                 rewriters, tieBreaker, fieldBoostModel, boostingQueries);
     }
 
@@ -281,6 +255,14 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         this.boostingQueries = boostingQueries;
     }
 
+    public Optional<Generated> getGenerated() {
+        return Optional.ofNullable(generated);
+    }
+
+    public void setGenerated(Generated generated) {
+        this.generated = generated;
+    }
+
     public void setQueryFieldsAndBoostings(final List<String> queryFieldsAndBoostings) {
         if (queryFieldsAndBoostings == null) {
             throw new IllegalArgumentException("Query fields must not be null");
@@ -289,9 +271,6 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         this.queryFields = queryFieldsAndBoostings;
     }
 
-    public void setGeneratedQueryFieldsAndBoostings(final List<String> generatedQueryFieldsAndBoostings) {
-        this.generatedQueryFieldsAndBoostings = paramToQueryFieldsAndBoosting(generatedQueryFieldsAndBoostings);
-    }
 
     public void setRewriters(final List<String> rewriters) {
         this.rewriters = rewriters == null ? Collections.emptyList() : rewriters;
@@ -305,16 +284,12 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         return queryFieldsAndBoostings;
     }
 
-    public Map<String, Float> getGeneratedQueryFieldsAndBoostings() {
-        return generatedQueryFieldsAndBoostings;
-    }
-
     public void setTieBreaker(final float tie) {
         this.tieBreaker = tie;
     }
 
-    public Float getTieBreaker() {
-        return tieBreaker;
+    public Optional<Float> getTieBreaker() {
+        return Optional.ofNullable(tieBreaker);
     }
 
     public String getMinimumShouldMatch() {
