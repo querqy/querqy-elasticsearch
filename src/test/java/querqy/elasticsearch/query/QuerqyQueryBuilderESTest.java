@@ -165,7 +165,7 @@ public class QuerqyQueryBuilderESTest extends AbstractQueryTestCase<QuerqyQueryB
         writeQuerqyQueryBuilder.setQueryFieldsAndBoostings(Arrays.asList("f1^0.4", "f2^3.0"));
         writeQuerqyQueryBuilder.setGenerated(new Generated(Arrays.asList("f3^0.2", "f4^3.2")));
         writeQuerqyQueryBuilder.setMinimumShouldMatch("2<-25% 9<-3");
-        writeQuerqyQueryBuilder.setRewriters(Arrays.asList("common1", "wordbreak"));
+        writeQuerqyQueryBuilder.setRewriters(Arrays.asList(new Rewriter("common1"), new Rewriter("wordbreak")));
         writeQuerqyQueryBuilder.setTieBreaker(0.7f);
 
         final PhraseBoosts phraseBoosts = new PhraseBoosts();
@@ -201,7 +201,7 @@ public class QuerqyQueryBuilderESTest extends AbstractQueryTestCase<QuerqyQueryB
         writeQuerqyQueryBuilder.setQueryFieldsAndBoostings(Arrays.asList("f1^0.4", "f2^3.0"));
         writeQuerqyQueryBuilder.setGenerated(new Generated(Arrays.asList("f3^0.2", "f4^3.2")));
         writeQuerqyQueryBuilder.setMinimumShouldMatch("2<-25% 9<-3");
-        writeQuerqyQueryBuilder.setRewriters(Arrays.asList("common1", "wordbreak"));
+        writeQuerqyQueryBuilder.setRewriters(Arrays.asList(new Rewriter("common1"), new Rewriter("wordbreak")));
         writeQuerqyQueryBuilder.setTieBreaker(0.7f);
 
         final PhraseBoosts phraseBoosts = new PhraseBoosts();

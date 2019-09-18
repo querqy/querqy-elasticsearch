@@ -72,7 +72,7 @@ public class RewriterShardContexts implements IndexEventListener {
     }
 
     public synchronized void reloadRewriteChain(final String chainId) {
-        System.out.println("RELOAD CHAIN " + chainId);
+//        System.out.println("RELOAD CHAIN " + chainId);
 
         // TODO
 //        shardContexts.values().parallelStream().forEach(ctx -> {

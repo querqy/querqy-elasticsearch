@@ -4,12 +4,15 @@ import org.elasticsearch.index.shard.IndexShard;
 import querqy.elasticsearch.ConfigUtils;
 import querqy.elasticsearch.ESRewriterFactory;
 import querqy.rewrite.RewriterFactory;
+import querqy.rewrite.commonrules.ExpressionCriteriaSelectionStrategyFactory;
 import querqy.rewrite.commonrules.QuerqyParserFactory;
+import querqy.rewrite.commonrules.SelectionStrategyFactory;
 import querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,8 +34,11 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
 
         final String rules = ConfigUtils.getStringArg(config, "rules", "");
 
+        final Map<String, SelectionStrategyFactory> selectionStrategyFactories = new HashMap<>();
+        // FIXME: this will be the default in the next Querqy release
+        selectionStrategyFactories.put("expr", new ExpressionCriteriaSelectionStrategyFactory());
         delegate = new querqy.rewrite.commonrules.SimpleCommonRulesRewriterFactory(rewriterId,
-                new StringReader(rules), querqyParser, ignoreCase, Collections.emptyMap());
+                new StringReader(rules), querqyParser, ignoreCase, selectionStrategyFactories);
     }
 
     @Override

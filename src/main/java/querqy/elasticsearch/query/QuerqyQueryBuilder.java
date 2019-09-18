@@ -19,6 +19,7 @@ import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.rewrite.SearchFieldsAndBoosting.FieldBoostModel;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         PARSER.declareString(QuerqyQueryBuilder::setMinimumShouldMatch, FIELD_MINIMUM_SHOULD_MATCH);
         PARSER.declareString(QuerqyQueryBuilder::setFieldBoostModel, FIELD_FIELD_BOOST_MODEL);
         PARSER.declareStringArray(QuerqyQueryBuilder::setQueryFieldsAndBoostings, FIELD_QUERY_FIELDS);
-        PARSER.declareStringArray(QuerqyQueryBuilder::setRewriters, FIELD_REWRITERS);
+        PARSER.declareObjectArray(QuerqyQueryBuilder::setRewriters, Rewriter.PARSER, FIELD_REWRITERS);
         PARSER.declareObject(QuerqyQueryBuilder::setGenerated, Generated.PARSER, FIELD_GENERATED);
         PARSER.declareObject(QuerqyQueryBuilder::setMatchingQuery, MatchingQuery.PARSER, FIELD_MATCHING_QUERY);
         PARSER.declareObject(QuerqyQueryBuilder::setBoostingQueries, BoostingQueries.PARSER, FIELD_BOOSTING_QUERIES);
@@ -69,7 +70,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     private BoostingQueries boostingQueries = null;
     private MatchingQuery matchingQuery = null;
 
-    private List<String> rewriters = Collections.emptyList();
+    private List<Rewriter> rewriters = Collections.emptyList();
 
     private QuerqyProcessor querqyProcessor;
 
@@ -100,7 +101,11 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         fieldBoostModel = strFieldBoostModel == null
                 ? null : FieldBoostModel.valueOf(strFieldBoostModel);
 
-        rewriters = in.readStringList();
+        final int numRewriters = in.readInt();
+        rewriters = new ArrayList<>(numRewriters);
+        for (int i = 0; i < numRewriters; i++) {
+            rewriters.add(new Rewriter(in));
+        }
     }
 
     @Override
@@ -113,8 +118,10 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         out.writeOptionalString(minimumShouldMatch);
         out.writeOptionalFloat(tieBreaker);
         out.writeOptionalString(fieldBoostModel == null ? null : fieldBoostModel.name());
-
-        out.writeStringCollection(rewriters);
+        out.writeInt(rewriters.size());
+        for (final Rewriter rewriter : rewriters) {
+            rewriter.writeTo(out);
+        }
     }
 
     @Override
@@ -152,9 +159,8 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         if (rewriters != null) {
 
             builder.startArray(FIELD_REWRITERS.getPreferredName());
-
-            for (final String rewriter : rewriters) {
-                builder.value(rewriter);
+            for (final Rewriter rewriter : rewriters) {
+                rewriter.toXContent(builder, params);
             }
 
             builder.endArray();
@@ -190,7 +196,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     protected Query doToQuery(final QueryShardContext context) throws IOException {
         try {
             final Query query = querqyProcessor.parseQuery(this, context);
-            System.out.println(query);
+           // System.out.println(query);
             return query;
         } catch (final LuceneSearchEngineRequestAdapter.SyntaxException e) {
             throw new IOException(e);
@@ -271,12 +277,11 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         this.queryFields = queryFieldsAndBoostings;
     }
 
-
-    public void setRewriters(final List<String> rewriters) {
+    public void setRewriters(final List<Rewriter> rewriters) {
         this.rewriters = rewriters == null ? Collections.emptyList() : rewriters;
     }
 
-    public List<String> getRewriters() {
+    public List<Rewriter> getRewriters() {
         return rewriters;
     }
 

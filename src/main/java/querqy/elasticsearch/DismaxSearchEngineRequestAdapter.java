@@ -16,6 +16,7 @@ import querqy.elasticsearch.query.BoostingQueries;
 import querqy.elasticsearch.query.Generated;
 import querqy.elasticsearch.query.PhraseBoosts;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
+import querqy.elasticsearch.query.Rewriter;
 import querqy.elasticsearch.query.RewrittenQueries;
 import querqy.infologging.InfoLoggingContext;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
@@ -346,6 +347,34 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Optional<String> getRequestParam(final String name) {
+        return getParam(name);
+    }
+
+    private <T> Optional<T> getParam(final String name) {
+        final String[] parts = name.split("\\.");
+        if (parts.length < 3 || !"querqy".equals(parts[0])) {
+            return Optional.empty();
+        }
+
+        final String rewriterId = parts[1];
+        for (final Rewriter rewriter : queryBuilder.getRewriters()) {
+            if (rewriterId.equals(rewriter.getName())) {
+                final Map<String, Object> params = rewriter.getParams();
+                if (params == null) {
+                    return Optional.empty();
+                }
+
+                Map<String, Object> current = params;
+                final int len = parts.length - 1;
+                for (int i = 2; i < len; i++) {
+                    current = ( Map<String, Object>) current.get(parts[i]);
+                    if (current == null) {
+                        return Optional.empty();
+                    }
+                }
+                return Optional.ofNullable((T) current.get(parts[len]));
+            }
+        }
         return Optional.empty();
     }
 
@@ -357,7 +386,38 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public String[] getRequestParams(final String name) {
+        final String[] parts = name.split("\\.");
+        if (parts.length < 3 || !"querqy".equals(parts[0])) {
+            return new String[0];
+        }
+
+        final String rewriterId = parts[1];
+        for (final Rewriter rewriter : queryBuilder.getRewriters()) {
+            if (rewriterId.equals(rewriter.getName())) {
+                final Map<String, Object> params = rewriter.getParams();
+                if (params == null) {
+                    return new String[0];
+                }
+
+                Map<String, Object> current = params;
+                final int len = parts.length - 1;
+                for (int i = 2; i < len; i++) {
+                    current = ( Map<String, Object>) current.get(parts[i]);
+                    if (current == null) {
+                        return new String[0];
+                    }
+                }
+                final Object obj = current.get(parts[len]);
+                if (obj instanceof String) {
+                    return new String[] {obj.toString()};
+                } else {
+                    return (String[]) obj;
+                }
+            }
+        }
+
         return new String[0];
+
     }
 
     /**
@@ -368,7 +428,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Optional<Boolean> getBooleanRequestParam(final String name) {
-        return Optional.empty();
+        return getParam(name);
     }
 
     /**
@@ -379,7 +439,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Optional<Integer> getIntegerRequestParam(final String name) {
-        return Optional.empty();
+        return getParam(name);
     }
 
     /**
@@ -390,7 +450,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Optional<Float> getFloatRequestParam(final String name) {
-        return Optional.empty();
+        return getParam(name);
     }
 
     /**
@@ -401,7 +461,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Optional<Double> getDoubleRequestParam(final String name) {
-        return Optional.empty();
+        return getParam(name);
     }
 
     /**

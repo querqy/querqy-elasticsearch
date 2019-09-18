@@ -5,6 +5,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.elasticsearch.index.query.QueryShardContext;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
+import querqy.elasticsearch.query.Rewriter;
 import querqy.lucene.LuceneQueries;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.QueryParsingController;
@@ -12,6 +13,7 @@ import querqy.rewrite.RewriteChain;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class QuerqyProcessor {
@@ -29,10 +31,11 @@ public class QuerqyProcessor {
     public Query parseQuery(final QuerqyQueryBuilder queryBuilder, final QueryShardContext shardContext)
             throws LuceneSearchEngineRequestAdapter.SyntaxException {
 
-        final List<String> rewriterIds = queryBuilder.getRewriters();
+        final List<Rewriter> rewriters = queryBuilder.getRewriters();
 
-        final RewriteChain rewriteChain = rewriterIds == null || rewriterIds.isEmpty()
-                ? EMPTY_REWRITE_CHAIN : rewriterShardContexts.getRewriteChain(rewriterIds, shardContext);
+        final RewriteChain rewriteChain = rewriters == null || rewriters.isEmpty()
+                ? EMPTY_REWRITE_CHAIN : rewriterShardContexts.getRewriteChain(rewriters.stream().map(Rewriter::getName)
+                .collect(Collectors.toList()), shardContext);
 
         final DismaxSearchEngineRequestAdapter requestAdapter =
                 new DismaxSearchEngineRequestAdapter(queryBuilder, rewriteChain, shardContext);
