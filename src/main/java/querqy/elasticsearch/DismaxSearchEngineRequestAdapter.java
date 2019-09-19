@@ -408,6 +408,9 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
                     }
                 }
                 final Object obj = current.get(parts[len]);
+                if (obj == null) {
+                    return new String[0];
+                }
                 if (obj instanceof String) {
                     return new String[] {obj.toString()};
                 } else {
