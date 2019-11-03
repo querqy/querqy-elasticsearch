@@ -33,12 +33,17 @@ import querqy.rewrite.RewriteChain;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+
+/**
+ *  Rewriters will access params using prefix 'querqy.<&lt;rewriter id&gt;....
+ */
 public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineRequestAdapter {
 
     private final RewriteChain rewriteChain;
@@ -350,7 +355,8 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
         return getParam(name);
     }
 
-    private <T> Optional<T> getParam(final String name) {
+    <T> Optional<T> getParam(final String name) {
+
         final String[] parts = name.split("\\.");
         if (parts.length < 3 || !"querqy".equals(parts[0])) {
             return Optional.empty();
@@ -359,23 +365,34 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
         final String rewriterId = parts[1];
         for (final Rewriter rewriter : queryBuilder.getRewriters()) {
             if (rewriterId.equals(rewriter.getName())) {
-                final Map<String, Object> params = rewriter.getParams();
-                if (params == null) {
-                    return Optional.empty();
-                }
-
-                Map<String, Object> current = params;
-                final int len = parts.length - 1;
-                for (int i = 2; i < len; i++) {
-                    current = ( Map<String, Object>) current.get(parts[i]);
-                    if (current == null) {
-                        return Optional.empty();
-                    }
-                }
-                return Optional.ofNullable((T) current.get(parts[len]));
+                return getRewriterParam(rewriter, Arrays.copyOfRange(parts, 2, parts.length));
             }
         }
+
         return Optional.empty();
+
+    }
+
+
+    <T> Optional<T> getRewriterParam(final Rewriter rewriter, final String[] path) {
+
+        final Map<String, Object> params = rewriter.getParams();
+        if (params == null) {
+            return Optional.empty();
+        }
+
+        Map<String, Object> current = params;
+        final int len = path.length - 1;
+        for (int i = 0; i < len; i++) {
+            current = (Map<String, Object>) current.get(path[i]);
+            if (current == null) {
+                return Optional.empty();
+            }
+        }
+
+        return Optional.ofNullable((T) current.get(path[len]));
+
+
     }
 
     /**

@@ -30,7 +30,7 @@
 
         <log4j.version>2.11.1</log4j.version>
         <querqy.lucene.version>4.4.lucene800.1</querqy.lucene.version>
-        <elasticsearch.version>7.0.1</elasticsearch.version>
+        <elasticsearch.version>7.2.1</elasticsearch.version>
 
     </properties>
 
@@ -157,37 +157,10 @@
                         <showDeprecation>true</showDeprecation>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>cobertura-maven-plugin</artifactId>
-                    <version>${cobertura-maven-plugin.version}</version>
-                    <configuration>
-                        <instrumentation>
-                            <excludes>
-                                <exclude>**/*Test.class</exclude>
-                            </excludes>
-                        </instrumentation>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>clean</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
+
             </plugins>
         </pluginManagement>
     </build>
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>${cobertura-maven-plugin.version}</version>
-            </plugin>
-        </plugins>
-    </reporting>
 
 </project>
 

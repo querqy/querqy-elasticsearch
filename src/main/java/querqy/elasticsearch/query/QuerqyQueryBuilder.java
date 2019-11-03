@@ -196,7 +196,6 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     protected Query doToQuery(final QueryShardContext context) throws IOException {
         try {
             final Query query = querqyProcessor.parseQuery(this, context);
-           // System.out.println(query);
             return query;
         } catch (final LuceneSearchEngineRequestAdapter.SyntaxException e) {
             throw new IOException(e);
@@ -303,6 +302,11 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
 
     public void setMinimumShouldMatch(final String minimumShouldMatch) {
         this.minimumShouldMatch = minimumShouldMatch;
+    }
+
+    QuerqyQueryBuilder minimumShouldMatch(final String minimumShouldMatch) {
+        setMinimumShouldMatch(minimumShouldMatch);
+        return this;
     }
 
     public Optional<FieldBoostModel> getFieldBoostModel() {
