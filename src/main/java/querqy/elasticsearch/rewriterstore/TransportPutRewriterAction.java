@@ -1,9 +1,9 @@
 package querqy.elasticsearch.rewriterstore;
 
 import static org.elasticsearch.action.ActionListener.wrap;
+import static querqy.elasticsearch.rewriterstore.Constants.QUERQY_INDEX_NAME;
 import static querqy.elasticsearch.rewriterstore.PutRewriterAction.*;
 
-import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
@@ -30,9 +30,6 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class TransportPutRewriterAction extends HandledTransportAction<PutRewriterRequest, PutRewriterResponse> {
-
-    // TODO: configurable?
-    public static final String QUERQY_INDEX_NAME = ".querqy";
 
     private final Client client;
     private final ClusterService clusterService;
@@ -123,7 +120,7 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
         final Map<String, Object> source = new HashMap<>(request.getContent());
         source.put("type", "rewriter");
 
-        final IndexRequest indexRequest = client.prepareIndex(".querqy", null, request.getRewriterId())
+        final IndexRequest indexRequest = client.prepareIndex(QUERQY_INDEX_NAME, null, request.getRewriterId())
                 .setCreate(false)
                 .setRouting(request.getRouting())
                 .setSource(source)

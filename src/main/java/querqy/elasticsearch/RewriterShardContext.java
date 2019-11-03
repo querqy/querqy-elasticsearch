@@ -71,6 +71,14 @@ public class RewriterShardContext {
         return null;
     }
 
+    public void clearRewriter(final String rewriterId) {
+        factories.invalidate(rewriterId);
+        System.out.println("Cleared " + rewriterId);
+    }
+
+    public void clearRewriters() {
+        factories.invalidateAll();
+    }
 
     public void reloadRewriter(final String rewriterId) throws Exception {
         if (factories.get(rewriterId) != null) {

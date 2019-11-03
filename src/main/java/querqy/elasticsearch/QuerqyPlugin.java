@@ -29,12 +29,17 @@ import org.elasticsearch.script.ScriptService;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.watcher.ResourceWatcherService;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
+import querqy.elasticsearch.rewriterstore.DeleteRewriterAction;
+import querqy.elasticsearch.rewriterstore.NodesClearRewriterCacheAction;
 import querqy.elasticsearch.rewriterstore.NodesReloadRewriteChainAction;
 import querqy.elasticsearch.rewriterstore.NodesReloadRewriterAction;
 import querqy.elasticsearch.rewriterstore.PutRewriteChainAction;
+import querqy.elasticsearch.rewriterstore.RestDeleteRewriterAction;
 import querqy.elasticsearch.rewriterstore.RestPutRewriteChainAction;
 import querqy.elasticsearch.rewriterstore.RestPutRewriterAction;
 import querqy.elasticsearch.rewriterstore.PutRewriterAction;
+import querqy.elasticsearch.rewriterstore.TransportDeleteRewriterAction;
+import querqy.elasticsearch.rewriterstore.TransportNodesClearRewriterCacheAction;
 import querqy.elasticsearch.rewriterstore.TransportNodesReloadRewriteChainAction;
 import querqy.elasticsearch.rewriterstore.TransportNodesReloadRewriterAction;
 import querqy.elasticsearch.rewriterstore.TransportPutRewriteChainAction;
@@ -206,13 +211,18 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
                                              final SettingsFilter settingsFilter,
                                              final IndexNameExpressionResolver indexNameExpressionResolver,
                                              final Supplier<DiscoveryNodes> nodesInCluster) {
-        final RestPutRewriterAction rewriterRestHandler = new RestPutRewriterAction(settings);
-        restController.registerHandler(RestRequest.Method.PUT, "/_querqy/rewriter/{rewriterId}",  rewriterRestHandler);
+        final RestPutRewriterAction putRewriterRestHandler = new RestPutRewriterAction(settings);
+        restController.registerHandler(RestRequest.Method.PUT, "/_querqy/rewriter/{rewriterId}",
+                putRewriterRestHandler);
+
+        final RestDeleteRewriterAction deleteRewriterRestHandler = new RestDeleteRewriterAction(settings);
+        restController.registerHandler(RestRequest.Method.DELETE, "/_querqy/rewriter/{rewriterId}",
+                deleteRewriterRestHandler);
 
         final RestPutRewriteChainAction rewriteChainAction = new RestPutRewriteChainAction(settings);
         restController.registerHandler(RestRequest.Method.PUT, "/_querqy/rewritechain/{chainId}",  rewriteChainAction);
 
-        return Collections.singletonList(rewriterRestHandler);
+        return Arrays.asList(putRewriterRestHandler, deleteRewriterRestHandler);
 
     }
 
@@ -221,6 +231,8 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
         return unmodifiableList(asList(
                 new ActionHandler<>(PutRewriterAction.INSTANCE, TransportPutRewriterAction.class),
                 new ActionHandler<>(NodesReloadRewriterAction.INSTANCE, TransportNodesReloadRewriterAction.class),
+                new ActionHandler<>(DeleteRewriterAction.INSTANCE, TransportDeleteRewriterAction.class),
+                new ActionHandler<>(NodesClearRewriterCacheAction.INSTANCE, TransportNodesClearRewriterCacheAction.class),
                 new ActionHandler<>(PutRewriteChainAction.INSTANCE, TransportPutRewriteChainAction.class),
                 new ActionHandler<>(NodesReloadRewriteChainAction.INSTANCE, TransportNodesReloadRewriteChainAction.class)
 

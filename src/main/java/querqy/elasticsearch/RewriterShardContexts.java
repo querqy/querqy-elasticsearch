@@ -71,6 +71,15 @@ public class RewriterShardContexts implements IndexEventListener {
         });
     }
 
+    public void clearRewriter(final String rewriterId) {
+        shardContexts.values().parallelStream().forEach(ctx -> ctx.clearRewriter(rewriterId));
+    }
+
+    public void clearRewriters() {
+        shardContexts.values().parallelStream().forEach(RewriterShardContext::clearRewriters);
+    }
+
+
     public synchronized void reloadRewriteChain(final String chainId) {
 //        System.out.println("RELOAD CHAIN " + chainId);
 
