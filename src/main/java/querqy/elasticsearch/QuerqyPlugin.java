@@ -247,6 +247,10 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
                                                final NamedXContentRegistry xContentRegistry,
                                                final Environment environment, final NodeEnvironment nodeEnvironment,
                                                final NamedWriteableRegistry namedWriteableRegistry) {
-        return Arrays.asList(rewriterShardContexts);
+        return Arrays.asList(rewriterShardContexts, querqyProcessor);
     }
+
+//    public QuerqyProcessor getQuerqyProcessor() {
+//        return querqyProcessor;
+//    }
 }
