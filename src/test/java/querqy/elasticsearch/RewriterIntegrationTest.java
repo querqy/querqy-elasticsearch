@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -12,9 +13,12 @@ import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESSingleNodeTestCase;
 import org.junit.After;
+import org.junit.Test;
 import querqy.elasticsearch.query.MatchingQuery;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.query.Rewriter;
+import querqy.elasticsearch.rewriterstore.DeleteRewriterAction;
+import querqy.elasticsearch.rewriterstore.DeleteRewriterRequest;
 import querqy.elasticsearch.rewriterstore.PutRewriterAction;
 import querqy.elasticsearch.rewriterstore.PutRewriterRequest;
 
@@ -27,7 +31,8 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         return Collections.singleton(QuerqyPlugin.class);
     }
 
-    public void testSearchWithCommonRules() throws Exception {
+    public void testSearchWithConfig() throws Exception {
+
         index();
 
         final Map<String, Object> content = new HashMap<>();
@@ -56,6 +61,116 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         assertEquals(2L, response.getHits().getTotalHits().value);
 
     }
+
+    public void testSearchWithUpdatedConfig() throws Exception {
+
+        index();
+
+        final Map<String, Object> content = new HashMap<>();
+        content.put("class", "querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory");
+
+        final Map<String, Object> config = new HashMap<>();
+        config.put("rules", "");
+        config.put("ignoreCase", true);
+        config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
+        content.put("config", config);
+
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+
+        client().execute(PutRewriterAction.INSTANCE, request).get();
+
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+        querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
+        querqyQuery.setMatchingQuery(new MatchingQuery("a k"));
+        querqyQuery.setQueryFieldsAndBoostings(Arrays.asList("field1", "field2"));
+        querqyQuery.setMinimumShouldMatch("1");
+
+        final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder.setQuery(querqyQuery);
+
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        assertEquals(1L, response.getHits().getTotalHits().value);
+
+
+        final Map<String, Object> content2 = new HashMap<>();
+        content2.put("class", "querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory");
+
+        final Map<String, Object> config2 = new HashMap<>();
+        config2.put("rules", "k =>\nSYNONYM: c");
+        config2.put("ignoreCase", true);
+        config2.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
+        content2.put("config", config2);
+
+        final PutRewriterRequest request2 = new PutRewriterRequest("common_rules", content2, null);
+        client().execute(PutRewriterAction.INSTANCE, request2).get();
+
+        QuerqyQueryBuilder querqyQuery2 = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+        querqyQuery2.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
+        querqyQuery2.setMatchingQuery(new MatchingQuery("a k"));
+        querqyQuery2.setQueryFieldsAndBoostings(Arrays.asList("field1", "field2"));
+        querqyQuery2.setMinimumShouldMatch("1");
+
+        final SearchRequestBuilder searchRequestBuilder2 = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder2.setQuery(querqyQuery2);
+
+        SearchResponse response2 = client().search(searchRequestBuilder2.request()).get();
+        assertEquals(2L, response2.getHits().getTotalHits().value);
+
+    }
+
+
+    public void testThatRewriterIsDeleted() throws Exception {
+
+        index();
+
+        final Map<String, Object> content = new HashMap<>();
+        content.put("class", "querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory");
+
+        final Map<String, Object> config = new HashMap<>();
+        config.put("rules", "k =>\nSYNONYM: c");
+        config.put("ignoreCase", true);
+        config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
+        content.put("config", config);
+
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+
+        client().execute(PutRewriterAction.INSTANCE, request).get();
+
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+        querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
+        querqyQuery.setMatchingQuery(new MatchingQuery("a k"));
+        querqyQuery.setQueryFieldsAndBoostings(Arrays.asList("field1", "field2"));
+        querqyQuery.setMinimumShouldMatch("1");
+
+        final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder.setQuery(querqyQuery);
+
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        assertEquals(2L, response.getHits().getTotalHits().value);
+
+
+        final DeleteRewriterRequest delRequest = new DeleteRewriterRequest("common_rules", null);
+        client().execute(DeleteRewriterAction.INSTANCE, delRequest).get();
+
+        QuerqyQueryBuilder querqyQuery2 = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+        querqyQuery2.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
+        querqyQuery2.setMatchingQuery(new MatchingQuery("a k"));
+        querqyQuery2.setQueryFieldsAndBoostings(Arrays.asList("field1", "field2"));
+        querqyQuery2.setMinimumShouldMatch("1");
+
+        final SearchRequestBuilder searchRequestBuilder2 = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder2.setQuery(querqyQuery2);
+
+        try {
+            client().search(searchRequestBuilder.request()).get();
+            fail("Could use deleted rewriter in request");
+        } catch (final ExecutionException e) {
+            assertTrue(e.getMessage().contains("Rewriter not found: common_rules"));
+        }
+
+    }
+
+
 
     @After
     public void deleteRewriterIndex() {

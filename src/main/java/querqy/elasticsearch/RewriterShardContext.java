@@ -67,10 +67,6 @@ public class RewriterShardContext {
         return new RewriteChain(rewriterFactories);
     }
 
-    public ESRewriteChain getRewriteChain(final String chainId, final QueryShardContext queryShardContext) {
-        return null;
-    }
-
     public void clearRewriter(final String rewriterId) {
         factories.invalidate(rewriterId);
     }
@@ -92,10 +88,14 @@ public class RewriterShardContext {
         if (forceLoad || (factory == null)) {
 
             final GetResponse response = client.prepareGet(".querqy", null, rewriterId).execute().get();
-
             final Map<String, Object> source = response.getSource();
+
+            if (source == null) {
+                throw new RewriterNotFoundException("Rewriter not found: " + rewriterId);
+            }
+
             if (!"rewriter".equals(source.get("type"))) {
-                throw new IllegalArgumentException("Not a rewriter: " + rewriterId);
+                throw new RewriterNotFoundException("Not a rewriter: " + rewriterId);
             }
             factory = ESRewriterFactory.loadConfiguredInstance(rewriterId, source, "class")
                     .createRewriterFactory(indexService.getShard(shardId.id()));

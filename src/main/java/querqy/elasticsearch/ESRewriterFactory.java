@@ -1,6 +1,10 @@
 package querqy.elasticsearch;
 
 import org.elasticsearch.SpecialPermission;
+import org.elasticsearch.common.bytes.BytesArray;
+import org.elasticsearch.common.xcontent.XContentHelper;
+import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.shard.IndexShard;
 import querqy.rewrite.RewriterFactory;
 
@@ -54,8 +58,21 @@ public abstract class ESRewriterFactory {
                     try {
                         final ESRewriterFactory factory = (ESRewriterFactory) Class.forName(className)
                                 .getDeclaredConstructor(String.class).newInstance(rewriterId);
-                        factory.configure(
-                                (Map<String, Object>) instanceDesc.getOrDefault("config", Collections.emptyMap()));
+
+                        String configStr = (String) instanceDesc.get("config");
+                        if (configStr != null) {
+                            configStr = configStr.trim();
+                        }
+                        final Map<String, Object> config;
+                        if (configStr != null && configStr.length() > 0) {
+                            final XContentParser parser = XContentHelper.createParser(null, null,
+                                    new BytesArray(configStr), XContentType.JSON);
+                            config = parser.map();
+                        } else {
+                            config = Collections.emptyMap();
+                        }
+
+                        factory.configure(config);
                         return factory;
                     } catch (final Exception e) {
                         throw new RuntimeException(e);

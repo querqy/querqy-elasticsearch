@@ -1,5 +1,7 @@
 package querqy.elasticsearch;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
@@ -17,6 +19,8 @@ import java.util.Map;
 
 public class RewriterShardContexts implements IndexEventListener {
 
+    private static final Logger LOGGER = LogManager.getLogger(RewriterShardContexts.class);
+
 
     private final Map<ShardId, RewriterShardContext> shardContexts;
 
@@ -33,7 +37,8 @@ public class RewriterShardContexts implements IndexEventListener {
         shardContexts = new HashMap<>();
     }
 
-    public RewriteChain getRewriteChain(final List<String> rewriterIds, final QueryShardContext queryShardContext) {
+    public RewriteChain getRewriteChain(final List<String> rewriterIds, final QueryShardContext queryShardContext)
+            throws RewriterNotFoundException {
         final ShardId shardId = new ShardId(queryShardContext.getFullyQualifiedIndex(), queryShardContext.getShardId());
         RewriterShardContext shardContext = shardContexts.get(shardId);
 
@@ -44,6 +49,7 @@ public class RewriterShardContexts implements IndexEventListener {
         try {
             return shardContext.getRewriteChain(rewriterIds);
         } catch (final Exception e) {
+            LOGGER.error("Could not get rewrite chain", e);
             throw new RuntimeException("Could not get rewrite chain", e);
         }
     }
@@ -62,21 +68,22 @@ public class RewriterShardContexts implements IndexEventListener {
     }
 
     public synchronized void reloadRewriter(final String rewriterId) {
-        shardContexts.values().parallelStream().forEach(ctx -> {
+        shardContexts.values().forEach(ctx -> {
             try {
                 ctx.reloadRewriter(rewriterId);
             } catch (final Exception e) {
+                LOGGER.error("Error reloading rewriter " + rewriterId, e);
                 throw new RuntimeException("Could not reload rewriter " + rewriterId, e);
             }
         });
     }
 
     public void clearRewriter(final String rewriterId) {
-        shardContexts.values().parallelStream().forEach(ctx -> ctx.clearRewriter(rewriterId));
+        shardContexts.values().forEach(ctx -> ctx.clearRewriter(rewriterId));
     }
 
     public void clearRewriters() {
-        shardContexts.values().parallelStream().forEach(RewriterShardContext::clearRewriters);
+        shardContexts.values().forEach(RewriterShardContext::clearRewriters);
     }
 
 

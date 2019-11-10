@@ -1,6 +1,11 @@
 {
     "properties": {
       "class": {"type": "keyword"},
-      "type": {"type": "keyword"}
+      "type": {"type": "keyword"},
+      "config": {
+        "type" : "keyword",
+        "index": false
+      }
+
     }
 }

@@ -20,10 +20,13 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.tasks.Task;
 import org.elasticsearch.transport.TransportService;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,7 +66,11 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
                         @Override
                         public void onResponse(final CreateIndexResponse createIndexResponse) {
-                            saveRewriter(task, request, listener);
+                            try {
+                                saveRewriter(task, request, listener);
+                            } catch (final IOException e) {
+                                listener.onFailure(e);
+                            }
                         }
 
                         @Override
@@ -73,7 +80,11 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
                     });
 
                 } else {
-                    saveRewriter(task, request, listener);
+                    try {
+                        saveRewriter(task, request, listener);
+                    } catch (IOException e) {
+                        listener.onFailure(e);
+                    }
                 }
             }
 
@@ -82,15 +93,13 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
                 listener.onFailure(e);
             }
         });
-//
-//        indicesClient.exists()
 
 
     }
 
 
     protected void saveRewriter(final Task task, final PutRewriterRequest request,
-                                final ActionListener<PutRewriterResponse> listener) {
+                                final ActionListener<PutRewriterResponse> listener) throws IOException {
         final IndexRequest indexRequest = buildIndexRequest(task, request);
         client.execute(IndexAction.INSTANCE, indexRequest,
 
@@ -115,10 +124,14 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
         ;
     }
 
-    private IndexRequest buildIndexRequest(final Task parentTask, final PutRewriterRequest request) {
+    private IndexRequest buildIndexRequest(final Task parentTask, final PutRewriterRequest request) throws IOException {
 
         final Map<String, Object> source = new HashMap<>(request.getContent());
         source.put("type", "rewriter");
+        final Map<String, Object> config = (Map<String, Object>) source.get("config");
+        if (config != null) {
+            source.put("config", mapToJsonString(config));
+        }
 
         final IndexRequest indexRequest = client.prepareIndex(QUERQY_INDEX_NAME, null, request.getRewriterId())
                 .setCreate(false)
@@ -128,6 +141,17 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
                 .request();
         indexRequest.setParentTask(clusterService.localNode().getId(), parentTask.getId());
         return indexRequest;
+    }
+
+
+    private static String mapToJsonString(final Map<String, Object> map) throws IOException {
+        try (final ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            final XContentBuilder builder = new XContentBuilder(XContentType.JSON.xContent(), bos);
+            builder.value(map);
+            builder.flush();
+            builder.close();
+            return new String(bos.toByteArray(), Charset.forName("utf-8"));
+        }
     }
 
 

@@ -68,9 +68,7 @@ public class NodesReloadRewriterResponse extends BaseNodesResponse<NodesReloadRe
     public String toString() {
         try {
             final XContentBuilder builder = XContentFactory.jsonBuilder().prettyPrint();
-            builder.startObject();
             toXContent(builder, EMPTY_PARAMS);
-            builder.endObject();
             return Strings.toString(builder);
         } catch (final IOException e) {
             return "{ \"error\" : \"" + e.getMessage() + "\"}";
