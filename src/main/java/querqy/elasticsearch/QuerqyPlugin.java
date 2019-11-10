@@ -2,6 +2,7 @@ package querqy.elasticsearch;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
+import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX_NUM_REPLICAS;
 
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
@@ -12,6 +13,7 @@ import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
 import org.elasticsearch.common.settings.ClusterSettings;
 import org.elasticsearch.common.settings.IndexScopedSettings;
+import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.SettingsFilter;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
@@ -48,13 +50,11 @@ import java.util.function.Supplier;
 
 public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
 
-    //private final Rewriters rewriters;
 
     private final QuerqyProcessor querqyProcessor;
     private final RewriterShardContexts rewriterShardContexts;
 
     public QuerqyPlugin(final Settings settings) {
-        // rewriters = new Rewriters(settings);
         rewriterShardContexts = new RewriterShardContexts();
         querqyProcessor = new QuerqyProcessor(rewriterShardContexts);
     }
@@ -241,4 +241,10 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
         return Arrays.asList(rewriterShardContexts, querqyProcessor);
     }
 
+    @Override
+    public List<Setting<?>> getSettings() {
+        return Collections.singletonList(Setting.intSetting(SETTINGS_QUERQY_INDEX_NUM_REPLICAS, 1, 0,
+                Setting.Property.NodeScope));
+
+    }
 }

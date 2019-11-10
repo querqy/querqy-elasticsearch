@@ -2,46 +2,29 @@ package querqy.elasticsearch;
 
 import org.elasticsearch.action.admin.cluster.node.info.NodeInfo;
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse;
 import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.Node;
-import org.elasticsearch.client.Request;
-import org.elasticsearch.client.Response;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.common.network.NetworkModule;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.http.HttpInfo;
 import org.elasticsearch.plugins.Plugin;
-import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.test.ESIntegTestCase;
-import org.elasticsearch.test.transport.MockTransportService;
-import querqy.elasticsearch.query.MatchingQuery;
-import querqy.elasticsearch.query.QuerqyQueryBuilder;
-import querqy.elasticsearch.query.Rewriter;
-import querqy.elasticsearch.rewriterstore.NodesReloadRewriterAction;
 import querqy.elasticsearch.rewriterstore.PutRewriterAction;
 import querqy.elasticsearch.rewriterstore.PutRewriterRequest;
-import querqy.elasticsearch.rewriterstore.PutRewriterResponse;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import static org.elasticsearch.test.ESIntegTestCase.Scope.SUITE;
-import static org.elasticsearch.test.ESIntegTestCase.Scope.TEST;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX_NUM_REPLICAS;
 
-@ESIntegTestCase.ClusterScope(scope = SUITE, numClientNodes = 1, maxNumDataNodes = 2)
+@ESIntegTestCase.ClusterScope(scope = SUITE, numClientNodes = 1, minNumDataNodes = 4, maxNumDataNodes = 6)
 public class RewriterStoreIntegrationTest extends ESIntegTestCase {
 
-    private static String INDEX_NAME = "idx";
+    static final int NUM_DOT_QUERY_REPLICAS = 2 + new Random().nextInt(4);
 
 
     @Override
@@ -52,6 +35,14 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
     @Override
     protected Collection<Class<? extends Plugin>> transportClientPlugins() {
         return Collections.singleton(QuerqyPlugin.class);
+    }
+
+    @Override
+    protected Settings nodeSettings(final int nodeOrdinal) {
+
+        return Settings.builder().put(super.nodeSettings(nodeOrdinal))
+                .put(SETTINGS_QUERQY_INDEX_NUM_REPLICAS, NUM_DOT_QUERY_REPLICAS)
+                .build();
     }
 
     @Override
@@ -86,9 +77,6 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
         config1.put("p1", 1L); // p1 as long
         payload1.put("config", config1);
 
-//        final NodesInfoResponse response = client().admin().cluster().prepareNodesInfo().setPlugins(true).get();
-//        final List<NodeInfo> nodes = response.getNodes();
-
         client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r1", payload1, null)).get();
 
 
@@ -114,12 +102,30 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
 
     }
 
+    public void testThatReplicaSettingForDotQuerqyIndexIsApplied() throws Exception {
+        final Map<String, Object> payload1 = new HashMap<>();
+        payload1.put("class", DummyESRewriterFactory.class.getName());
+        final Map<String, Object> config1 = new HashMap<>();
+        config1.put("p1", 1L);
+        payload1.put("config", config1);
+
+        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r1", payload1, null)).get();
+
+        final GetSettingsResponse idxSettings = client().admin().indices().prepareGetSettings(".querqy").get();
+
+        assertNotNull(idxSettings);
+        assertEquals(NUM_DOT_QUERY_REPLICAS,
+                Integer.parseInt(idxSettings.getIndexToSettings().get(".querqy").get("index.number_of_replicas")));
+    }
+
+
     public void index() {
-        client().admin().indices().prepareCreate(INDEX_NAME).get();
-        client().prepareIndex(INDEX_NAME, null)
+        final String indexName = "idx";
+        client().admin().indices().prepareCreate(indexName).get();
+        client().prepareIndex(indexName, null)
                 .setSource("field1", "a b", "field2", "a c")
                 .get();
-        client().prepareIndex(INDEX_NAME, null)
+        client().prepareIndex(indexName, null)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("field1", "b c")
                 .get();

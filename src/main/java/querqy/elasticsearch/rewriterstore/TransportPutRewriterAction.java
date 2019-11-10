@@ -1,7 +1,9 @@
 package querqy.elasticsearch.rewriterstore;
 
 import static org.elasticsearch.action.ActionListener.wrap;
+import static querqy.elasticsearch.rewriterstore.Constants.DEFAULT_QUERQY_INDEX_NUM_REPLICAS;
 import static querqy.elasticsearch.rewriterstore.Constants.QUERQY_INDEX_NAME;
+import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX_NUM_REPLICAS;
 import static querqy.elasticsearch.rewriterstore.PutRewriterAction.*;
 
 import org.elasticsearch.action.ActionListener;
@@ -20,6 +22,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.tasks.Task;
@@ -36,13 +39,16 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
     private final Client client;
     private final ClusterService clusterService;
+    private final Settings settings;
 
     @Inject
     public TransportPutRewriterAction(final TransportService transportService, final ActionFilters actionFilters,
-                                      final ClusterService clusterService, final Client client) {
+                                      final ClusterService clusterService, final Client client, final Settings settings)
+    {
         super(NAME, false, transportService, actionFilters, PutRewriterRequest::new);
         this.clusterService = clusterService;
         this.client = client;
+        this.settings = settings;
     }
 
     @Override
@@ -57,12 +63,8 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
             public void onResponse(final IndicesExistsResponse indicesExistsResponse) {
                 if (!indicesExistsResponse.isExists()) {
 
-                    final CreateIndexRequestBuilder createIndexRequestBuilder = indicesClient
-                            .prepareCreate(QUERQY_INDEX_NAME);
-                    final CreateIndexRequest createIndexRequest = createIndexRequestBuilder
-                            .addMapping("querqy-rewriter", readUtf8Resource("querqy-mapping.json"), XContentType.JSON).request();
-
-                    indicesClient.create(createIndexRequest, new ActionListener<CreateIndexResponse>() {
+                    indicesClient.create(buildCreateQuerqyIndexRequest(indicesClient),
+                            new ActionListener<CreateIndexResponse>() {
 
                         @Override
                         public void onResponse(final CreateIndexResponse createIndexResponse) {
@@ -93,8 +95,16 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
                 listener.onFailure(e);
             }
         });
+    }
 
+    protected CreateIndexRequest buildCreateQuerqyIndexRequest(final IndicesAdminClient indicesClient) {
 
+        final CreateIndexRequestBuilder createIndexRequestBuilder = indicesClient.prepareCreate(QUERQY_INDEX_NAME);
+        final int numReplicas = settings.getAsInt(SETTINGS_QUERQY_INDEX_NUM_REPLICAS, DEFAULT_QUERQY_INDEX_NUM_REPLICAS);
+        return  createIndexRequestBuilder
+                .addMapping("querqy-rewriter", readUtf8Resource("querqy-mapping.json"), XContentType.JSON)
+                .setSettings(Settings.builder().put("number_of_replicas", numReplicas))
+                .request();
     }
 
 
