@@ -151,7 +151,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         if (fieldBoostModel != null) {
             final Optional<String> strFieldBoostModel = fieldBoostModelToString(fieldBoostModel);
             if (strFieldBoostModel.isPresent()) {
-                builder.field(FIELD_FIELD_BOOST_MODEL.getPreferredName(), strFieldBoostModel);
+                builder.field(FIELD_FIELD_BOOST_MODEL.getPreferredName(), strFieldBoostModel.get());
             }
         }
 
@@ -234,10 +234,6 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     @Override
     public String getWriteableName() {
         return NAME;
-    }
-
-    public QuerqyProcessor getQuerqyProcessor() {
-        return querqyProcessor;
     }
 
     public void setQuerqyProcessor(final QuerqyProcessor querqyProcessor) {

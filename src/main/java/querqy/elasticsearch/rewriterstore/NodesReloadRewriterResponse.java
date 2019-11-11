@@ -16,6 +16,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 public class NodesReloadRewriterResponse extends BaseNodesResponse<NodesReloadRewriterResponse.NodeResponse>
         implements ToXContentObject {
@@ -62,6 +63,31 @@ public class NodesReloadRewriterResponse extends BaseNodesResponse<NodesReloadRe
         builder.endObject();
         builder.endObject();
         return builder;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof NodesReloadRewriterResponse)) {
+            return false;
+        }
+        final NodesReloadRewriterResponse other = (NodesReloadRewriterResponse) obj;
+        // We only count failures as they don't implement equals():
+        final List<FailedNodeException> thisFailures = failures();
+        final List<FailedNodeException> thatFailures = other.failures();
+        if (thisFailures == null && thatFailures != null) {
+            return false;
+        }
+        if (thisFailures != null) {
+            if (thatFailures == null) {
+                return false;
+            }
+            if (thisFailures.size() != thatFailures.size()) {
+                return false;
+            }
+        }
+
+        return Objects.equals(getClusterName(), other.getClusterName())
+                && Objects.equals(getNodes(), other.getNodes());
     }
 
     @Override
@@ -124,12 +150,20 @@ public class NodesReloadRewriterResponse extends BaseNodesResponse<NodesReloadRe
                 return false;
             }
             final NodesReloadRewriterResponse.NodeResponse that = (NodesReloadRewriterResponse.NodeResponse) o;
-            return reloadException != null ? reloadException.equals(that.reloadException) : that.reloadException == null;
+            // We cannot rely on the Exception to implement equals(), users of NodesReloadRewriterResponse will
+            // be interested just in the message anyway
+            if (reloadException == null) {
+                return that.reloadException == null;
+            } else if (that.reloadException == null) {
+                return false;
+            }
+            return Objects.equals(reloadException.getMessage(), that.reloadException.getMessage());
         }
 
         @Override
         public int hashCode() {
-            return reloadException != null ? reloadException.hashCode() : 0;
+            return reloadException != null && reloadException.getMessage() != null
+                    ? reloadException.getMessage().hashCode() : 0;
         }
 
         static NodesReloadRewriterResponse.NodeResponse readNodeResponse(final StreamInput in) throws IOException {

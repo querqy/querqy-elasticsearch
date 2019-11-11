@@ -61,7 +61,7 @@ public class RewrittenQueries implements NamedWriteable, ToXContent {
         out.writeBoolean(useFieldBoosts);
         out.writeFloat(positiveWeight);
         out.writeFloat(negativeWeight);
-        out.writeOptionalString(querySimilarityScoringToString(similarityScoring).orElse(null));
+        out.writeOptionalString(similarityScoring != null ? similarityScoring.name() : null);
     }
 
     @Override

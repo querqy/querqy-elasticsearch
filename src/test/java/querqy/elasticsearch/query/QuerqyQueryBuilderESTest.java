@@ -12,10 +12,13 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.elasticsearch.common.ParseField;
+import org.elasticsearch.common.ParsingException;
+import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.common.xcontent.ObjectParser;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
@@ -27,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 import querqy.elasticsearch.QuerqyPlugin;
 import querqy.elasticsearch.QuerqyProcessor;
-import querqy.lucene.PhraseBoosting;
 import querqy.lucene.rewrite.DependentTermQueryBuilder;
 import querqy.lucene.rewrite.DocumentFrequencyCorrection;
 import querqy.lucene.rewrite.IndependentFieldBoost;
@@ -167,15 +169,23 @@ public class QuerqyQueryBuilderESTest extends AbstractQueryTestCase<QuerqyQueryB
         writeQuerqyQueryBuilder.setMinimumShouldMatch("2<-25% 9<-3");
         writeQuerqyQueryBuilder.setRewriters(Arrays.asList(new Rewriter("common1"), new Rewriter("wordbreak")));
         writeQuerqyQueryBuilder.setTieBreaker(0.7f);
+        writeQuerqyQueryBuilder.setFieldBoostModel("prms");
 
         final PhraseBoosts phraseBoosts = new PhraseBoosts();
         phraseBoosts.setTieBreaker(0.15f);
-        phraseBoosts.setFull(new PhraseBoostDefinition(4, Arrays.asList("ffull1^0.9")));
-        phraseBoosts.setBigram(new PhraseBoostDefinition(1, Arrays.asList("fb1^0.25")));
+        phraseBoosts.setFull(new PhraseBoostDefinition(4, Collections.singletonList("ffull1^0.9")));
+        phraseBoosts.setBigram(new PhraseBoostDefinition(1, Collections.singletonList("fb1^0.25")));
         phraseBoosts.setTrigram(new PhraseBoostDefinition(3, Arrays.asList("ft1", "ft2^7")));
 
         final BoostingQueries boostingQueries = new BoostingQueries();
         boostingQueries.setPhraseBoosts(phraseBoosts);
+
+        final RewrittenQueries rewrittenQueries = new RewrittenQueries();
+        rewrittenQueries.setNegativeWeight(0.2f);
+        rewrittenQueries.setPositiveWeight(0.7f);
+        rewrittenQueries.setSimilarityScoring("off");
+        rewrittenQueries.setUseFieldBoosts(false);
+        boostingQueries.setRewrittenQueries(rewrittenQueries);
 
         writeQuerqyQueryBuilder.setBoostingQueries(boostingQueries);
 
@@ -203,15 +213,23 @@ public class QuerqyQueryBuilderESTest extends AbstractQueryTestCase<QuerqyQueryB
         writeQuerqyQueryBuilder.setMinimumShouldMatch("2<-25% 9<-3");
         writeQuerqyQueryBuilder.setRewriters(Arrays.asList(new Rewriter("common1"), new Rewriter("wordbreak")));
         writeQuerqyQueryBuilder.setTieBreaker(0.7f);
+        writeQuerqyQueryBuilder.setFieldBoostModel("prms");
 
         final PhraseBoosts phraseBoosts = new PhraseBoosts();
         phraseBoosts.setTieBreaker(0.5f);
         phraseBoosts.setFull(new PhraseBoostDefinition(2, Arrays.asList("ffull1^9", "ffull2")));
-        phraseBoosts.setBigram(new PhraseBoostDefinition(0, Arrays.asList("fb1^0.5")));
+        phraseBoosts.setBigram(new PhraseBoostDefinition(0, Collections.singletonList("fb1^0.5")));
         phraseBoosts.setTrigram(new PhraseBoostDefinition(1, Arrays.asList("ft1", "ft2")));
 
         final BoostingQueries boostingQueries = new BoostingQueries();
         boostingQueries.setPhraseBoosts(phraseBoosts);
+
+        final RewrittenQueries rewrittenQueries = new RewrittenQueries();
+        rewrittenQueries.setNegativeWeight(0.2f);
+        rewrittenQueries.setPositiveWeight(0.7f);
+        rewrittenQueries.setSimilarityScoring("off");
+        rewrittenQueries.setUseFieldBoosts(false);
+        boostingQueries.setRewrittenQueries(rewrittenQueries);
 
         writeQuerqyQueryBuilder.setBoostingQueries(boostingQueries);
 
@@ -228,6 +246,50 @@ public class QuerqyQueryBuilderESTest extends AbstractQueryTestCase<QuerqyQueryB
         assertEqualBuilders(writeQuerqyQueryBuilder, fromJsonInnerObject(os.toByteArray()));
 
     }
+
+    @Test
+    public void testThatMissingMatchingQueryCausesParsingException() throws IOException {
+
+        try {
+            QuerqyQueryBuilder.fromXContent(XContentHelper.createParser(null, null, new BytesArray("{}"),
+                    XContentType.JSON), null);
+            fail("missing matching_query must cause Exception");
+        } catch (final ParsingException e) {
+            assertTrue(e.getMessage().contains("matching_query"));
+        }
+
+    }
+
+    @Test
+    public void testThatMissingQueryStringCausesParsingException() throws IOException {
+
+        try {
+            QuerqyQueryBuilder.fromXContent(XContentHelper.createParser(null, null, new BytesArray("{" +
+                            "\"matching_query\": {}}"),
+                    XContentType.JSON), null);
+            fail("missing query string must cause Exception");
+        } catch (final ParsingException e) {
+            assertTrue(e.getMessage().contains("[querqy] requires a query"));
+        }
+
+    }
+
+    @Test
+    public void testThatMissingQueryFieldsCausesParsingException() throws IOException {
+
+        try {
+            QuerqyQueryBuilder.fromXContent(XContentHelper.createParser(null, null, new BytesArray("{" +
+                            "\"matching_query\": {" +
+                            "\"query\": \"hello\"" +
+                            "}}"),
+                    XContentType.JSON), null);
+            fail("missing query fields must cause Exception");
+        } catch (final ParsingException e) {
+            assertTrue(e.getMessage().contains("query_fields"));
+        }
+
+    }
+
 
     private void assertEqualBuilders(final QuerqyQueryBuilder builder1, final QuerqyQueryBuilder builder2) {
 
