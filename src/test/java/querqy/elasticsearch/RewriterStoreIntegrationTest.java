@@ -45,7 +45,7 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
                 .build();
     }
 
-    @Override
+    //@Override
     protected boolean addMockInternalEngine() {
         return false;
     }
