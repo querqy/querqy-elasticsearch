@@ -36,7 +36,7 @@
         <jts.version>1.15.0</jts.version>
 
         <log4j.version>2.11.1</log4j.version>
-        <querqy.lucene.version>4.4.lucene800.1</querqy.lucene.version>
+        <querqy.lucene.version>4.5.lucene800.0</querqy.lucene.version>
         <elasticsearch.version>7.0.1</elasticsearch.version>
         <jacoco.version>0.8.5</jacoco.version>
 
