@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class QuerqyQueryBuilderESTest extends AbstractQueryTestCase<QuerqyQueryBuilder> {
+public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBuilder> {
 
     QuerqyProcessor querqyProcessor;
 

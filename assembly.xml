@@ -21,5 +21,15 @@
             <filtered>true</filtered>
         </file>
     </files>
+    <fileSets>
+        <fileSet>
+            <outputDirectory></outputDirectory>
+            <directory>src/main/resources/META-INF</directory>
+            <includes>
+                <include>**.txt</include>
+            </includes>
+            <filtered>false</filtered>
+        </fileSet>
+    </fileSets>
 
 </assembly>

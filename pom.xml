@@ -3,7 +3,7 @@
 
     <groupId>querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>4.4.es7.0.1.0-SNAPSHOT</version>
+    <version>4.5.es7.0.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -17,6 +17,13 @@
         <tag>HEAD</tag>
     </scm>
 
+    <licenses>
+        <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
     <properties>
 
         <maven-assembly-plugin.version>3.1.1</maven-assembly-plugin.version>
@@ -25,7 +32,6 @@
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-        <cobertura-maven-plugin.version>2.7</cobertura-maven-plugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
