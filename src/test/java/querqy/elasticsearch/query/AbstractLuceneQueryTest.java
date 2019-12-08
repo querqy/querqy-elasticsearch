@@ -18,9 +18,6 @@ import querqy.lucene.rewrite.IndependentFieldBoost;
 import java.util.Arrays;
 import java.util.List;
 
-/**
-TODO: This utility was copied from querqy-lucene. Should we publish the test-jar from querqy-lucene?
- */
 public  class AbstractLuceneQueryTest {
 
    public static ClauseMatcher tq(Occur occur, float boost, String field, String text) {
@@ -87,28 +84,28 @@ public  class AbstractLuceneQueryTest {
    }
 
    @SafeVarargs
-   public static DMQMatcher dmq(float boost, float tieBreaker, TypeSafeMatcher<? extends Query>... disjuncts) {
+   public static DMQMatcher dmq(Float boost, Float tieBreaker, TypeSafeMatcher<? extends Query>... disjuncts) {
       return new DMQMatcher(boost, tieBreaker, disjuncts);
    }
 
    @SafeVarargs
-   public static DMQMatcher dmq(float boost, TypeSafeMatcher<? extends Query>... disjuncts) {
-      return dmq(boost, 0.0f, disjuncts);
+   public static DMQMatcher dmq(Float boost, TypeSafeMatcher<? extends Query>... disjuncts) {
+      return dmq(boost, null, disjuncts);
    }
 
    @SafeVarargs
    public static  DMQMatcher dmq(TypeSafeMatcher<? extends Query>... disjuncts) {
-      return dmq(1f, 0.0f, disjuncts);
+      return dmq((Float) null, null, disjuncts);
    }
 
    @SafeVarargs
-   public static  ClauseMatcher dmq(Occur occur, float boost, float tieBreaker,
+   public static  ClauseMatcher dmq(Occur occur, Float boost, Float tieBreaker,
                                   TypeSafeMatcher<? extends Query>... disjuncts) {
       return c(occur, dmq(boost, tieBreaker, disjuncts));
    }
 
    @SafeVarargs
-   public static  ClauseMatcher dmq(Occur occur, float boost, TypeSafeMatcher<? extends Query>... disjuncts) {
+   public static  ClauseMatcher dmq(Occur occur, Float boost, TypeSafeMatcher<? extends Query>... disjuncts) {
       return c(occur, dmq(boost, disjuncts));
    }
 
@@ -121,7 +118,41 @@ public  class AbstractLuceneQueryTest {
       return new ClauseMatcher(occur, queryMatcher);
    }
 
-    static class ClauseMatcher extends TypeSafeMatcher<BooleanClause> {
+    public static OccurClauseMatcher anyMust() {
+       return new OccurClauseMatcher(Occur.MUST);
+    }
+
+    public static OccurClauseMatcher anyShould() {
+        return new OccurClauseMatcher(Occur.SHOULD);
+    }
+
+    public static OccurClauseMatcher anyMustNot() {
+        return new OccurClauseMatcher(Occur.MUST_NOT);
+    }
+
+    public static OccurClauseMatcher anyFilter() {
+        return new OccurClauseMatcher(Occur.FILTER);
+    }
+
+    static class OccurClauseMatcher extends TypeSafeMatcher<BooleanClause> {
+        Occur occur;
+
+        public OccurClauseMatcher(final Occur occur) {
+            this.occur = occur;
+        }
+
+        @Override
+        public void describeTo(final Description description) {
+            description.appendText("occur: " + occur);
+        }
+
+        @Override
+        protected boolean matchesSafely(final BooleanClause clause) {
+            return clause.getOccur() == occur;
+        }
+    }
+
+    public static class ClauseMatcher extends TypeSafeMatcher<BooleanClause> {
 
       Occur occur;
       TypeSafeMatcher<? extends Query> queryMatcher;
@@ -145,13 +176,14 @@ public  class AbstractLuceneQueryTest {
     }
 
     static class DMQMatcher extends TypeSafeMatcher<Query> {
-        float boost;
-        float tieBreaker;
-        TypeSafeMatcher<? extends Query>[] disjuncts;
+        final  Float boost;
+        final Float tieBreaker;
+        final TypeSafeMatcher<? extends Query>[] disjuncts;
 
         @SafeVarargs
-        public DMQMatcher(float boost, float tieBreaker, TypeSafeMatcher<? extends Query>... disjuncts) {
-            super((boost == 1f) ? DisjunctionMaxQuery.class : BoostQuery.class);
+        public DMQMatcher(final Float boost, final Float tieBreaker, TypeSafeMatcher<? extends Query>... disjuncts) {
+            super((boost == null || boost.floatValue() == 1f)
+                    ? DisjunctionMaxQuery.class : BoostQuery.class);
             this.boost = boost;
             this.tieBreaker = tieBreaker;
             this.disjuncts = disjuncts;
@@ -159,7 +191,13 @@ public  class AbstractLuceneQueryTest {
 
         @Override
         public void describeTo(Description description) {
-            description.appendText("DMQ: tie=" + tieBreaker + ", boost=" + boost + ", ");
+            description.appendText("DMQ: ");
+            if (tieBreaker != null) {
+                description.appendText("tieBreaker=").appendValue(tieBreaker);
+            }
+            if (boost != null) {
+                description.appendText("boost=").appendValue(boost);
+            }
             description.appendList("disjuncts:[", ",\n", "]", Arrays.asList(disjuncts));
         }
 
@@ -176,7 +214,7 @@ public  class AbstractLuceneQueryTest {
                     dmq = (DisjunctionMaxQuery) boostQuery.getQuery();
                 }
             } else {
-                if (boost != 1f) {
+                if (boost != null && boost != 1f) {
                     return false;
                 } else {
                     dmq = (DisjunctionMaxQuery) query;
@@ -189,12 +227,12 @@ public  class AbstractLuceneQueryTest {
 
         protected boolean matchDisjunctionMaxQuery(DisjunctionMaxQuery dmq) {
 
-            if (tieBreaker != dmq.getTieBreakerMultiplier()) {
+            if (tieBreaker != null && tieBreaker != dmq.getTieBreakerMultiplier()) {
                 return false;
             }
 
             List<Query> dmqDisjuncts = dmq.getDisjuncts();
-            if (dmqDisjuncts == null || dmqDisjuncts.size() != disjuncts.length) {
+            if (dmqDisjuncts.size() != disjuncts.length) {
                 return false;
             }
 

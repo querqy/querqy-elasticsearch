@@ -20,8 +20,6 @@ public class QuerqyProcessor {
 
     private static final RewriteChain EMPTY_REWRITE_CHAIN = new RewriteChain(Collections.emptyList());
 
-    //private final Rewriters rewriters;
-
     private RewriterShardContexts rewriterShardContexts;
 
     public QuerqyProcessor(final RewriterShardContexts rewriterShardContexts) {
@@ -70,15 +68,44 @@ public class QuerqyProcessor {
             }
         }
 
-        if (queries.filterQueries != null) {
-            for (final Query query : queries.filterQueries) {
-                builder.add(query, BooleanClause.Occur.FILTER);
-            }
-        }
-
+        appendFilterQueries(queries, builder);
 
         return builder.build();
 
+    }
+
+
+    void appendFilterQueries(final LuceneQueries queries, final BooleanQuery.Builder builder) {
+
+        if (queries.filterQueries != null) {
+
+            for (final Query query : queries.filterQueries) {
+
+                if (query instanceof BooleanQuery) {
+
+                    final BooleanQuery bq = (BooleanQuery) query;
+
+                    final List<BooleanClause> clauses = bq.clauses();
+                    final int minimumNumberShouldMatch = bq.getMinimumNumberShouldMatch();
+
+                    if (minimumNumberShouldMatch < 2 || clauses.size() <= minimumNumberShouldMatch) {
+
+                        for (final BooleanClause clause : clauses) {
+                            if (clause.getOccur() == BooleanClause.Occur.MUST_NOT) {
+                                builder.add(clause.getQuery(), BooleanClause.Occur.MUST_NOT);
+                            } else {
+                                builder.add(clause.getQuery(), BooleanClause.Occur.FILTER);
+                            }
+                        }
+                    } else {
+                        builder.add(query, BooleanClause.Occur.FILTER);
+                    }
+                } else {
+                    builder.add(query, BooleanClause.Occur.FILTER);
+                }
+
+            }
+        }
     }
 
 }

@@ -86,21 +86,6 @@ public class RewriterShardContexts implements IndexEventListener {
         shardContexts.values().forEach(RewriterShardContext::clearRewriters);
     }
 
-
-    public synchronized void reloadRewriteChain(final String chainId) {
-//        System.out.println("RELOAD CHAIN " + chainId);
-
-        // TODO
-//        shardContexts.values().parallelStream().forEach(ctx -> {
-//            try {
-//                ctx.reloadRewriter(rewriterId);
-//            } catch (final Exception e) {
-//                throw new RuntimeException("Could not reload rewriter " + rewriterId, e);
-//            }
-//        });
-    }
-
-
     @Override
     public synchronized void shardRoutingChanged(final IndexShard indexShard, final ShardRouting oldRouting,
                                                  final ShardRouting newRouting) {

@@ -24,7 +24,7 @@ import querqy.elasticsearch.rewriterstore.PutRewriterRequest;
 
 public class RewriterIT extends ESSingleNodeTestCase {
 
-    final String INDEX_NAME = "test_index";
+    private final String INDEX_NAME = "test_index";
 
     @Override
     protected Collection<Class<? extends Plugin>> getPlugins() {
