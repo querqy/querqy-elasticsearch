@@ -12,6 +12,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 public class NodesClearRewriterCacheResponse extends BaseNodesResponse<NodesClearRewriterCacheResponse.NodeResponse>
         implements ToXContentObject {
@@ -47,7 +48,7 @@ public class NodesClearRewriterCacheResponse extends BaseNodesResponse<NodesClea
         builder.startObject("nodes");
         for (final NodesClearRewriterCacheResponse.NodeResponse node : getNodes()) {
             builder.startObject(node.getNode().getId());
-            builder.field("name", node.getNode().getName());
+            node.toXContent(builder, params);
             builder.endObject();
         }
         builder.endObject();
@@ -55,7 +56,10 @@ public class NodesClearRewriterCacheResponse extends BaseNodesResponse<NodesClea
         return builder;
     }
 
-    public static class NodeResponse extends BaseNodeResponse {
+
+
+    public static class NodeResponse extends BaseNodeResponse
+            implements ToXContentObject {
 
         public NodeResponse() {
         }
@@ -77,12 +81,23 @@ public class NodesClearRewriterCacheResponse extends BaseNodesResponse<NodesClea
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            return true;
+            return Objects.equals(getNode(), ((NodesClearRewriterCacheResponse.NodeResponse) o).getNode());
+
         }
 
 
         static NodesClearRewriterCacheResponse.NodeResponse readNodeResponse(final StreamInput in) throws IOException {
             return new NodesClearRewriterCacheResponse.NodeResponse(in);
+        }
+
+        @Override
+        public XContentBuilder toXContent(final XContentBuilder builder, final Params params) throws IOException {
+            return builder.field("name", getNode().getName());
+        }
+
+        @Override
+        public boolean isFragment() {
+            return true;
         }
     }
 }

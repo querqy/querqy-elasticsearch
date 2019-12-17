@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public interface RequestUtils {
 
-    static Map<String, Float> paramToQueryFieldsAndBoosting(final List<String> param) {
+    static Map<String, Float> paramToQueryFieldsAndBoosting(final Iterable<String> param) {
 
         if (param == null) {
             return Collections.emptyMap();
@@ -23,17 +23,22 @@ public interface RequestUtils {
 
         final Map<String, Float> qf = new HashMap<>();
 
-        for (final String fieldElement: param) {
+        for (final String fieldname: param) {
 
-            final int weightPos = fieldElement.indexOf('^');
+            final int weightPos = fieldname.indexOf('^');
             if (weightPos == 0) {
-                throw new IllegalArgumentException("field cannot start with ^: " + fieldElement);
+                throw new IllegalArgumentException("field cannot start with ^: " + fieldname);
             }
 
             if (weightPos > -1) {
-                qf.put(fieldElement.substring(0, weightPos), Float.parseFloat(fieldElement.substring(weightPos + 1)));
+                if (qf.put(fieldname.substring(0, weightPos),
+                        Float.parseFloat(fieldname.substring(weightPos + 1))) != null) {
+                    throw new IllegalArgumentException("Duplicate field: " + fieldname);
+                }
             } else {
-                qf.put(fieldElement, DEFAULT_BOOST);
+                if (qf.put(fieldname, DEFAULT_BOOST)!= null) {
+                    throw new IllegalArgumentException("Duplicate field: " + fieldname);
+                }
             }
 
         }

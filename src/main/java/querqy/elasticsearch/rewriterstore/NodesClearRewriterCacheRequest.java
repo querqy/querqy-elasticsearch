@@ -36,7 +36,7 @@ public class NodesClearRewriterCacheRequest extends BaseNodesRequest<NodesClearR
     }
 
     public NodeRequest newNodeRequest(final String nodeId) {
-        return new NodeRequest(nodeId, rewriterId);
+        return new NodeRequest(rewriterId, nodeId);
     }
 
     public static class NodeRequest extends BaseNodeRequest {
@@ -46,7 +46,7 @@ public class NodesClearRewriterCacheRequest extends BaseNodesRequest<NodesClearR
         public NodeRequest() {
         }
 
-        public NodeRequest(final String nodeId, final String rewriterId) {
+        public NodeRequest(final String rewriterId,final String nodeId) {
             super(nodeId);
             this.rewriterId = rewriterId;
         }

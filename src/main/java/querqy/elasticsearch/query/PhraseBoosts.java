@@ -66,6 +66,25 @@ public class PhraseBoosts implements NamedWriteable, ToXContent {
 
     }
 
+    public PhraseBoosts full(final PhraseBoostDefinition full) {
+        setFull(full);
+        return this;
+    }
+
+    public PhraseBoosts bigram(final PhraseBoostDefinition bigram) {
+        setBigram(bigram);
+        return this;
+    }
+
+    public PhraseBoosts trigram(final PhraseBoostDefinition trigram) {
+        setTrigram(trigram);
+        return this;
+    }
+
+    public PhraseBoosts tieBreaker(final float tie) {
+        setTieBreaker(tie);
+        return this;
+    }
 
     public void setTieBreaker(final float tie) {
         this.tie = tie;
@@ -106,7 +125,7 @@ public class PhraseBoosts implements NamedWriteable, ToXContent {
     }
 
     @Override
-    public void writeTo(StreamOutput out) throws IOException {
+    public void writeTo(final StreamOutput out) throws IOException {
         out.writeFloat(tie);
         out.writeOptionalWriteable(full);
         out.writeOptionalWriteable(bigram);

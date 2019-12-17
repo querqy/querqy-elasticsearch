@@ -22,7 +22,7 @@ import querqy.elasticsearch.rewriterstore.DeleteRewriterRequest;
 import querqy.elasticsearch.rewriterstore.PutRewriterAction;
 import querqy.elasticsearch.rewriterstore.PutRewriterRequest;
 
-public class RewriterIT extends ESSingleNodeTestCase {
+public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
     private final String INDEX_NAME = "test_index";
 

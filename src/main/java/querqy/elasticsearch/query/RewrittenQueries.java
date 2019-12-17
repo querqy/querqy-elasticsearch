@@ -18,8 +18,10 @@ import java.util.Optional;
 
 public class RewrittenQueries implements NamedWriteable, ToXContent {
 
+    public static final String NAME = "rewritten_queries_boosts";
+
     static final ObjectParser<RewrittenQueries, Void> PARSER = new ObjectParser<>(
-            "rewritten_queries_boosts", RewrittenQueries::new);
+            NAME, RewrittenQueries::new);
 
     private static final ParseField FIELD_USE_FIELD_BOOST = new ParseField("use_field_boost");
     private static final ParseField FIELD_NEGATIVE_WEIGHT = new ParseField("negative_query_weight");
@@ -53,7 +55,7 @@ public class RewrittenQueries implements NamedWriteable, ToXContent {
 
     @Override
     public String getWriteableName() {
-        return "rewritten_queries_boosts";
+        return NAME;
     }
 
     @Override

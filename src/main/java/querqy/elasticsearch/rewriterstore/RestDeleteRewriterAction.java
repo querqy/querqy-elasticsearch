@@ -8,9 +8,10 @@ import org.elasticsearch.rest.BaseRestHandler;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.action.RestStatusToXContentListener;
 
-import java.io.IOException;
 
 public class RestDeleteRewriterAction extends BaseRestHandler {
+
+    public static final String PARAM_REWRITER_ID = "rewriterId";
 
     public RestDeleteRewriterAction(final Settings settings) {
         super(settings);
@@ -22,10 +23,22 @@ public class RestDeleteRewriterAction extends BaseRestHandler {
     }
 
     @Override
-    protected RestChannelConsumer prepareRequest(final RestRequest request, final NodeClient client)
-            throws IOException {
+    protected RestChannelConsumer prepareRequest(final RestRequest request, final NodeClient client) {
 
-        String rewriterId = request.param("rewriterId");
+        final String routing = request.param("routing");
+
+        final RestDeleteRewriterAction.DeleteRewriterRequestBuilder builder = createRequestBuilder(request, client,
+                routing);
+
+
+        return (channel) -> builder.execute(
+                new RestStatusToXContentListener<>(channel));
+    }
+
+
+    DeleteRewriterRequestBuilder createRequestBuilder(final RestRequest request, final NodeClient client,
+                                                   final String routing) {
+        String rewriterId = request.param(PARAM_REWRITER_ID);
         if (rewriterId == null) {
             throw new IllegalArgumentException("RestDeleteRewriterAction requires rewriterId parameter");
         }
@@ -35,16 +48,10 @@ public class RestDeleteRewriterAction extends BaseRestHandler {
             throw new IllegalArgumentException("RestDeleteRewriterAction: rewriterId parameter must not be empty");
         }
 
-        final String routing = request.param("routing");
-
-        final RestDeleteRewriterAction.DeleteRewriterRequestBuilder builder = new RestDeleteRewriterAction
-                .DeleteRewriterRequestBuilder(client, DeleteRewriterAction.INSTANCE,
+        return new RestDeleteRewriterAction.DeleteRewriterRequestBuilder(client, DeleteRewriterAction.INSTANCE,
                 new DeleteRewriterRequest(rewriterId, routing));
-
-
-        return (channel) -> builder.execute(
-                new RestStatusToXContentListener<>(channel));
     }
+
 
     public static class DeleteRewriterRequestBuilder
             extends ActionRequestBuilder<DeleteRewriterRequest, DeleteRewriterResponse> {
@@ -53,5 +60,6 @@ public class RestDeleteRewriterAction extends BaseRestHandler {
                                          final DeleteRewriterRequest request) {
             super(client, action, request);
         }
+
     }
 }

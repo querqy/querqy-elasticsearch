@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX_NUM_REPLICAS;
 
 @ESIntegTestCase.ClusterScope(scope = SUITE, numClientNodes = 1, minNumDataNodes = 4, maxNumDataNodes = 6)
-public class RewriterStoreIT extends ESIntegTestCase {
+public class RewriterStoreIntegrationTest extends ESIntegTestCase {
 
     static final int NUM_DOT_QUERY_REPLICAS = 2 + new Random().nextInt(4);
 

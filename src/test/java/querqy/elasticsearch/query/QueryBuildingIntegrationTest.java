@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueryBuildingIT extends ESSingleNodeTestCase {
+public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
     private final String INDEX_NAME = "test_index";
 
@@ -448,6 +448,130 @@ public class QueryBuildingIT extends ESSingleNodeTestCase {
 
     }
 
+
+    public void testPhraseBoostNotMatching() throws Exception {
+
+        index();
+
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+
+        querqyQuery.setMatchingQuery(new MatchingQuery("aa bb cc dd 11"));
+        querqyQuery.setMinimumShouldMatch("1");
+        querqyQuery.setQueryFieldsAndBoostings(singletonList("field2"));
+        querqyQuery.setBoostingQueries(new BoostingQueries().phraseBoosts(new PhraseBoosts()
+                .full(new PhraseBoostDefinition(0, "field2"))));
+
+        final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder.setQuery(querqyQuery);
+
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        final SearchHits hits = response.getHits();
+        assertEquals(2L, hits.getTotalHits().value);
+
+        final SearchHit first = hits.getAt(0);
+        assertEquals("3", first.getSourceAsMap().get("id"));
+
+    }
+
+    public void testFullPhraseBoostMatching() throws Exception {
+
+        index();
+
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+
+        querqyQuery.setMatchingQuery(new MatchingQuery("aa bb cc dd"));
+        querqyQuery.setMinimumShouldMatch("1");
+        querqyQuery.setQueryFieldsAndBoostings(singletonList("field2"));
+        querqyQuery.setBoostingQueries(new BoostingQueries().phraseBoosts(new PhraseBoosts()
+                .full(new PhraseBoostDefinition(0, "field2"))));
+
+        final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder.setQuery(querqyQuery);
+
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        final SearchHits hits = response.getHits();
+        assertEquals(2L, hits.getTotalHits().value);
+
+        final SearchHit first = hits.getAt(0);
+        assertEquals("4", first.getSourceAsMap().get("id"));
+
+    }
+
+
+    public void testTrigramMatching() throws Exception {
+
+        index();
+
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+
+        querqyQuery.setMatchingQuery(new MatchingQuery("aa bb cc 11 dd"));
+        querqyQuery.setMinimumShouldMatch("1");
+        querqyQuery.setQueryFieldsAndBoostings(singletonList("field2"));
+        querqyQuery.setBoostingQueries(new BoostingQueries().phraseBoosts(new PhraseBoosts()
+                .trigram(new PhraseBoostDefinition(0, "field2^100"))));
+
+        final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder.setQuery(querqyQuery);
+
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        final SearchHits hits = response.getHits();
+        assertEquals(2L, hits.getTotalHits().value);
+
+        final SearchHit first = hits.getAt(0);
+        assertEquals("4", first.getSourceAsMap().get("id"));
+
+    }
+
+    public void testBigramMatching() throws Exception {
+
+        index();
+
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+
+        querqyQuery.setMatchingQuery(new MatchingQuery("aa bb nono cc 11 dd"));
+        querqyQuery.setMinimumShouldMatch("1");
+        querqyQuery.setQueryFieldsAndBoostings(singletonList("field2"));
+        querqyQuery.setBoostingQueries(new BoostingQueries().phraseBoosts(new PhraseBoosts()
+                .bigram(new PhraseBoostDefinition(0, "field2^100"))));
+
+        final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder.setQuery(querqyQuery);
+
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        final SearchHits hits = response.getHits();
+        assertEquals(2L, hits.getTotalHits().value);
+
+        final SearchHit first = hits.getAt(0);
+        assertEquals("4", first.getSourceAsMap().get("id"));
+
+    }
+
+    public void testBigramMatchingWithSlop() throws Exception {
+
+        index();
+
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+
+        querqyQuery.setMatchingQuery(new MatchingQuery("aa cc nono 11"));
+        querqyQuery.setMinimumShouldMatch("1");
+        querqyQuery.setQueryFieldsAndBoostings(singletonList("field2"));
+        querqyQuery.setBoostingQueries(
+                new BoostingQueries().phraseBoosts(
+                        new PhraseBoosts().bigram(new PhraseBoostDefinition().slop(1).fields("field2^100"))));
+
+        final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder.setQuery(querqyQuery).setExplain(true);
+
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        final SearchHits hits = response.getHits();
+        assertEquals(2L, hits.getTotalHits().value);
+
+        final SearchHit first = hits.getAt(0);
+        assertEquals("4", first.getSourceAsMap().get("id"));
+
+    }
+
+
     public void index() {
         client().admin().indices().prepareCreate(INDEX_NAME).get();
         client().prepareIndex(INDEX_NAME, null)
@@ -456,6 +580,17 @@ public class QueryBuildingIT extends ESSingleNodeTestCase {
         client().prepareIndex(INDEX_NAME, null)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("id", "2", "field1", "ii jj cc kk ee ll gg hh")
+                .get();
+
+        client().prepareIndex(INDEX_NAME, null)
+                .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
+                .setSource("id", "3", "field2", "aa xx bb yy cc zz dd ee ff gg hh 11")
+                .get();
+
+
+        client().prepareIndex(INDEX_NAME, null)
+                .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
+                .setSource("id", "4", "field2", "aa bb cc dd ee ff gg hh xx yy zz 22")
                 .get();
     }
 }

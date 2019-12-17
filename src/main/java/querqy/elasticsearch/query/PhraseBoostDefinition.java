@@ -12,6 +12,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import querqy.lucene.PhraseBoosting;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,11 @@ public class PhraseBoostDefinition implements NamedWriteable, ToXContent {
         setFields(fields);
     }
 
+    public PhraseBoostDefinition(final int slop, final String... fields) {
+        setSlop(slop);
+        setFields(Arrays.asList(fields));
+    }
+
     public PhraseBoostDefinition(final StreamInput in) throws IOException {
         slop = in.readInt();
         final int numFields = in.readInt();
@@ -56,11 +62,24 @@ public class PhraseBoostDefinition implements NamedWriteable, ToXContent {
         this.slop = slop;
     }
 
+    public PhraseBoostDefinition slop(final int slop) {
+        setSlop(slop);
+        return this;
+    }
+
     public void setFields(final List<String> fields) {
+        if (fields == null || fields.isEmpty()) {
+            throw new IllegalArgumentException("Query fields must not be null or empty");
+        }
+        this.queryFieldsAndBoostings = paramToQueryFieldsAndBoosting(fields);
+    }
+
+    public PhraseBoostDefinition fields(final String... fields) {
         if (fields == null) {
             throw new IllegalArgumentException("Query fields must not be null");
         }
-        this.queryFieldsAndBoostings = paramToQueryFieldsAndBoosting(fields);
+        setFields(Arrays.asList(fields));
+        return this;
     }
 
     public List<PhraseBoosting.PhraseBoostFieldParams> toPhraseBoostFieldParams(final PhraseBoosting.NGramType nGramType) {

@@ -23,7 +23,6 @@ public class BoostingQueries implements NamedWriteable, ToXContent {
 
     static {
 
-
         PARSER.declareObject(BoostingQueries::setRewrittenQueries, RewrittenQueries.PARSER, FIELD_REWRITTEN_QUERIES);
         PARSER.declareObject(BoostingQueries::setPhraseBoosts, PhraseBoosts.PARSER, FIELD_PHRASE_BOOSTS);
     }
@@ -34,10 +33,8 @@ public class BoostingQueries implements NamedWriteable, ToXContent {
     public BoostingQueries() {}
 
     public BoostingQueries(final StreamInput in) throws IOException {
-
-        rewrittenQueries = in.readOptionalWriteable(RewrittenQueries::new);
-        phraseBoosts = in.readOptionalWriteable(PhraseBoosts::new);
-
+        this.rewrittenQueries = in.readOptionalWriteable(RewrittenQueries::new);
+        this.phraseBoosts = in.readOptionalWriteable(PhraseBoosts::new);
     }
 
 
@@ -82,12 +79,22 @@ public class BoostingQueries implements NamedWriteable, ToXContent {
         this.rewrittenQueries = rewrittenQueries;
     }
 
+    public BoostingQueries rewrittenQueries(final RewrittenQueries rewrittenQueries) {
+        setRewrittenQueries(rewrittenQueries);
+        return this;
+    }
+
     public PhraseBoosts getPhraseBoosts() {
         return phraseBoosts;
     }
 
-    public void setPhraseBoosts(PhraseBoosts phraseBoosts) {
+    public void setPhraseBoosts(final PhraseBoosts phraseBoosts) {
         this.phraseBoosts = phraseBoosts;
+    }
+
+    public BoostingQueries phraseBoosts(final PhraseBoosts phraseBoosts) {
+        setPhraseBoosts(phraseBoosts);
+        return this;
     }
 
     @Override

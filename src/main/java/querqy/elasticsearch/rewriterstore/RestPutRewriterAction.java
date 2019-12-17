@@ -14,6 +14,8 @@ import java.util.Map;
 
 public class RestPutRewriterAction extends BaseRestHandler {
 
+    public static final String PARAM_REWRITER_ID = "rewriterId";
+
     public RestPutRewriterAction(final Settings settings) {
         super(settings);
     }
@@ -26,7 +28,18 @@ public class RestPutRewriterAction extends BaseRestHandler {
     @Override
     protected RestChannelConsumer prepareRequest(final RestRequest request, final NodeClient client) {
 
-        String rewriterId = request.param("rewriterId");
+        final String routing = request.param("routing");
+        final PutRewriterRequestBuilder requestBuilder = createRequestBuilder(request, client, routing);
+
+        return (channel) -> requestBuilder.execute(
+                new RestStatusToXContentListener<>(channel, (r) -> r.getIndexResponse().getLocation(routing)));
+
+
+    }
+
+    PutRewriterRequestBuilder createRequestBuilder(final RestRequest request, final NodeClient client,
+                                                   final String routing) {
+        String rewriterId = request.param(PARAM_REWRITER_ID);
         if (rewriterId == null) {
             throw new IllegalArgumentException("RestPutRewriterAction requires rewriterId parameter");
         }
@@ -36,20 +49,14 @@ public class RestPutRewriterAction extends BaseRestHandler {
             throw new IllegalArgumentException("RestPutRewriterAction: rewriterId parameter must not be empty");
         }
 
-        final String routing = request.param("routing");
 
         final Map<String, Object> source = XContentHelper
                 .convertToMap(request.content(), false, XContentType.JSON).v2();
 
-        final PutRewriterRequestBuilder builder = new PutRewriterRequestBuilder(client, PutRewriterAction.INSTANCE,
+        return new PutRewriterRequestBuilder(client, PutRewriterAction.INSTANCE,
                 new PutRewriterRequest(rewriterId, source, routing));
-
-
-        return (channel) -> builder.execute(
-                new RestStatusToXContentListener<>(channel, (r) -> r.getIndexResponse().getLocation(routing)));
-
-
     }
+
 
     public static class PutRewriterRequestBuilder
             extends ActionRequestBuilder<PutRewriterRequest, PutRewriterResponse> {

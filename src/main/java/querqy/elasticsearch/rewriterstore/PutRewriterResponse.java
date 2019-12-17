@@ -22,6 +22,10 @@ public class PutRewriterResponse extends ActionResponse implements StatusToXCont
         this.reloadResponse = reloadResponse;
     }
 
+    public PutRewriterResponse(final StreamInput in) throws IOException {
+        readFrom(in);
+    }
+
     @Override
     public void readFrom(final StreamInput in) throws IOException {
         super.readFrom(in);
