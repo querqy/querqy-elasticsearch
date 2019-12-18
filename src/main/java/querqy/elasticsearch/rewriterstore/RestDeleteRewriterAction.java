@@ -25,19 +25,14 @@ public class RestDeleteRewriterAction extends BaseRestHandler {
     @Override
     protected RestChannelConsumer prepareRequest(final RestRequest request, final NodeClient client) {
 
-        final String routing = request.param("routing");
-
-        final RestDeleteRewriterAction.DeleteRewriterRequestBuilder builder = createRequestBuilder(request, client,
-                routing);
-
+        final RestDeleteRewriterAction.DeleteRewriterRequestBuilder builder = createRequestBuilder(request, client);
 
         return (channel) -> builder.execute(
                 new RestStatusToXContentListener<>(channel));
     }
 
 
-    DeleteRewriterRequestBuilder createRequestBuilder(final RestRequest request, final NodeClient client,
-                                                   final String routing) {
+    DeleteRewriterRequestBuilder createRequestBuilder(final RestRequest request, final NodeClient client) {
         String rewriterId = request.param(PARAM_REWRITER_ID);
         if (rewriterId == null) {
             throw new IllegalArgumentException("RestDeleteRewriterAction requires rewriterId parameter");
@@ -49,7 +44,7 @@ public class RestDeleteRewriterAction extends BaseRestHandler {
         }
 
         return new RestDeleteRewriterAction.DeleteRewriterRequestBuilder(client, DeleteRewriterAction.INSTANCE,
-                new DeleteRewriterRequest(rewriterId, routing));
+                new DeleteRewriterRequest(rewriterId));
     }
 
 

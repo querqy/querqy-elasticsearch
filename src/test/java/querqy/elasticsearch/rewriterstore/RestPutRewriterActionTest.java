@@ -61,13 +61,12 @@ public class RestPutRewriterActionTest {
                 .withContent(BytesReference.fromByteBuffers(new ByteBuffer[] {buffer}), XContentType.JSON)
                 .build();
         final RestPutRewriterAction.PutRewriterRequestBuilder requestBuilder = new RestPutRewriterAction(Settings.EMPTY)
-                .createRequestBuilder(restRequest, client, "route1");
+                .createRequestBuilder(restRequest, client);
 
         final PutRewriterRequest putRewriterRequest = requestBuilder.request();
         assertNotNull(putRewriterRequest);
 
         assertEquals("rewriter1", putRewriterRequest.getRewriterId());
-        assertEquals("route1", putRewriterRequest.getRouting());
 
         final Map<String, Object> content = putRewriterRequest.getContent();
         assertNotNull(content);

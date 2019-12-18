@@ -28,17 +28,15 @@ public class RestPutRewriterAction extends BaseRestHandler {
     @Override
     protected RestChannelConsumer prepareRequest(final RestRequest request, final NodeClient client) {
 
-        final String routing = request.param("routing");
-        final PutRewriterRequestBuilder requestBuilder = createRequestBuilder(request, client, routing);
+        final PutRewriterRequestBuilder requestBuilder = createRequestBuilder(request, client);
 
         return (channel) -> requestBuilder.execute(
-                new RestStatusToXContentListener<>(channel, (r) -> r.getIndexResponse().getLocation(routing)));
+                new RestStatusToXContentListener<>(channel, (r) -> r.getIndexResponse().getLocation(null)));
 
 
     }
 
-    PutRewriterRequestBuilder createRequestBuilder(final RestRequest request, final NodeClient client,
-                                                   final String routing) {
+    PutRewriterRequestBuilder createRequestBuilder(final RestRequest request, final NodeClient client) {
         String rewriterId = request.param(PARAM_REWRITER_ID);
         if (rewriterId == null) {
             throw new IllegalArgumentException("RestPutRewriterAction requires rewriterId parameter");
@@ -54,7 +52,7 @@ public class RestPutRewriterAction extends BaseRestHandler {
                 .convertToMap(request.content(), false, XContentType.JSON).v2();
 
         return new PutRewriterRequestBuilder(client, PutRewriterAction.INSTANCE,
-                new PutRewriterRequest(rewriterId, source, routing));
+                new PutRewriterRequest(rewriterId, source));
     }
 
 

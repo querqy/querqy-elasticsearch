@@ -40,7 +40,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -75,7 +75,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -110,7 +110,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -145,7 +145,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -180,7 +180,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -216,7 +216,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -251,7 +251,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -286,7 +286,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -321,7 +321,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -356,7 +356,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -391,7 +391,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -426,7 +426,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 

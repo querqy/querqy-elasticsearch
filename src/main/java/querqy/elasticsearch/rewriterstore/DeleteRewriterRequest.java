@@ -8,16 +8,14 @@ import java.util.Collections;
 public class DeleteRewriterRequest extends ActionRequest {
 
     private String rewriterId;
-    private String routing;
 
     public DeleteRewriterRequest() {
         super();
     }
 
-    public DeleteRewriterRequest(final String rewriterId, final String routing) {
+    public DeleteRewriterRequest(final String rewriterId) {
         super();
         this.rewriterId = rewriterId;
-        this.routing = routing;
     }
 
     @Override
@@ -37,7 +35,5 @@ public class DeleteRewriterRequest extends ActionRequest {
         return rewriterId;
     }
 
-    public String getRouting() {
-        return routing;
-    }
+
 }

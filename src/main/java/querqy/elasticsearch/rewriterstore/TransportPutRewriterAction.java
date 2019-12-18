@@ -145,7 +145,6 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
         final IndexRequest indexRequest = client.prepareIndex(QUERQY_INDEX_NAME, null, request.getRewriterId())
                 .setCreate(false)
-                .setRouting(request.getRouting())
                 .setSource(source)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .request();

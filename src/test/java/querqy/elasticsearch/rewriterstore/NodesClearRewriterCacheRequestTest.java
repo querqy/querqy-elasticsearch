@@ -11,7 +11,7 @@ import java.util.Optional;
 public class NodesClearRewriterCacheRequestTest {
 
     @Test
-    public void testStreamSerialisationWithoutRewriterId() throws IOException {
+    public void testStreamSerializationWithoutRewriterId() throws IOException {
 
         final NodesClearRewriterCacheRequest request1 = new NodesClearRewriterCacheRequest(null, "n1", "n2");
         final BytesStreamOutput output = new BytesStreamOutput();
@@ -26,7 +26,7 @@ public class NodesClearRewriterCacheRequestTest {
     }
 
     @Test
-    public void testStreamSerialisationWithRewriterId() throws IOException {
+    public void testStreamSerializationWithRewriterId() throws IOException {
 
         final NodesClearRewriterCacheRequest request1 = new NodesClearRewriterCacheRequest("r1", "n1", "n2");
         final BytesStreamOutput output = new BytesStreamOutput();
@@ -55,7 +55,7 @@ public class NodesClearRewriterCacheRequestTest {
     }
 
     @Test
-    public void testNodeRequestSerialisationWithRewriterId() throws IOException {
+    public void testNodeRequestSerializationWithRewriterId() throws IOException {
 
         final NodesClearRewriterCacheRequest.NodeRequest nodeRequest1 = new NodesClearRewriterCacheRequest
                 .NodeRequest("r11", "n2");
@@ -73,7 +73,7 @@ public class NodesClearRewriterCacheRequestTest {
     }
 
     @Test
-    public void testNodeRequestSerialisationWithoutRewriterId() throws IOException {
+    public void testNodeRequestSerializationWithoutRewriterId() throws IOException {
 
         final NodesClearRewriterCacheRequest.NodeRequest nodeRequest1 = new NodesClearRewriterCacheRequest
                 .NodeRequest(null, "n2");

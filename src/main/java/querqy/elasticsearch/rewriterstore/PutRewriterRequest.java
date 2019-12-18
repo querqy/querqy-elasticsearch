@@ -20,17 +20,15 @@ public class PutRewriterRequest extends ActionRequest {
 
     private Map<String, Object> content;
     private String rewriterId;
-    private String routing;
 
     public PutRewriterRequest() {
         super();
     }
 
-    public PutRewriterRequest(final String rewriterId, final Map<String, Object> content, final String routing) {
+    public PutRewriterRequest(final String rewriterId, final Map<String, Object> content) {
         super();
         this.rewriterId = rewriterId;
         this.content = content;
-        this.routing = routing;
     }
 
     @Override
@@ -82,7 +80,6 @@ public class PutRewriterRequest extends ActionRequest {
         super.writeTo(out);
         out.writeString(rewriterId);
         out.writeMap(content);
-        out.writeOptionalString(routing);
     }
 
     @Override
@@ -90,7 +87,6 @@ public class PutRewriterRequest extends ActionRequest {
         super.readFrom(in);
         rewriterId = in.readString();
         content = in.readMap();
-        routing = in.readOptionalString();
     }
 
     public String getRewriterId() {
@@ -109,11 +105,4 @@ public class PutRewriterRequest extends ActionRequest {
         this.content = content;
     }
 
-    public String getRouting() {
-        return routing;
-    }
-
-    public void setRouting(String routing) {
-        this.routing = routing;
-    }
 }

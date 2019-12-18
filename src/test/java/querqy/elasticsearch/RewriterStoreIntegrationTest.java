@@ -77,7 +77,7 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
         config1.put("p1", 1L); // p1 as long
         payload1.put("config", config1);
 
-        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r1", payload1, null)).get();
+        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r1", payload1)).get();
 
 
         final Map<String, Object> payload2 = new HashMap<>();
@@ -86,7 +86,7 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
         config2.put("p1", false); // p1 as boolean
         payload2.put("config", config2);
 
-        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r2", payload2, null)).get();
+        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r2", payload2)).get();
 
 
         final Map<String, Object> payload3 = new HashMap<>();
@@ -98,7 +98,7 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
         config3.put("p1", p1); // p1 as object
         payload3.put("config", config3);
 
-        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r3", payload3, null)).get();
+        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r3", payload3)).get();
 
     }
 
@@ -109,7 +109,7 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
         config1.put("p1", 1L);
         payload1.put("config", config1);
 
-        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r1", payload1, null)).get();
+        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r1", payload1)).get();
 
         final GetSettingsResponse idxSettings = client().admin().indices().prepareGetSettings(".querqy").get();
 

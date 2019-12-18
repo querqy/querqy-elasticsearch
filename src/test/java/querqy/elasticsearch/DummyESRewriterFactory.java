@@ -25,7 +25,8 @@ public class DummyESRewriterFactory extends ESRewriterFactory {
 
     @Override
     public List<String> validateConfiguration(final Map<String, Object> config) {
-        return null;
+        final Object error = config.get("error");
+        return error == null ? null : Collections.singletonList(error.toString());
     }
 
     @Override

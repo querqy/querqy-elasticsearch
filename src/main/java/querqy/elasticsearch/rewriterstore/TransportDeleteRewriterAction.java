@@ -14,6 +14,8 @@ import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.tasks.Task;
 import org.elasticsearch.transport.TransportService;
 
+import java.util.function.Supplier;
+
 public class TransportDeleteRewriterAction  extends HandledTransportAction<DeleteRewriterRequest, DeleteRewriterResponse> {
 
     private final Client client;
@@ -22,7 +24,8 @@ public class TransportDeleteRewriterAction  extends HandledTransportAction<Delet
     @Inject
     public TransportDeleteRewriterAction(final TransportService transportService, final ActionFilters actionFilters,
                                       final ClusterService clusterService, final Client client) {
-        super(DeleteRewriterAction.NAME, false, transportService, actionFilters, DeleteRewriterRequest::new);
+        super(DeleteRewriterAction.NAME, false, transportService, actionFilters,
+                (Supplier<DeleteRewriterRequest>) DeleteRewriterRequest::new);
         this.clusterService = clusterService;
         this.client = client;
     }
@@ -32,7 +35,6 @@ public class TransportDeleteRewriterAction  extends HandledTransportAction<Delet
 
         final DeleteRequestBuilder deleteRequest = client.prepareDelete(QUERQY_INDEX_NAME, null,
                 request.getRewriterId());
-        deleteRequest.setRouting(request.getRouting());
 
         deleteRequest.execute(new ActionListener<DeleteResponse>() {
 

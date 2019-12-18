@@ -44,7 +44,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -75,7 +75,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -101,7 +101,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         config2.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content2.put("config", config2);
 
-        final PutRewriterRequest request2 = new PutRewriterRequest("common_rules", content2, null);
+        final PutRewriterRequest request2 = new PutRewriterRequest("common_rules", content2);
         client().execute(PutRewriterAction.INSTANCE, request2).get();
 
         QuerqyQueryBuilder querqyQuery2 = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
@@ -132,7 +132,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
         content.put("config", config);
 
-        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content, null);
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
@@ -149,7 +149,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         assertEquals(2L, response.getHits().getTotalHits().value);
 
 
-        final DeleteRewriterRequest delRequest = new DeleteRewriterRequest("common_rules", null);
+        final DeleteRewriterRequest delRequest = new DeleteRewriterRequest("common_rules");
         client().execute(DeleteRewriterAction.INSTANCE, delRequest).get();
 
         QuerqyQueryBuilder querqyQuery2 = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));

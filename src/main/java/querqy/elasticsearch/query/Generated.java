@@ -80,7 +80,12 @@ public class Generated implements NamedWriteable, ToXContent {
         if (queryFieldsAndBoostings != null && !queryFieldsAndBoostings.isEmpty()) {
             builder.startArray(FIELD_QUERY_FIELDS.getPreferredName());
             for (final Map.Entry<String, Float> fieldEntry : queryFieldsAndBoostings.entrySet()) {
-                builder.value(fieldEntry.getKey() + "^" + fieldEntry.getValue());
+                final float boost = fieldEntry.getValue();
+                if (boost == 1f) {
+                    builder.value(fieldEntry.getKey());
+                } else {
+                    builder.value(fieldEntry.getKey() + "^" + boost);
+                }
             }
             builder.endArray();
         }

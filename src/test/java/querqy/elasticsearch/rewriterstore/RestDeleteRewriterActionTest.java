@@ -51,13 +51,12 @@ public class RestDeleteRewriterActionTest {
                 .withParams(params)
                 .build();
         final RestDeleteRewriterAction.DeleteRewriterRequestBuilder requestBuilder
-                = new RestDeleteRewriterAction(Settings.EMPTY).createRequestBuilder(restRequest, client, "route2");
+                = new RestDeleteRewriterAction(Settings.EMPTY).createRequestBuilder(restRequest, client);
 
         final DeleteRewriterRequest deleteRewriterRequest = requestBuilder.request();
         assertNotNull(deleteRewriterRequest);
 
         assertEquals("rewriter11", deleteRewriterRequest.getRewriterId());
-        assertEquals("route2", deleteRewriterRequest.getRouting());
 
     }
 
