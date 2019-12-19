@@ -15,6 +15,12 @@ import java.util.Optional;
 
 public interface RequestUtils {
 
+    String SIMILARITY_SCORING_OFF = "off";
+    String SIMILARITY_SCORING_ON = "on";
+    String SIMILARITY_SCORING_DFC = "dfc";
+    String FIELD_BOOST_MODEL_PRMS = "prms";
+    String FIELD_BOOST_MODEL_FIXED = "fixed";
+
     static Map<String, Float> paramToQueryFieldsAndBoosting(final Iterable<String> param) {
 
         if (param == null) {
@@ -52,11 +58,11 @@ public interface RequestUtils {
             return null;
         } else {
             switch (paramValue) {
-                case "dfc":
+                case SIMILARITY_SCORING_DFC:
                     return QuerySimilarityScoring.DFC;
-                case "off":
+                case SIMILARITY_SCORING_OFF:
                     return QuerySimilarityScoring.SIMILARITY_SCORE_OFF;
-                case "on":
+                case SIMILARITY_SCORING_ON:
                     return QuerySimilarityScoring.SIMILARITY_SCORE_ON;
                 default:
                     throw new IllegalArgumentException("Invalid value for " + field.getPreferredName() + ": " +
@@ -71,31 +77,30 @@ public interface RequestUtils {
         }
         switch(querySimilarityScoring) {
             case DFC:
-                return Optional.of("dfc"); // FIXME: use constants
+                return Optional.of(SIMILARITY_SCORING_DFC);
             case SIMILARITY_SCORE_ON:
-                return Optional.of("on"); // FIXME: use constants
+                return Optional.of(SIMILARITY_SCORING_ON);
             case SIMILARITY_SCORE_OFF:
-                return Optional.of("off"); // FIXME: use constants
+                return Optional.of(SIMILARITY_SCORING_OFF);
             default:
-                throw new IllegalStateException("querySimilarityScoring set to unknown value: " +
+                throw new IllegalArgumentException("querySimilarityScoring set to unknown value: " +
                         querySimilarityScoring);
 
         }
     }
 
-    static FieldBoostModel paramToFieldBoostModel(final String paramValue, final ParseField field) {
+    static FieldBoostModel paramToFieldBoostModel(final String paramValue) {
         if (paramValue == null) {
             return null;
         } else {
             switch (paramValue) {
-                case "prms":
+                case FIELD_BOOST_MODEL_PRMS:
                     return FieldBoostModel.PRMS;
-                case "fixed":
+                case FIELD_BOOST_MODEL_FIXED:
                     return FieldBoostModel.FIXED;
-                // TODO: can we handle FieldBoostModel.NONE?;
+                // TODO: can we handle FieldBoostModel.NONE?
                 default:
-                    throw new IllegalArgumentException("Invalid value for " + field.getPreferredName() + ": " +
-                            paramValue);
+                    throw new IllegalArgumentException("Invalid field boost model " + paramValue);
             }
         }
     }
@@ -106,10 +111,10 @@ public interface RequestUtils {
         }
         switch(fieldBoostModel) {
             case FIXED:
-                return Optional.of("fixed"); // FIXME: use constants
+                return Optional.of(FIELD_BOOST_MODEL_FIXED);
             case PRMS:
-                return Optional.of("prms"); // FIXME: use constants
-            // TODO: can we handle FieldBoostModel.NONE?;
+                return Optional.of(FIELD_BOOST_MODEL_PRMS);
+            // TODO: can we handle FieldBoostModel.NONE
             default:
                 throw new IllegalStateException("fieldBoostModel set to unknown value: " +
                         fieldBoostModel);

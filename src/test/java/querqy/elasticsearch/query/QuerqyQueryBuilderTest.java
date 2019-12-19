@@ -202,6 +202,60 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
 
     }
 
+    @Test
+    public void testWriteReadStreamForAllPropertiesAndRewriterParams() throws IOException {
+
+        final QuerqyQueryBuilder writeQuerqyQueryBuilder = new QuerqyQueryBuilder(querqyProcessor);
+        writeQuerqyQueryBuilder.setMatchingQuery(new MatchingQuery("query string", "on"));
+        writeQuerqyQueryBuilder.setQueryFieldsAndBoostings(Arrays.asList("f1^0.4", "f2^3.0"));
+        writeQuerqyQueryBuilder.setGenerated(new Generated(Arrays.asList("f3^0.2", "f4^3.2")));
+        writeQuerqyQueryBuilder.setMinimumShouldMatch("2<-25% 9<-3");
+
+        final Rewriter rewriter1 = new Rewriter("common1");
+
+        final Map<String, Object> params = new HashMap<>();
+
+        final Map<String, Object> criteria = new HashMap<>();
+        criteria.put("sort", "prio desc");
+        criteria.put("limit", 1);
+        params.put("criteria", criteria);
+        rewriter1.setParams(params);
+
+        writeQuerqyQueryBuilder.setRewriters(Arrays.asList(rewriter1, new Rewriter("wordbreak")));
+        writeQuerqyQueryBuilder.setTieBreaker(0.7f);
+        writeQuerqyQueryBuilder.setFieldBoostModel("prms");
+
+        final PhraseBoosts phraseBoosts = new PhraseBoosts();
+        phraseBoosts.setTieBreaker(0.15f);
+        phraseBoosts.setFull(new PhraseBoostDefinition(4, Collections.singletonList("ffull1^0.9")));
+        phraseBoosts.setBigram(new PhraseBoostDefinition(1, Collections.singletonList("fb1^0.25")));
+        phraseBoosts.setTrigram(new PhraseBoostDefinition(3, Arrays.asList("ft1", "ft2^7")));
+
+        final BoostingQueries boostingQueries = new BoostingQueries();
+        boostingQueries.setPhraseBoosts(phraseBoosts);
+
+        final RewrittenQueries rewrittenQueries = new RewrittenQueries();
+        rewrittenQueries.setNegativeWeight(0.2f);
+        rewrittenQueries.setPositiveWeight(0.7f);
+        rewrittenQueries.setSimilarityScoring("off");
+        rewrittenQueries.setUseFieldBoosts(false);
+        boostingQueries.setRewrittenQueries(rewrittenQueries);
+
+        writeQuerqyQueryBuilder.setBoostingQueries(boostingQueries);
+
+        final BytesStreamOutput out = new BytesStreamOutput();
+        writeQuerqyQueryBuilder.writeTo(out);
+        out.flush();
+        out.close();
+
+        final QuerqyQueryBuilder readQuerqyQueryBuilder = new QuerqyQueryBuilder(out.bytes().streamInput(),
+                querqyProcessor);
+
+        assertEqualBuilders(writeQuerqyQueryBuilder, readQuerqyQueryBuilder);
+
+
+    }
+
 
     @Test
     public void testWriteReadJsonForAllProperties() throws IOException {
@@ -211,7 +265,18 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
         writeQuerqyQueryBuilder.setQueryFieldsAndBoostings(Arrays.asList("f1^0.4", "f2^3.0"));
         writeQuerqyQueryBuilder.setGenerated(new Generated(Arrays.asList("f3^0.2", "f4^3.2")));
         writeQuerqyQueryBuilder.setMinimumShouldMatch("2<-25% 9<-3");
-        writeQuerqyQueryBuilder.setRewriters(Arrays.asList(new Rewriter("common1"), new Rewriter("wordbreak")));
+
+        final Rewriter rewriter1 = new Rewriter("common1");
+
+        final Map<String, Object> params = new HashMap<>();
+
+        final Map<String, Object> criteria = new HashMap<>();
+        criteria.put("sort", "prio desc");
+        criteria.put("limit", 1);
+        params.put("criteria", criteria);
+        rewriter1.setParams(params);
+
+        writeQuerqyQueryBuilder.setRewriters(Arrays.asList(rewriter1, new Rewriter("wordbreak")));
         writeQuerqyQueryBuilder.setTieBreaker(0.7f);
         writeQuerqyQueryBuilder.setFieldBoostModel("prms");
 
@@ -232,7 +297,6 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
         boostingQueries.setRewrittenQueries(rewrittenQueries);
 
         writeQuerqyQueryBuilder.setBoostingQueries(boostingQueries);
-
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 

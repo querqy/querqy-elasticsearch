@@ -23,10 +23,10 @@ public class Rewriter implements NamedWriteable, ToXContent {
 
     public Rewriter(final StreamInput in) throws IOException {
         name = in.readString();
-//        final boolean hasParams = in.readBoolean();
-//        if (hasParams) {
-//            params = in.readMap();
-//        }
+        final boolean hasParams = in.readBoolean();
+        if (hasParams) {
+            params = in.readMap();
+        }
     }
 
     public Rewriter(final String name) {
@@ -49,8 +49,12 @@ public class Rewriter implements NamedWriteable, ToXContent {
     @Override
     public void writeTo(final StreamOutput out) throws IOException {
         out.writeString(name);
-        //out.writeBoolean(params != null);
-        //out.writeMap(params);
+        if (params != null) {
+            out.writeBoolean(true);
+            out.writeMap(params);
+        } else {
+            out.writeBoolean(false);
+        }
     }
 
     @Override
@@ -70,7 +74,7 @@ public class Rewriter implements NamedWriteable, ToXContent {
 
     @Override
     public boolean isFragment() {
-        return false;
+        return params == null;
     }
 
     @Override
@@ -107,15 +111,15 @@ public class Rewriter implements NamedWriteable, ToXContent {
     public static class RewriterParser implements ContextParser<Void, Rewriter> {
 
         @Override
-        public Rewriter parse(final XContentParser p, final Void c) throws IOException {
-            final XContentParser.Token token = p.currentToken();
+        public Rewriter parse(final XContentParser parser, final Void context) throws IOException {
+            final XContentParser.Token token = parser.currentToken();
             if (token == XContentParser.Token.START_OBJECT) {
 
-                final Map<String, Object> definition = p.map();
+                final Map<String, Object> definition = parser.map();
                 return new Rewriter((String) definition.get("name"), (Map<String, Object>) definition.get("params"));
 
             } else if (token == XContentParser.Token.VALUE_STRING) {
-                return new Rewriter(p.text(), null);
+                return new Rewriter(parser.text(), null);
             } else {
                 throw new IOException("Unexpected token type: " + token);
             }

@@ -121,7 +121,11 @@ public class MatchingQuery implements NamedWriteable, ToXContent {
     }
 
     public void setSimilarityScoring(final String similarityScoring) {
-        this.similarityScoring = paramToQuerySimilarityScoring(similarityScoring, FIELD_SIMILARITY_SCORING);
+        setSimilarityScoring(paramToQuerySimilarityScoring(similarityScoring, FIELD_SIMILARITY_SCORING));
+    }
+
+    public void setSimilarityScoring(final QuerySimilarityScoring similarityScoring) {
+        this.similarityScoring = similarityScoring;
     }
 
     @Override

@@ -195,8 +195,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     @Override
     protected Query doToQuery(final QueryShardContext context) throws IOException {
         try {
-            final Query query = querqyProcessor.parseQuery(this, context);
-            return query;
+            return querqyProcessor.parseQuery(this, context);
         } catch (final LuceneSearchEngineRequestAdapter.SyntaxException e) {
             throw new IOException(e);
         }
@@ -252,7 +251,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         return boostingQueries;
     }
 
-    public void setBoostingQueries(BoostingQueries boostingQueries) {
+    public void setBoostingQueries(final BoostingQueries boostingQueries) {
         this.boostingQueries = boostingQueries;
     }
 
@@ -260,7 +259,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         return Optional.ofNullable(generated);
     }
 
-    public void setGenerated(Generated generated) {
+    public void setGenerated(final Generated generated) {
         this.generated = generated;
     }
 
@@ -310,6 +309,10 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     }
 
     public void setFieldBoostModel(final String fieldBoostModel) {
-        this.fieldBoostModel = paramToFieldBoostModel(fieldBoostModel, FIELD_FIELD_BOOST_MODEL);
+        setFieldBoostModel(paramToFieldBoostModel(fieldBoostModel));
+    }
+
+    public void setFieldBoostModel(final FieldBoostModel fieldFieldBoostModel) {
+        this.fieldBoostModel = fieldFieldBoostModel;
     }
 }
