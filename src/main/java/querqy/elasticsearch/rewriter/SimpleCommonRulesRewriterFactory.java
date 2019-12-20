@@ -1,5 +1,6 @@
 package querqy.elasticsearch.rewriter;
 
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.index.shard.IndexShard;
 import querqy.elasticsearch.ConfigUtils;
 import querqy.elasticsearch.ESRewriterFactory;
@@ -30,7 +31,7 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
         super(rewriterId);
     }
 
-    public void configure(final Map<String, Object> config) throws Exception {
+    public void configure(final Map<String, Object> config) {
         final boolean ignoreCase = ConfigUtils.getArg(config, "ignoreCase", true);
 
         final QuerqyParserFactory querqyParser = ConfigUtils
@@ -41,9 +42,13 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
         // TODO: we might want to configure named selection strategies in the future
         final Map<String, SelectionStrategyFactory> selectionStrategyFactories = Collections.emptyMap();
 
-        delegate = new querqy.rewrite.commonrules.SimpleCommonRulesRewriterFactory(rewriterId,
-                new StringReader(rules), querqyParser, ignoreCase, selectionStrategyFactories,
-                DEFAULT_SELECTION_STRATEGY_FACTORY);
+        try {
+            delegate = new querqy.rewrite.commonrules.SimpleCommonRulesRewriterFactory(rewriterId,
+                    new StringReader(rules), querqyParser, ignoreCase, selectionStrategyFactories,
+                    DEFAULT_SELECTION_STRATEGY_FACTORY);
+        } catch (final IOException e) {
+            throw new ElasticsearchException(e);
+        }
 
     }
 

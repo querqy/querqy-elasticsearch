@@ -170,6 +170,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     }
 
     public static QuerqyQueryBuilder fromXContent(final XContentParser parser, final QuerqyProcessor querqyProcessor) {
+
         final QuerqyQueryBuilder builder;
         try {
             builder = PARSER.apply(parser, null);
@@ -236,7 +237,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     }
 
     public void setQuerqyProcessor(final QuerqyProcessor querqyProcessor) {
-        this.querqyProcessor = querqyProcessor;
+        this.querqyProcessor = Objects.requireNonNull(querqyProcessor);
     }
 
     public MatchingQuery getMatchingQuery() {

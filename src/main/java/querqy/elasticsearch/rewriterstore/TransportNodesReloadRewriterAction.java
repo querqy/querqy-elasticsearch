@@ -59,7 +59,6 @@ public class TransportNodesReloadRewriterAction extends TransportNodesAction<Nod
             final NodesReloadRewriterRequest.NodeRequest request) {
         try {
             rewriterShardContexts.reloadRewriter(request.getRewriterId());
-            //rewriters.reloadFactory(request.getRewriterId(), client, indexServices);
             return new NodesReloadRewriterResponse.NodeResponse(clusterService.localNode(), null);
         } catch (final Exception e) {
             return new NodesReloadRewriterResponse.NodeResponse(clusterService.localNode(), e);

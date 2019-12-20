@@ -2,6 +2,7 @@ package querqy.elasticsearch;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
@@ -12,9 +13,9 @@ import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.indices.IndicesService;
 import querqy.rewrite.RewriteChain;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RewriterShardContexts implements IndexEventListener {
 
@@ -26,18 +27,13 @@ public class RewriterShardContexts implements IndexEventListener {
     private IndicesService indicesService;
     private Settings settings;
 
-    public RewriterShardContexts(final IndicesService indicesService, final Settings settings) {
-        this.indicesService = indicesService;
+    public RewriterShardContexts(final Settings settings) {
         this.settings = settings;
-        shardContexts = new HashMap<>();
+        shardContexts = new ConcurrentHashMap<>();
     }
 
-    public RewriterShardContexts() {
-        shardContexts = new HashMap<>();
-    }
+    public RewriteChain getRewriteChain(final List<String> rewriterIds, final QueryShardContext queryShardContext) {
 
-    public RewriteChain getRewriteChain(final List<String> rewriterIds, final QueryShardContext queryShardContext)
-            throws RewriterNotFoundException {
         final ShardId shardId = new ShardId(queryShardContext.getFullyQualifiedIndex(), queryShardContext.getShardId());
         RewriterShardContext shardContext = shardContexts.get(shardId);
 
@@ -45,12 +41,7 @@ public class RewriterShardContexts implements IndexEventListener {
             shardContext = loadShardContext(shardId, queryShardContext);
         }
 
-        try {
-            return shardContext.getRewriteChain(rewriterIds);
-        } catch (final Exception e) {
-            LOGGER.error("Could not get rewrite chain", e);
-            throw new RuntimeException("Could not get rewrite chain", e);
-        }
+        return shardContext.getRewriteChain(rewriterIds);
     }
 
     protected synchronized RewriterShardContext loadShardContext(final ShardId shardId,
@@ -72,7 +63,7 @@ public class RewriterShardContexts implements IndexEventListener {
                 ctx.reloadRewriter(rewriterId);
             } catch (final Exception e) {
                 LOGGER.error("Error reloading rewriter " + rewriterId, e);
-                throw new RuntimeException("Could not reload rewriter " + rewriterId, e);
+                throw new ElasticsearchException("Could not reload rewriter " + rewriterId, e);
             }
         });
     }
@@ -101,8 +92,4 @@ public class RewriterShardContexts implements IndexEventListener {
         this.indicesService = indicesService;
     }
 
-    @Inject
-    public void setSettings(final Settings settings) {
-        this.settings = settings;
-    }
 }

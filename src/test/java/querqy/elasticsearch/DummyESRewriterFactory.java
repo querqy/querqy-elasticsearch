@@ -19,7 +19,7 @@ public class DummyESRewriterFactory extends ESRewriterFactory {
     }
 
     @Override
-    public void configure(final Map<String, Object> config) throws Exception {
+    public void configure(final Map<String, Object> config) {
 
     }
 
@@ -30,17 +30,12 @@ public class DummyESRewriterFactory extends ESRewriterFactory {
     }
 
     @Override
-    public RewriterFactory createRewriterFactory(final IndexShard indexShard) throws Exception {
+    public RewriterFactory createRewriterFactory(final IndexShard indexShard)  {
         return new RewriterFactory(rewriterId) {
             @Override
             public QueryRewriter createRewriter(final ExpandedQuery input,
                                                 final SearchEngineRequestAdapter searchEngineRequestAdapter) {
-                return new QueryRewriter() {
-                    @Override
-                    public ExpandedQuery rewrite(ExpandedQuery query) {
-                        return query;
-                    }
-                };
+                return query -> query;
             }
 
             @Override

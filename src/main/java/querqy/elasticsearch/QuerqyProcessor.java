@@ -27,7 +27,7 @@ public class QuerqyProcessor {
     }
 
     public Query parseQuery(final QuerqyQueryBuilder queryBuilder, final QueryShardContext shardContext)
-            throws LuceneSearchEngineRequestAdapter.SyntaxException, RewriterNotFoundException {
+            throws LuceneSearchEngineRequestAdapter.SyntaxException {
 
         final List<Rewriter> rewriters = queryBuilder.getRewriters();
 

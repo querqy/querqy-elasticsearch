@@ -1,39 +1,42 @@
 package querqy.elasticsearch;
 
-import org.apache.lucene.util.RamUsageEstimator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.ResourceNotFoundException;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.cache.Cache;
-import org.elasticsearch.common.cache.CacheBuilder;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.IndexService;
-import org.elasticsearch.index.query.QueryShardContext;
 import org.elasticsearch.index.shard.ShardId;
-import org.elasticsearch.monitor.jvm.JvmInfo;
+import org.elasticsearch.indices.InvalidTypeNameException;
 import querqy.rewrite.RewriteChain;
 import querqy.rewrite.RewriterFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class RewriterShardContext {
 
 
-    public static final Setting<ByteSizeValue> CACHE_MEM_SETTING = Setting.memorySizeSetting("querqy.caches.max_mem",
-            (s) -> new ByteSizeValue(Math.min(RamUsageEstimator.ONE_MB * 10, JvmInfo.jvmInfo().getMem().getHeapMax().getBytes()/10)).toString(),
-            Setting.Property.NodeScope);
-    public static final Setting<TimeValue> CACHE_EXPIRE_AFTER_WRITE = Setting.timeSetting("querqy.caches.expire_after_write",
-            TimeValue.timeValueHours(1),
+    public static final Setting<TimeValue> CACHE_EXPIRE_AFTER_WRITE = Setting.timeSetting(
+            "querqy.caches.rewriter.expire_after_write",
+            TimeValue.timeValueNanos(0), // do not expire by default
             TimeValue.timeValueNanos(0),
             Setting.Property.NodeScope);
-    public static final Setting<TimeValue> CACHE_EXPIRE_AFTER_READ = Setting.timeSetting("querqy.caches.expire_after_read",
-            TimeValue.timeValueHours(1),
+
+    public static final Setting<TimeValue> CACHE_EXPIRE_AFTER_READ = Setting.timeSetting(
+            "querqy.caches.rewriter.expire_after_read",
+            TimeValue.timeValueNanos(0), // do not expire by default
             TimeValue.timeValueNanos(0),
             Setting.Property.NodeScope);
+
+    private static final Logger LOGGER = LogManager.getLogger(RewriterShardContext.class);
 
     final Cache<String, RewriterFactory> factories;
     final Client client;
@@ -45,14 +48,11 @@ public class RewriterShardContext {
         this.indexService = indexService;
         this.shardId = shardId;
         this.client = client;
-        final CacheBuilder<String, RewriterFactory> builder = CacheBuilder.builder();
-        factories = configureCache(builder,
-                CACHE_EXPIRE_AFTER_READ.get(settings),
-                CACHE_EXPIRE_AFTER_WRITE.get(settings),
-                CACHE_MEM_SETTING.get(settings)).build();
+        factories = Caches.buildCache(CACHE_EXPIRE_AFTER_READ.get(settings), CACHE_EXPIRE_AFTER_WRITE.get(settings));
+        LOGGER.info("Context loaded for shard {} {}", shardId, shardId.getIndex());
     }
 
-    public RewriteChain getRewriteChain(final List<String> rewriterIds) throws Exception {
+    public RewriteChain getRewriteChain(final List<String> rewriterIds) {
         final List<RewriterFactory> rewriterFactories = new ArrayList<>(rewriterIds.size());
         for (final String id : rewriterIds) {
 
@@ -75,27 +75,34 @@ public class RewriterShardContext {
         factories.invalidateAll();
     }
 
-    public void reloadRewriter(final String rewriterId) throws Exception {
+    public void reloadRewriter(final String rewriterId) {
         if (factories.get(rewriterId) != null) {
             loadFactory(rewriterId, true);
         }
     }
 
-    public synchronized RewriterFactory loadFactory(final String rewriterId, final boolean forceLoad) throws Exception {
+    public synchronized RewriterFactory loadFactory(final String rewriterId, final boolean forceLoad) {
 
         RewriterFactory factory = factories.get(rewriterId);
 
         if (forceLoad || (factory == null)) {
 
-            final GetResponse response = client.prepareGet(".querqy", null, rewriterId).execute().get();
+            final GetResponse response;
+
+            try {
+                response = client.prepareGet(".querqy", null, rewriterId).execute().get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new ElasticsearchException("Could not load rewriter " + rewriterId, e);
+            }
+
             final Map<String, Object> source = response.getSource();
 
             if (source == null) {
-                throw new RewriterNotFoundException("Rewriter not found: " + rewriterId);
+                throw new ResourceNotFoundException("Rewriter not found: " + rewriterId);
             }
 
             if (!"rewriter".equals(source.get("type"))) {
-                throw new RewriterNotFoundException("Not a rewriter: " + rewriterId);
+                throw new InvalidTypeNameException("Not a rewriter: " + rewriterId);
             }
             factory = ESRewriterFactory.loadConfiguredInstance(rewriterId, source, "class")
                     .createRewriterFactory(indexService.getShard(shardId.id()));
@@ -107,24 +114,6 @@ public class RewriterShardContext {
         return factory;
 
     }
-
-
-
-
-    private static <K, V> CacheBuilder<K, V> configureCache(final CacheBuilder<K, V> builder,
-                                                            final TimeValue expireAfterWrite,
-                                                            final TimeValue expireAfterAccess,
-                                                            final ByteSizeValue maxWeight) {
-        if (expireAfterWrite.nanos() > 0) {
-            builder.setExpireAfterWrite(expireAfterWrite);
-        }
-        if (expireAfterAccess.nanos() > 0) {
-            builder.setExpireAfterAccess(expireAfterAccess);
-        }
-        builder.setMaximumWeight(maxWeight.getBytes());
-        return builder;
-    }
-
 
 
 }

@@ -55,7 +55,7 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
     private final RewriterShardContexts rewriterShardContexts;
 
     public QuerqyPlugin(final Settings settings) {
-        rewriterShardContexts = new RewriterShardContexts();
+        rewriterShardContexts = new RewriterShardContexts(settings);
         querqyProcessor = new QuerqyProcessor(rewriterShardContexts);
     }
 
