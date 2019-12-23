@@ -3,7 +3,7 @@
 
     <groupId>querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>${querqy.major.version}.${querqy.minor.version}.es${es.major.version}${es.minor.version}${es.bugfix.version}.0-SNAPSHOT</version>
+    <version>1.0.es${es.major.version}${es.minor.version}${es.bugfix.version}.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -42,9 +42,7 @@
         <jts.version>1.15.0</jts.version>
 
         <log4j.version>2.11.1</log4j.version>
-        <querqy.major.version>4</querqy.major.version>
-        <querqy.minor.version>5</querqy.minor.version>
-        <querqy.lucene.version>${querqy.major.version}.${querqy.minor.version}.lucene800.1</querqy.lucene.version>
+        <querqy.lucene.version>4.5.lucene800.1</querqy.lucene.version>
         <es.major.version>7</es.major.version>
         <es.minor.version>0</es.minor.version>
         <es.bugfix.version>1</es.bugfix.version>
