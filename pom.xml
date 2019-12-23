@@ -3,7 +3,7 @@
 
     <groupId>querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>1.0.es${es.major.version}${es.minor.version}${es.bugfix.version}.0-SNAPSHOT</version>
+    <version>1.0.es711.0</version>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -14,7 +14,7 @@
         <url>git@github.com:renekrie/querqy-elasticsearch.git</url>
         <connection>scm:git:git@github.com:renekrie/querqy-elasticsearch.git</connection>
         <developerConnection>scm:git:git@github.com:renekrie/querqy-elasticsearch.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>querqy-elasticsearch-1.0.es711.0</tag>
     </scm>
 
     <licenses>
