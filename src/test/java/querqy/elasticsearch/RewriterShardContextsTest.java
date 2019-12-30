@@ -13,7 +13,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.transport.RemoteTransportException;
-import org.hamcrest.Matchers;
 import querqy.elasticsearch.query.MatchingQuery;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.query.Rewriter;
