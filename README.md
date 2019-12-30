@@ -434,7 +434,7 @@ resp = es.search(index='myindex', size=10, body = {
             
             "generated" : {                                           # 19
                 "query_fields": [                                     # 20
-                    "title^2.0", brand^1.5", "shortSummary^0.0007"
+                    "title^2.0", "brand^1.5", "shortSummary^0.0007"
                 ]
                 "field_boost_factor": 0.8                             # 21
             }
