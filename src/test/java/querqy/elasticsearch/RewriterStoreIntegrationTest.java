@@ -56,11 +56,6 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
                 .build();
     }
 
-    //@Override
-    protected boolean addMockInternalEngine() {
-        return false;
-    }
-
     public void testPluginIsLoaded() {
 
         final NodesInfoResponse response = client().admin().cluster().prepareNodesInfo().setPlugins(true).get();
@@ -141,9 +136,5 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
                 .setSource("field1", "b c")
                 .get();
     }
-
-
-
-
 
 }
