@@ -117,7 +117,7 @@ other than the `matching_query` as well. Hence the `query_fields` list is not
 a child element of the `matching_query`.
 
 The combination of a query string with a list of fields and field weights resembles Elasticsearch's [`multi_match`](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html) query. However, Querqy
-always builds a query that is similar to a `multi_match` query of type `cross_fields`. Unlike the `multi_match` query, Querqy always builds a `cross_fields` query, even if the fields use different analyzers. Furthermore, Querqy uses a different approach to deal with document frequency and scoring when the input terms are expanded across fields and split into further terms by the analyzers. Details will be explained in section @@TODO
+always builds a query that is similar to a `multi_match` query of type `cross_fields`. Unlike the `multi_match` query, Querqy always builds a `cross_fields` query, even if the fields use different analyzers. Furthermore, Querqy uses a different approach to deal with document frequency and scoring when the input terms are expanded across fields and split into further terms by the analyzers. Details will be explained in section [(`matching_query`) `similarity_scoring`](https://github.com/renekrie/querqy-elasticsearch#matching_query-similarity_scoring-1).
 
 ### Using a rewriter
 
@@ -483,13 +483,13 @@ Controls how Lucene's scoring implementation (= *similarity*) is used when an in
 
 - `dfc`: 'document frequency correction' - use the same document frequency value for all terms that are derived from the same input query term. For example, let `a b` be the input query and let it be  rewritten into `(f1:a | f2:a | ((f1:x | f2:x) | (f1:y | f2:x)) (f1:b | f2:b)` by synonym and field expansion, then `(f1:a | f2:a | ((f1:x | f2:x) | (f1:y | f2:x))` (all derived from `a`) will use the same document frequency value. More specifically, Querqy will use the maximum document frequency of these terms as the document frequency value for all of them. Similarily, the maximum  document frequency of `(f1:b | f2:b)` will be used for these two terms. 
 - `off`: Ignore the output of Lucene's similarity scoring. Only field boosts will be used for scoring.
-- `on`: Use Lucene's similarity scoring output. Note that in Querqy field boosting is handled outside the similarity and it can be configured using the  `field_boost_model` parameter (TODO: link).
+- `on`: Use Lucene's similarity scoring output. Note that in Querqy field boosting is handled outside the similarity and it can be configured using the [`field_boost_model` parameter](https://github.com/renekrie/querqy-elasticsearch#field_boost_model-5).
 
 ##### (`matching_query`) `weight` (#2)
 
 Default value: `1.0`
 
-A weight that is multiplied with the score that is produced by the matching query before the score of the boosting queries (see below @TODO) is added.
+A weight that is multiplied with the score that is produced by the matching query before the score of the [boosting queries](https://github.com/renekrie/querqy-elasticsearch#boosting-queries-6) is added.
 
 #### Boosting queries (#6)
 
@@ -512,7 +512,7 @@ Values: dfc (default), on, off
 
 Controls how Lucene's scoring implementation (= *similarity*) is used when the boosting query is expanded across fields.
 
-- `dfc`: 'document frequency correction' - use the same document frequency (*df*) value for all term queries that are produced from the same boost term. Querqy will use the maximum document frequency of the produced terms as the *df* value for all of them. If the `matching_query` also uses `similarity_scoring=dfc` (@TODO: link), the maximum *df* of the matching query will be added to the *df* of the boosting query terms in order to put the *df*s in the two query parts on a comparable scale and to avoid giving extremely high weight to very sparse boost terms.  
+- `dfc`: 'document frequency correction' - use the same document frequency (*df*) value for all term queries that are produced from the same boost term. Querqy will use the maximum document frequency of the produced terms as the *df* value for all of them. If the `matching_query` also uses `similarity_scoring=dfc` (see [here](https://github.com/renekrie/querqy-elasticsearch#matching_query-similarity_scoring-1)), the maximum *df* of the matching query will be added to the *df* of the boosting query terms in order to put the *df*s in the two query parts on a comparable scale and to avoid giving extremely high weight to very sparse boost terms.  
 - `off`: Ignore the output of Lucene's similarity scoring. 
 - `on`: Use Lucene's similarity scoring output. 
 
@@ -546,7 +546,7 @@ The score produced by `phrase_boosts` is added to the boost of the `matching_que
 
 #### Controlling generated query parts (#19)
 
-The parameters in the `generated` object control the fields and the weights of the query parts that were created during query rewriting. These query parts can occur in the matching query - for example, synonyms or (de)compound words - or in boosting queries (see `rewritten_queries` in @TODO above).
+The parameters in the `generated` object control the fields and the weights of the query parts that were created during query rewriting. These query parts can occur in the matching query - for example, synonyms or (de)compound words - or in boosting queries (see `rewritten_queries` in [`boosting_queries`](https://github.com/renekrie/querqy-elasticsearch#boosting-queries-6) above).
 
 ##### (`generated`) `query_fields` (#20)
 
