@@ -99,11 +99,6 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
 
     }
 
-    @Override
-    protected boolean isCacheable(final QuerqyQueryBuilder queryBuilder) {
-        return true;
-    }
-
     @Test
     public void testWriteReadStreamForMinimalProperties() throws IOException {
 

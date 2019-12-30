@@ -1,8 +1,8 @@
 package querqy.elasticsearch.rewriterstore;
 
-import org.elasticsearch.action.Action;
+import org.elasticsearch.action.ActionType;
 
-public class DeleteRewriterAction extends Action<DeleteRewriterResponse> {
+public class DeleteRewriterAction extends ActionType<DeleteRewriterResponse> {
 
     public static final String NAME = "cluster:admin/querqy/rewriter/delete";
     public static final DeleteRewriterAction INSTANCE = new DeleteRewriterAction(NAME);
@@ -11,11 +11,7 @@ public class DeleteRewriterAction extends Action<DeleteRewriterResponse> {
      * @param name The name of the action, must be unique across actions.
      */
     protected DeleteRewriterAction(final String name) {
-        super(name);
+        super(name, DeleteRewriterResponse::new);
     }
 
-    @Override
-    public DeleteRewriterResponse newResponse() {
-        return new DeleteRewriterResponse();
-    }
 }

@@ -15,14 +15,13 @@ public class PutRewriterResponse extends ActionResponse implements StatusToXCont
     private IndexResponse indexResponse;
     private NodesReloadRewriterResponse reloadResponse;
 
-    protected PutRewriterResponse() {}
-
     public PutRewriterResponse(final IndexResponse indexResponse, final NodesReloadRewriterResponse reloadResponse) {
         this.indexResponse = indexResponse;
         this.reloadResponse = reloadResponse;
     }
 
     public PutRewriterResponse(final StreamInput in) throws IOException {
+        super(in);
         readFrom(in);
     }
 

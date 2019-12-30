@@ -43,14 +43,14 @@ public class NodesClearRewriterCacheRequestTest {
     @Test
     public void testNodeRequestCreationWithRewriterId() {
         final NodesClearRewriterCacheRequest request = new NodesClearRewriterCacheRequest("r1", "n1", "n2");
-        final NodesClearRewriterCacheRequest.NodeRequest nodeRequest = request.newNodeRequest("n3");
+        final NodesClearRewriterCacheRequest.NodeRequest nodeRequest = request.newNodeRequest();
         assertEquals(Optional.of("r1"), nodeRequest.getRewriterId());
     }
 
     @Test
     public void testNodeRequestCreationWithoutRewriterId() {
         final NodesClearRewriterCacheRequest request = new NodesClearRewriterCacheRequest(null, "n1", "n2");
-        final NodesClearRewriterCacheRequest.NodeRequest nodeRequest = request.newNodeRequest("n3");
+        final NodesClearRewriterCacheRequest.NodeRequest nodeRequest = request.newNodeRequest();
         assertFalse(nodeRequest.getRewriterId().isPresent());
     }
 
@@ -58,7 +58,7 @@ public class NodesClearRewriterCacheRequestTest {
     public void testNodeRequestSerializationWithRewriterId() throws IOException {
 
         final NodesClearRewriterCacheRequest.NodeRequest nodeRequest1 = new NodesClearRewriterCacheRequest
-                .NodeRequest("r11", "n2");
+                .NodeRequest("r11");
 
         final BytesStreamOutput output = new BytesStreamOutput();
         nodeRequest1.writeTo(output);
@@ -76,7 +76,7 @@ public class NodesClearRewriterCacheRequestTest {
     public void testNodeRequestSerializationWithoutRewriterId() throws IOException {
 
         final NodesClearRewriterCacheRequest.NodeRequest nodeRequest1 = new NodesClearRewriterCacheRequest
-                .NodeRequest(null, "n2");
+                .NodeRequest(null);
 
         final BytesStreamOutput output = new BytesStreamOutput();
         nodeRequest1.writeTo(output);

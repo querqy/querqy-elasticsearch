@@ -44,10 +44,8 @@ public class TransportNodesClearRewriterCacheAction extends TransportNodesAction
     }
 
     @Override
-    protected NodesClearRewriterCacheRequest.NodeRequest newNodeRequest(final String nodeId,
-                                                                        final NodesClearRewriterCacheRequest request) {
-
-        return request.newNodeRequest(nodeId);
+    protected NodesClearRewriterCacheRequest.NodeRequest newNodeRequest(final NodesClearRewriterCacheRequest request) {
+        return request.newNodeRequest();
     }
 
     @Override

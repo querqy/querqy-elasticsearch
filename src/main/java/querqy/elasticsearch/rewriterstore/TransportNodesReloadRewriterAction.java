@@ -44,9 +44,8 @@ public class TransportNodesReloadRewriterAction extends TransportNodesAction<Nod
     }
 
     @Override
-    protected NodesReloadRewriterRequest.NodeRequest newNodeRequest(final String nodeId,
-                                                                    final NodesReloadRewriterRequest request) {
-        return new NodesReloadRewriterRequest.NodeRequest(nodeId, request.getRewriterId());
+    protected NodesReloadRewriterRequest.NodeRequest newNodeRequest(final NodesReloadRewriterRequest request) {
+        return new NodesReloadRewriterRequest.NodeRequest(request.getRewriterId());
     }
 
     @Override

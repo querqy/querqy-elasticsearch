@@ -35,19 +35,17 @@ public class NodesClearRewriterCacheRequest extends BaseNodesRequest<NodesClearR
         return Optional.ofNullable(rewriterId);
     }
 
-    public NodeRequest newNodeRequest(final String nodeId) {
-        return new NodeRequest(rewriterId, nodeId);
+    public NodeRequest newNodeRequest() {
+        return new NodeRequest(rewriterId);
     }
 
     public static class NodeRequest extends BaseNodeRequest {
 
         String rewriterId;
 
-        public NodeRequest() {
-        }
+        public NodeRequest() {}
 
-        public NodeRequest(final String rewriterId,final String nodeId) {
-            super(nodeId);
+        public NodeRequest(final String rewriterId) {
             this.rewriterId = rewriterId;
         }
 

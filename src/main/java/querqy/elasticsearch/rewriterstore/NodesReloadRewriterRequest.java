@@ -41,8 +41,8 @@ public class NodesReloadRewriterRequest extends BaseNodesRequest<NodesReloadRewr
         public NodeRequest() {
         }
 
-        public NodeRequest(final String nodeId, final String rewriterId) {
-            super(nodeId);
+        public NodeRequest(final String rewriterId) {
+            super();
             this.rewriterId = rewriterId;
         }
 
