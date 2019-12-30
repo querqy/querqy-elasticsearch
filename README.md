@@ -2,7 +2,7 @@
 
 # Querqy for Elasticsearch
 
-This is the Elasticsearch plugin version of [Querqy](https://github.com/querqy),
+This is the Elasticsearch plugin version of [Querqy](https://github.com/renekrie/querqy),
 a query preprocessing framework for Java-based search engines.
 
 ## Installation
