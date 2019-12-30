@@ -17,8 +17,7 @@ public class NodesReloadRewriterRequestTest {
         request1.writeTo(output);
         output.flush();
 
-        final NodesReloadRewriterRequest request2 = new NodesReloadRewriterRequest();
-        request2.readFrom(output.bytes().streamInput());
+        final NodesReloadRewriterRequest request2 = new NodesReloadRewriterRequest(output.bytes().streamInput());
         assertEquals("r1", request1.getRewriterId());
         assertEquals("r1", request2.getRewriterId());
 

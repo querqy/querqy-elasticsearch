@@ -22,7 +22,7 @@ public class RestDeleteRewriterActionTest {
         final FakeRestRequest restRequest = new FakeRestRequest.Builder(null)
                 .withParams(Collections.emptyMap()).build();
 
-        new RestDeleteRewriterAction(Settings.EMPTY).prepareRequest(restRequest, client);
+        new RestDeleteRewriterAction().prepareRequest(restRequest, client);
 
     }
 
@@ -35,7 +35,7 @@ public class RestDeleteRewriterActionTest {
         final FakeRestRequest restRequest = new FakeRestRequest.Builder(null)
                 .withParams(params).build();
 
-        new RestDeleteRewriterAction(Settings.EMPTY).prepareRequest(restRequest, client);
+        new RestDeleteRewriterAction().prepareRequest(restRequest, client);
 
     }
 
@@ -51,7 +51,7 @@ public class RestDeleteRewriterActionTest {
                 .withParams(params)
                 .build();
         final RestDeleteRewriterAction.DeleteRewriterRequestBuilder requestBuilder
-                = new RestDeleteRewriterAction(Settings.EMPTY).createRequestBuilder(restRequest, client);
+                = new RestDeleteRewriterAction().createRequestBuilder(restRequest, client);
 
         final DeleteRewriterRequest deleteRewriterRequest = requestBuilder.request();
         assertNotNull(deleteRewriterRequest);

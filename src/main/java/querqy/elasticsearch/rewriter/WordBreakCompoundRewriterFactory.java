@@ -164,7 +164,7 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
 
         try {
             searcher = indexShard.acquireSearcher("WordBreakCompoundRewriter");
-            return searcher.reader();
+            return searcher.getTopReaderContext().reader();
         } finally {
             if (searcher != null) {
                 searcher.close();

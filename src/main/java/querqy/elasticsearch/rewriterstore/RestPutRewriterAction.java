@@ -16,10 +16,6 @@ public class RestPutRewriterAction extends BaseRestHandler {
 
     public static final String PARAM_REWRITER_ID = "rewriterId";
 
-    public RestPutRewriterAction(final Settings settings) {
-        super(settings);
-    }
-
     @Override
     public String getName() {
         return "Save a Querqy rewriter";

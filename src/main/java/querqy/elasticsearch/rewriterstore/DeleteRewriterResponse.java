@@ -18,6 +18,8 @@ public class DeleteRewriterResponse extends ActionResponse implements StatusToXC
 
     public DeleteRewriterResponse(final StreamInput in) throws IOException {
         super(in);
+        deleteResponse = new DeleteResponse(in);
+        clearRewriterCacheResponse = new NodesClearRewriterCacheResponse(in);
     }
 
     public DeleteRewriterResponse(final DeleteResponse deleteResponse,
@@ -27,16 +29,7 @@ public class DeleteRewriterResponse extends ActionResponse implements StatusToXC
     }
 
     @Override
-    public void readFrom(final StreamInput in) throws IOException {
-        super.readFrom(in);
-        deleteResponse = new DeleteResponse();
-        deleteResponse.readFrom(in);
-        clearRewriterCacheResponse = new NodesClearRewriterCacheResponse(in);
-    }
-
-    @Override
     public void writeTo(final StreamOutput out) throws IOException {
-        super.writeTo(out);
         deleteResponse.writeTo(out);
         clearRewriterCacheResponse.writeTo(out);
     }

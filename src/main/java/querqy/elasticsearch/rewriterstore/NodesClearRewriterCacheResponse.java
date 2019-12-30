@@ -18,8 +18,6 @@ public class NodesClearRewriterCacheResponse extends BaseNodesResponse<NodesClea
         implements ToXContentObject {
 
 
-    public NodesClearRewriterCacheResponse() { }
-
     public NodesClearRewriterCacheResponse(final ClusterName clusterName,
                                        final List<NodesClearRewriterCacheResponse.NodeResponse> responses,
                                        final List<FailedNodeException> failures) {
@@ -27,8 +25,7 @@ public class NodesClearRewriterCacheResponse extends BaseNodesResponse<NodesClea
     }
 
     public NodesClearRewriterCacheResponse(final StreamInput in) throws IOException {
-        super();
-        readFrom(in);
+        super(in);
     }
 
 
@@ -39,7 +36,7 @@ public class NodesClearRewriterCacheResponse extends BaseNodesResponse<NodesClea
 
     @Override
     protected void writeNodesTo(final StreamOutput out, final List<NodeResponse> nodes) throws IOException {
-        out.writeStreamableList(nodes);
+        out.writeCollection(nodes);
     }
 
     @Override
@@ -61,12 +58,8 @@ public class NodesClearRewriterCacheResponse extends BaseNodesResponse<NodesClea
     public static class NodeResponse extends BaseNodeResponse
             implements ToXContentObject {
 
-        public NodeResponse() {
-        }
-
         public NodeResponse(final StreamInput in) throws IOException {
-            super();
-            readFrom(in);
+            super(in);
         }
 
         public NodeResponse(final DiscoveryNode node) {

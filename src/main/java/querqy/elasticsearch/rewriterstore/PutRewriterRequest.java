@@ -21,8 +21,15 @@ public class PutRewriterRequest extends ActionRequest {
     private Map<String, Object> content;
     private String rewriterId;
 
-    public PutRewriterRequest() {
+    // package-private for testing
+    PutRewriterRequest() {
         super();
+    }
+
+    public PutRewriterRequest(final StreamInput in) throws IOException {
+        super(in);
+        rewriterId = in.readString();
+        content = in.readMap();
     }
 
     public PutRewriterRequest(final String rewriterId, final Map<String, Object> content) {
@@ -80,13 +87,6 @@ public class PutRewriterRequest extends ActionRequest {
         super.writeTo(out);
         out.writeString(rewriterId);
         out.writeMap(content);
-    }
-
-    @Override
-    public void readFrom(final StreamInput in) throws IOException {
-        super.readFrom(in);
-        rewriterId = in.readString();
-        content = in.readMap();
     }
 
     public String getRewriterId() {

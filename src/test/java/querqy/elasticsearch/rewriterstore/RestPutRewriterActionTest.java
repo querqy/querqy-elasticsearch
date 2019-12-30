@@ -30,7 +30,7 @@ public class RestPutRewriterActionTest {
         final FakeRestRequest restRequest = new FakeRestRequest.Builder(null)
                 .withParams(Collections.emptyMap()).build();
 
-        new RestPutRewriterAction(Settings.EMPTY).prepareRequest(restRequest, client);
+        new RestPutRewriterAction().prepareRequest(restRequest, client);
 
     }
 
@@ -43,7 +43,7 @@ public class RestPutRewriterActionTest {
         final FakeRestRequest restRequest = new FakeRestRequest.Builder(null)
                 .withParams(params).build();
 
-        new RestPutRewriterAction(Settings.EMPTY).prepareRequest(restRequest, client);
+        new RestPutRewriterAction().prepareRequest(restRequest, client);
 
     }
 
@@ -60,7 +60,7 @@ public class RestPutRewriterActionTest {
                 .withParams(params)
                 .withContent(BytesReference.fromByteBuffers(new ByteBuffer[] {buffer}), XContentType.JSON)
                 .build();
-        final RestPutRewriterAction.PutRewriterRequestBuilder requestBuilder = new RestPutRewriterAction(Settings.EMPTY)
+        final RestPutRewriterAction.PutRewriterRequestBuilder requestBuilder = new RestPutRewriterAction()
                 .createRequestBuilder(restRequest, client);
 
         final PutRewriterRequest putRewriterRequest = requestBuilder.request();

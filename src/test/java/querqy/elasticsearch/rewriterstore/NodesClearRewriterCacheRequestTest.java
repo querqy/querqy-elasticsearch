@@ -18,8 +18,7 @@ public class NodesClearRewriterCacheRequestTest {
         request1.writeTo(output);
         output.flush();
 
-        final NodesClearRewriterCacheRequest request2 = new NodesClearRewriterCacheRequest();
-        request2.readFrom(output.bytes().streamInput());
+        final NodesClearRewriterCacheRequest request2 = new NodesClearRewriterCacheRequest(output.bytes().streamInput());
         assertFalse(request1.getRewriterId().isPresent());
         assertFalse(request2.getRewriterId().isPresent());
 
@@ -33,8 +32,7 @@ public class NodesClearRewriterCacheRequestTest {
         request1.writeTo(output);
         output.flush();
 
-        final NodesClearRewriterCacheRequest request2 = new NodesClearRewriterCacheRequest();
-        request2.readFrom(output.bytes().streamInput());
+        final NodesClearRewriterCacheRequest request2 = new NodesClearRewriterCacheRequest(output.bytes().streamInput());
         assertEquals(Optional.of("r1"), request1.getRewriterId());
         assertEquals(Optional.of("r1"), request2.getRewriterId());
 
@@ -65,8 +63,7 @@ public class NodesClearRewriterCacheRequestTest {
         output.flush();
 
         final NodesClearRewriterCacheRequest.NodeRequest nodeRequest2 = new NodesClearRewriterCacheRequest
-                .NodeRequest();
-        nodeRequest2.readFrom(output.bytes().streamInput());
+                .NodeRequest(output.bytes().streamInput());
 
         assertEquals(nodeRequest1.getRewriterId(), nodeRequest2.getRewriterId());
 
@@ -76,15 +73,14 @@ public class NodesClearRewriterCacheRequestTest {
     public void testNodeRequestSerializationWithoutRewriterId() throws IOException {
 
         final NodesClearRewriterCacheRequest.NodeRequest nodeRequest1 = new NodesClearRewriterCacheRequest
-                .NodeRequest(null);
+                .NodeRequest();
 
         final BytesStreamOutput output = new BytesStreamOutput();
         nodeRequest1.writeTo(output);
         output.flush();
 
         final NodesClearRewriterCacheRequest.NodeRequest nodeRequest2 = new NodesClearRewriterCacheRequest
-                .NodeRequest();
-        nodeRequest2.readFrom(output.bytes().streamInput());
+                .NodeRequest(output.bytes().streamInput());
 
         assertEquals(nodeRequest1.getRewriterId(), nodeRequest2.getRewriterId());
         assertFalse(nodeRequest2.getRewriterId().isPresent());

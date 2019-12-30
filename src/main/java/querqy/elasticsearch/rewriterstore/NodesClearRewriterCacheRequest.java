@@ -10,9 +10,17 @@ import java.util.Optional;
 
 public class NodesClearRewriterCacheRequest extends BaseNodesRequest<NodesClearRewriterCacheRequest> {
 
-    private String rewriterId;
+    private final String rewriterId;
 
-    public NodesClearRewriterCacheRequest() {}
+    public NodesClearRewriterCacheRequest(final StreamInput in) throws IOException {
+        super(in);
+        rewriterId = in.readOptionalString();
+    }
+
+    public NodesClearRewriterCacheRequest() {
+        super((String[]) null);
+        rewriterId = null;
+    }
 
     public NodesClearRewriterCacheRequest(final String rewriterId, final String... nodesIds) {
         super(nodesIds);
@@ -25,12 +33,6 @@ public class NodesClearRewriterCacheRequest extends BaseNodesRequest<NodesClearR
         out.writeOptionalString(rewriterId);
     }
 
-    @Override
-    public void readFrom(final StreamInput in) throws IOException {
-        super.readFrom(in);
-        rewriterId = in.readOptionalString();
-    }
-
     public Optional<String> getRewriterId() {
         return Optional.ofNullable(rewriterId);
     }
@@ -41,18 +43,19 @@ public class NodesClearRewriterCacheRequest extends BaseNodesRequest<NodesClearR
 
     public static class NodeRequest extends BaseNodeRequest {
 
-        String rewriterId;
+        final String rewriterId;
 
-        public NodeRequest() {}
+        public NodeRequest(final StreamInput in) throws IOException {
+            super(in);
+            rewriterId = in.readOptionalString();
+        }
+
+        public NodeRequest() {
+            rewriterId = null;
+        }
 
         public NodeRequest(final String rewriterId) {
             this.rewriterId = rewriterId;
-        }
-
-        @Override
-        public void readFrom(final StreamInput in) throws IOException {
-            super.readFrom(in);
-            rewriterId = in.readOptionalString();
         }
 
         @Override

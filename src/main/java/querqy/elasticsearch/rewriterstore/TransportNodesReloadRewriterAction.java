@@ -6,11 +6,13 @@ import org.elasticsearch.action.support.nodes.TransportNodesAction;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 import querqy.elasticsearch.RewriterShardContexts;
 
+import java.io.IOException;
 import java.util.List;
 
 public class TransportNodesReloadRewriterAction extends TransportNodesAction<NodesReloadRewriterRequest,
@@ -45,12 +47,12 @@ public class TransportNodesReloadRewriterAction extends TransportNodesAction<Nod
 
     @Override
     protected NodesReloadRewriterRequest.NodeRequest newNodeRequest(final NodesReloadRewriterRequest request) {
-        return new NodesReloadRewriterRequest.NodeRequest(request.getRewriterId());
+        return request.newNodeRequest();
     }
 
     @Override
-    protected NodesReloadRewriterResponse.NodeResponse newNodeResponse() {
-        return new NodesReloadRewriterResponse.NodeResponse();
+    protected NodesReloadRewriterResponse.NodeResponse newNodeResponse(final StreamInput in) throws IOException {
+        return new NodesReloadRewriterResponse.NodeResponse(in);
     }
 
     @Override

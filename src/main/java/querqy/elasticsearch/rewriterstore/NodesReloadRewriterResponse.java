@@ -22,8 +22,6 @@ public class NodesReloadRewriterResponse extends BaseNodesResponse<NodesReloadRe
         implements ToXContentObject {
 
 
-    public NodesReloadRewriterResponse() { }
-
     public NodesReloadRewriterResponse(final ClusterName clusterName,
                                        final List<NodesReloadRewriterResponse.NodeResponse> responses,
                                        final List<FailedNodeException> failures) {
@@ -31,8 +29,7 @@ public class NodesReloadRewriterResponse extends BaseNodesResponse<NodesReloadRe
     }
 
     public NodesReloadRewriterResponse(final StreamInput in) throws IOException {
-        super();
-        readFrom(in);
+        super(in);
     }
 
     @Override
@@ -42,7 +39,7 @@ public class NodesReloadRewriterResponse extends BaseNodesResponse<NodesReloadRe
 
     @Override
     protected void writeNodesTo(final StreamOutput out, final List<NodeResponse> nodes) throws IOException {
-        out.writeStreamableList(nodes);
+        out.writeCollection(nodes);
     }
 
     @Override
@@ -103,31 +100,20 @@ public class NodesReloadRewriterResponse extends BaseNodesResponse<NodesReloadRe
 
     public static class NodeResponse extends BaseNodeResponse {
 
-        private Exception reloadException = null;
-
-        public NodeResponse() {
-        }
+        private final Exception reloadException;
 
         public NodeResponse(final StreamInput in) throws IOException {
-            super();
-            readFrom(in);
+            super(in);
+            reloadException = in.readBoolean() ? in.readException() : null;
         }
 
-        public NodeResponse(final DiscoveryNode node, Exception reloadException) {
+        public NodeResponse(final DiscoveryNode node, final Exception reloadException) {
             super(node);
             this.reloadException = reloadException;
         }
 
         public Exception reloadException() {
             return this.reloadException;
-        }
-
-        @Override
-        public void readFrom(final StreamInput in) throws IOException {
-            super.readFrom(in);
-            if (in.readBoolean()) {
-                reloadException = in.readException();
-            }
         }
 
         @Override

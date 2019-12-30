@@ -13,10 +13,6 @@ public class RestDeleteRewriterAction extends BaseRestHandler {
 
     public static final String PARAM_REWRITER_ID = "rewriterId";
 
-    public RestDeleteRewriterAction(final Settings settings) {
-        super(settings);
-    }
-
     @Override
     public String getName() {
         return "Delete a Querqy rewriter";

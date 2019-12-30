@@ -12,6 +12,7 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.cluster.node.DiscoveryNodeRole;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -48,8 +49,11 @@ public class PutRewriterResponseTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testToJson() throws IOException {
-        final IndexResponse indexResponse = new IndexResponse(new ShardId("idx1", "shard1", 1),  null, "id1", 11, 2L,
-                8L, true);
+
+        DiscoveryNode.setPossibleRoles(DiscoveryNodeRole.BUILT_IN_ROLES);
+
+        final IndexResponse indexResponse = new IndexResponse(new ShardId("idx1", "shard1", 1),  ".querqy", "id1", 11,
+                2L, 8L, true);
 
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
                 Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);

@@ -10,6 +10,7 @@ import org.elasticsearch.Version;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.cluster.node.DiscoveryNodeRole;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentHelper;
@@ -47,13 +48,15 @@ public class DeleteRewriterResponseTest {
     @Test
     public void testToJson() throws IOException {
 
+        DiscoveryNode.setPossibleRoles(DiscoveryNodeRole.BUILT_IN_ROLES);
+
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
                 Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
         final DiscoveryNode node2 = new DiscoveryNode("name2", "d2", new TransportAddress(META_ADDRESS, 0),
                 Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
 
-        final DeleteResponse deleteResponse = new DeleteResponse(new ShardId("idx1", "shard1", 1), null, "id1", 11, 2L,
-                8L, true);
+        final DeleteResponse deleteResponse = new DeleteResponse(new ShardId("idx1", "shard1", 1), ".querqy", "id1", 11,
+                2L, 8L, true);
         final NodesClearRewriterCacheResponse clearRewriterCacheResponse = new NodesClearRewriterCacheResponse
                 (new ClusterName("cluster27"),
                         Arrays.asList(new NodesClearRewriterCacheResponse.NodeResponse(node1),

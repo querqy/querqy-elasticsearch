@@ -6,11 +6,13 @@ import org.elasticsearch.action.support.nodes.TransportNodesAction;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 import querqy.elasticsearch.RewriterShardContexts;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,8 +51,8 @@ public class TransportNodesClearRewriterCacheAction extends TransportNodesAction
     }
 
     @Override
-    protected NodesClearRewriterCacheResponse.NodeResponse newNodeResponse() {
-        return new NodesClearRewriterCacheResponse.NodeResponse();
+    protected NodesClearRewriterCacheResponse.NodeResponse newNodeResponse(final StreamInput in) throws IOException {
+        return new NodesClearRewriterCacheResponse.NodeResponse(in);
     }
 
     @Override

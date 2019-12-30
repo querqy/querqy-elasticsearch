@@ -81,8 +81,7 @@ public class PutRewriterRequestTest {
         request1.writeTo(output);
         output.flush();
 
-        final PutRewriterRequest request2 = new PutRewriterRequest();
-        request2.readFrom(output.bytes().streamInput());
+        final PutRewriterRequest request2 = new PutRewriterRequest(output.bytes().streamInput());
 
         assertEquals(request1.getRewriterId(), request2.getRewriterId());
         assertEquals(request1.getContent(), request2.getContent());

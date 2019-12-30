@@ -9,13 +9,16 @@ import java.io.IOException;
 
 public class NodesReloadRewriterRequest extends BaseNodesRequest<NodesReloadRewriterRequest> {
 
-    private String rewriterId;
-
-    public NodesReloadRewriterRequest() {}
+    private final String rewriterId;
 
     public NodesReloadRewriterRequest(final String rewriterId, final String... nodesIds) {
         super(nodesIds);
         this.rewriterId = rewriterId;
+    }
+
+    public NodesReloadRewriterRequest(final StreamInput in) throws IOException {
+        super(in);
+        rewriterId = in.readString();
     }
 
     @Override
@@ -24,32 +27,27 @@ public class NodesReloadRewriterRequest extends BaseNodesRequest<NodesReloadRewr
         out.writeString(rewriterId);
     }
 
-    @Override
-    public void readFrom(final StreamInput in) throws IOException {
-        super.readFrom(in);
-        rewriterId = in.readString();
+    public NodeRequest newNodeRequest() {
+        return new NodeRequest(rewriterId);
     }
 
     public String getRewriterId() {
         return rewriterId;
     }
 
+
     public static class NodeRequest extends BaseNodeRequest {
 
         String rewriterId;
 
-        public NodeRequest() {
+        public NodeRequest(final StreamInput in) throws IOException {
+            super(in);
+            rewriterId = in.readString();
         }
 
         public NodeRequest(final String rewriterId) {
             super();
             this.rewriterId = rewriterId;
-        }
-
-        @Override
-        public void readFrom(final StreamInput in) throws IOException {
-            super.readFrom(in);
-            rewriterId = in.readString();
         }
 
         @Override

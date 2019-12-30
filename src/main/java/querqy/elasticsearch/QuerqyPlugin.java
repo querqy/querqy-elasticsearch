@@ -85,11 +85,11 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
                                              final SettingsFilter settingsFilter,
                                              final IndexNameExpressionResolver indexNameExpressionResolver,
                                              final Supplier<DiscoveryNodes> nodesInCluster) {
-        final RestPutRewriterAction putRewriterRestHandler = new RestPutRewriterAction(settings);
+        final RestPutRewriterAction putRewriterRestHandler = new RestPutRewriterAction();
         restController.registerHandler(RestRequest.Method.PUT, "/_querqy/rewriter/{rewriterId}",
                 putRewriterRestHandler);
 
-        final RestDeleteRewriterAction deleteRewriterRestHandler = new RestDeleteRewriterAction(settings);
+        final RestDeleteRewriterAction deleteRewriterRestHandler = new RestDeleteRewriterAction();
         restController.registerHandler(RestRequest.Method.DELETE, "/_querqy/rewriter/{rewriterId}",
                 deleteRewriterRestHandler);
 
