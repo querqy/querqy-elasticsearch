@@ -364,7 +364,7 @@ POST /myindex/_search
             
             "generated" : { 
                 "query_fields": [ 
-                    "title^2.0", brand^1.5", "shortSummary^0.0007"
+                    "title^2.0", "brand^1.5", "shortSummary^0.0007"
                 ]
                 "field_boost_factor": 0.8 
             }
