@@ -7,7 +7,6 @@ import static querqy.elasticsearch.rewriterstore.RestPutRewriterAction.PARAM_REW
 
 import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.test.rest.FakeRestRequest;
 import org.junit.Test;

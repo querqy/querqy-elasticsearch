@@ -17,14 +17,8 @@ import java.util.Map;
 
 public class PutRewriterRequest extends ActionRequest {
 
-
-    private Map<String, Object> content;
-    private String rewriterId;
-
-    // package-private for testing
-    PutRewriterRequest() {
-        super();
-    }
+    private final Map<String, Object> content;
+    private final String rewriterId;
 
     public PutRewriterRequest(final StreamInput in) throws IOException {
         super(in);
@@ -93,16 +87,8 @@ public class PutRewriterRequest extends ActionRequest {
         return rewriterId;
     }
 
-    public void setRewriterId(String rewriterId) {
-        this.rewriterId = rewriterId;
-    }
-
     public Map<String, Object> getContent() {
         return content;
-    }
-
-    public void setContent(Map<String, Object> content) {
-        this.content = content;
     }
 
 }

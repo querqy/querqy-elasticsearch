@@ -13,7 +13,6 @@ import querqy.rewrite.commonrules.select.SelectionStrategyFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

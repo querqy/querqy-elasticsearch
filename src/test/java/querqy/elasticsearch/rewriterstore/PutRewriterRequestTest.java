@@ -4,17 +4,13 @@ import static org.junit.Assert.*;
 
 import org.elasticsearch.action.ActionRequestValidationException;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
-import org.elasticsearch.index.shard.IndexShard;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import querqy.elasticsearch.DummyESRewriterFactory;
-import querqy.elasticsearch.ESRewriterFactory;
-import querqy.rewrite.RewriterFactory;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class PutRewriterRequestTest {
@@ -22,7 +18,7 @@ public class PutRewriterRequestTest {
     @Test
     public void testValidateMissingRewriterId() {
 
-        final PutRewriterRequest invalidRequest = new PutRewriterRequest();
+        final PutRewriterRequest invalidRequest = new PutRewriterRequest(null, null);
         final ActionRequestValidationException validationResult = invalidRequest.validate();
         assertNotNull(validationResult);
     }
