@@ -1,12 +1,9 @@
 package querqy.elasticsearch;
 
 import org.elasticsearch.SpecialPermission;
-import org.elasticsearch.index.query.QueryShardContext;
-import querqy.rewrite.RewriterFactory;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 

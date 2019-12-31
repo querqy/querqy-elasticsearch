@@ -5,11 +5,9 @@ import static querqy.lucene.rewrite.SearchFieldsAndBoosting.*;
 
 import org.elasticsearch.common.ParseField;
 import querqy.lucene.QuerySimilarityScoring;
-import querqy.lucene.rewrite.SearchFieldsAndBoosting;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 

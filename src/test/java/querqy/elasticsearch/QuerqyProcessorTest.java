@@ -10,11 +10,9 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.TermQuery;
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-import querqy.elasticsearch.query.AbstractLuceneQueryTest;
 import querqy.lucene.LuceneQueries;
 
 import java.util.Arrays;

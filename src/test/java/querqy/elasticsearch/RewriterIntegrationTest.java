@@ -13,7 +13,6 @@ import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESSingleNodeTestCase;
 import org.junit.After;
-import org.junit.Test;
 import querqy.elasticsearch.query.MatchingQuery;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.query.Rewriter;
