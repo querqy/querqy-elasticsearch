@@ -39,6 +39,14 @@ public class DeleteRewriterResponse extends ActionResponse implements StatusToXC
         return deleteResponse.status();
     }
 
+    public DeleteResponse getDeleteResponse() {
+        return deleteResponse;
+    }
+
+    public NodesClearRewriterCacheResponse getClearRewriterCacheResponse() {
+        return clearRewriterCacheResponse;
+    }
+
     @Override
     public XContentBuilder toXContent(final XContentBuilder builder, final Params params) throws IOException {
 
