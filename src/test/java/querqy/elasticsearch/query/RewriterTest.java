@@ -4,16 +4,11 @@ import static org.elasticsearch.common.xcontent.XContentHelper.*;
 import static org.elasticsearch.common.xcontent.XContentType.*;
 import static org.junit.Assert.*;
 
-import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
-import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.common.xcontent.XContentParser;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 

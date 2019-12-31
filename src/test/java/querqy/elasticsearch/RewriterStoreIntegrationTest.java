@@ -1,26 +1,15 @@
 package querqy.elasticsearch;
 
-import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.cluster.node.info.NodeInfo;
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse;
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse;
-import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.plugins.Plugin;
-import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.test.ESIntegTestCase;
-import querqy.elasticsearch.query.MatchingQuery;
-import querqy.elasticsearch.query.QuerqyQueryBuilder;
-import querqy.elasticsearch.query.Rewriter;
-import querqy.elasticsearch.rewriterstore.NodesClearRewriterCacheAction;
-import querqy.elasticsearch.rewriterstore.NodesClearRewriterCacheRequest;
-import querqy.elasticsearch.rewriterstore.NodesClearRewriterCacheResponse;
 import querqy.elasticsearch.rewriterstore.PutRewriterAction;
 import querqy.elasticsearch.rewriterstore.PutRewriterRequest;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
