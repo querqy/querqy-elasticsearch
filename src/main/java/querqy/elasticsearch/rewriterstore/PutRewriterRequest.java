@@ -93,16 +93,8 @@ public class PutRewriterRequest extends ActionRequest {
         return rewriterId;
     }
 
-    public void setRewriterId(String rewriterId) {
-        this.rewriterId = rewriterId;
-    }
-
     public Map<String, Object> getContent() {
         return content;
-    }
-
-    public void setContent(Map<String, Object> content) {
-        this.content = content;
     }
 
 }
