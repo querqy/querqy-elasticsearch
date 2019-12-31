@@ -24,8 +24,7 @@ public class TransportDeleteRewriterAction  extends HandledTransportAction<Delet
     @Inject
     public TransportDeleteRewriterAction(final TransportService transportService, final ActionFilters actionFilters,
                                       final ClusterService clusterService, final Client client) {
-        super(DeleteRewriterAction.NAME, false, transportService, actionFilters,
-                (Supplier<DeleteRewriterRequest>) DeleteRewriterRequest::new);
+        super(DeleteRewriterAction.NAME, false, transportService, actionFilters, DeleteRewriterRequest::new);
         this.clusterService = clusterService;
         this.client = client;
     }
