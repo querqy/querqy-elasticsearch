@@ -24,7 +24,6 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.QueryShardContext;
 import org.elasticsearch.plugins.Plugin;
-import org.elasticsearch.search.internal.SearchContext;
 import org.elasticsearch.test.AbstractQueryTestCase;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,10 +92,9 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
 
     @Override
     protected void doAssertLuceneQuery(final QuerqyQueryBuilder querqyQueryBuilder, final Query query,
-                                       final SearchContext searchContext) throws IOException {
-
-        assertThat(query, AbstractLuceneQueryTest.bq(AbstractLuceneQueryTest.dtq(BooleanClause.Occur.MUST, "f1", "test1")));
-
+                                       QueryShardContext queryShardContext)  {
+        assertThat(query, AbstractLuceneQueryTest.bq(AbstractLuceneQueryTest.dtq(BooleanClause.Occur.MUST, "f1",
+                "test1")));
     }
 
     @Test
