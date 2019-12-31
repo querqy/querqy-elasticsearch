@@ -31,8 +31,8 @@ that matches your Elasticsearch version:
 
 |Elasticsearch version|Querqy for Elasticsearch (use this as \<VERSION> above)|Querqy Lucene version|
 |----|-----------|-------------|
-|7.5.1|1.0.es751.0|4.5.lucene800.1|
-|7.5.0|1.0.es750.0|4.5.lucene800.1|
+|7.5.1|1.0.es751.0|4.5.lucene810.2|
+|7.5.0|1.0.es750.0|4.5.lucene810.2|
 |7.4.2|1.0.es742.0|4.5.lucene810.2|
 |7.4.1|1.0.es741.0|4.5.lucene810.2|
 |7.4.0|1.0.es740.0|4.5.lucene810.2|
