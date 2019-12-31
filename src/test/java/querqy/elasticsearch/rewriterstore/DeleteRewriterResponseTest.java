@@ -8,8 +8,11 @@ import static org.mockito.Mockito.verify;
 
 import org.elasticsearch.Version;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.cluster.node.DiscoveryNodeRole;
+import org.elasticsearch.common.io.stream.BytesStreamOutput;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentHelper;
@@ -43,17 +46,57 @@ public class DeleteRewriterResponseTest {
         verify(deleteResponse, times(1)).status();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    public void testToJson() throws IOException {
+    public void testStreamSerialization() throws IOException {
+        DiscoveryNode.setPossibleRoles(DiscoveryNodeRole.BUILT_IN_ROLES);
 
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
                 Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
         final DiscoveryNode node2 = new DiscoveryNode("name2", "d2", new TransportAddress(META_ADDRESS, 0),
                 Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
 
-        final DeleteResponse deleteResponse = new DeleteResponse(new ShardId("idx1", "shard1", 1), null, "id1", 11, 2L,
-                8L, true);
+        final DeleteResponse deleteResponse1 = new DeleteResponse(new ShardId("idx1", "shard1", 1), ".querqy", "id1",
+                11, 2L, 8L, true);
+        deleteResponse1.setShardInfo(new ReplicationResponse.ShardInfo(2, 1));
+
+        final NodesClearRewriterCacheResponse clearRewriterCacheResponse1 = new NodesClearRewriterCacheResponse
+                (new ClusterName("cluster27"),
+                        Arrays.asList(new NodesClearRewriterCacheResponse.NodeResponse(node1),
+                                new NodesClearRewriterCacheResponse.NodeResponse(node2)), Collections.emptyList());
+
+        final DeleteRewriterResponse response1 = new DeleteRewriterResponse(deleteResponse1,
+                clearRewriterCacheResponse1);
+
+        final BytesStreamOutput output = new BytesStreamOutput();
+        response1.writeTo(output);
+        output.flush();
+
+        final DeleteRewriterResponse response2 = new DeleteRewriterResponse(output.bytes().streamInput());
+        assertEquals(response1.status(), response2.status());
+
+        final DeleteResponse deleteResponse2 = response2.getDeleteResponse();
+        assertEquals(deleteResponse1.status(), deleteResponse2.status());
+        assertEquals(deleteResponse1.getShardId(), deleteResponse2.getShardId());
+
+        final NodesClearRewriterCacheResponse clearRewriterCacheResponse2 = response2.getClearRewriterCacheResponse();
+        assertEquals(clearRewriterCacheResponse1.getNodes(), clearRewriterCacheResponse2.getNodes());
+
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testToJson() throws IOException {
+
+        DiscoveryNode.setPossibleRoles(DiscoveryNodeRole.BUILT_IN_ROLES);
+
+        final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
+                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+        final DiscoveryNode node2 = new DiscoveryNode("name2", "d2", new TransportAddress(META_ADDRESS, 0),
+                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+
+        final DeleteResponse deleteResponse = new DeleteResponse(new ShardId("idx1", "shard1", 1), ".querqy", "id1", 11,
+                2L, 8L, true);
         final NodesClearRewriterCacheResponse clearRewriterCacheResponse = new NodesClearRewriterCacheResponse
                 (new ClusterName("cluster27"),
                         Arrays.asList(new NodesClearRewriterCacheResponse.NodeResponse(node1),
