@@ -47,7 +47,7 @@ that matches your Elasticsearch version:
 
 ## Querying
 
-Querqy defines its own query builder which can be can executed with a
+Querqy defines its own query builder which can be executed with a
 rich set of parameters. We will walk through these parameters step by
 step, starting with a minimal query, which does not use any rewriter, then
 adding a 'Common Rules' rewriter and finally explaining the full set of
