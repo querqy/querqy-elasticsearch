@@ -1,4 +1,4 @@
-name: Querqy ES CI
+name: Build
 
 on: [push]
 
