@@ -12,8 +12,8 @@
 
     <scm>
         <url>git@github.com:renekrie/querqy-elasticsearch.git</url>
-        <connection>scm:git:git@github.com:renekrie/querqy-elasticsearch.git</connection>
-        <developerConnection>scm:git:git@github.com:renekrie/querqy-elasticsearch.git</developerConnection>
+        <connection>scm:git:git@github.com:querqy/querqy-elasticsearch.git</connection>
+        <developerConnection>scm:git:git@github.com:querqy/querqy-elasticsearch.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
