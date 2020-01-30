@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/renekrie/maven/querqy-elasticsearch/images/download.svg) ](https://bintray.com/renekrie/maven/querqy-elasticsearch/_latestVersion)
+![Querqy for ES Build](https://github.com/querqy/querqy-elasticsearch/workflows/Querqy%20ES%20CI/badge.svg) [ ![Download](https://api.bintray.com/packages/renekrie/maven/querqy-elasticsearch/images/download.svg) ](https://bintray.com/renekrie/maven/querqy-elasticsearch/_latestVersion)
 
 # Querqy for Elasticsearch
 
