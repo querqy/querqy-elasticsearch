@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>querqy</groupId>
+    <groupId>org.querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
     <version>1.0.es${es.major.version}${es.minor.version}${es.bugfix.version}.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -10,19 +10,28 @@
         <maven>3.3.0</maven>
     </prerequisites>
 
-    <scm>
-        <url>git@github.com:renekrie/querqy-elasticsearch.git</url>
-        <connection>scm:git:git@github.com:querqy/querqy-elasticsearch.git</connection>
-        <developerConnection>scm:git:git@github.com:querqy/querqy-elasticsearch.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
-
     <licenses>
         <license>
             <name>Apache 2</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
+
+    <developers>
+        <developer>
+            <id>renekrie</id>
+            <name>René Kriegler</name>
+            <email>post@rene-kriegler.com</email>
+            <url>https://github.com/renekrie</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>git@github.com:querqy/querqy-elasticsearch.git</url>
+        <connection>scm:git:git@github.com:querqy/querqy-elasticsearch.git</connection>
+        <developerConnection>scm:git:git@github.com:querqy/querqy-elasticsearch.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
 
@@ -31,6 +40,7 @@
         <maven-jar-plugin.version>3.1.2</maven-jar-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -42,16 +52,17 @@
         <jts.version>1.15.0</jts.version>
 
         <log4j.version>2.11.1</log4j.version>
-        <querqy.lucene.version>4.5.lucene810.2</querqy.lucene.version>
+        <querqy.lucene.version>4.6.lucene810.0</querqy.lucene.version>
         <es.major.version>7</es.major.version>
-        <es.minor.version>5</es.minor.version>
-        <es.bugfix.version>2</es.bugfix.version>
+        <es.minor.version>6</es.minor.version>
+        <es.bugfix.version>0</es.bugfix.version>
         <elasticsearch.version>${es.major.version}.${es.minor.version}.${es.bugfix.version}</elasticsearch.version>
         <jacoco.version>0.8.5</jacoco.version>
 
     </properties>
 
     <repositories>
+        <!-- TODO: remove once Querqy is on Maven Central -->
         <repository>
             <id>querqy-repo</id>
             <name>Querqy repo</name>
@@ -61,7 +72,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>querqy</groupId>
+            <groupId>org.querqy</groupId>
             <artifactId>querqy-lucene</artifactId>
             <version>${querqy.lucene.version}</version>
             <exclusions>
@@ -120,19 +131,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>${maven-source-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptors>
@@ -190,16 +188,6 @@
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>${maven-release-plugin.version}</version>
-                    <configuration>
-                        <useReleaseProfile>false</useReleaseProfile>
-                        <releaseProfiles>release</releaseProfiles>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                     <configuration>
@@ -217,6 +205,60 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${maven-source-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven-javadoc-plugin.version}</version>
+                        <configuration>
+                            <source>8</source>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-release-plugin</artifactId>
+                        <version>${maven-release-plugin.version}</version>
+                        <configuration>
+                            <useReleaseProfile>false</useReleaseProfile>
+                            <releaseProfiles>release</releaseProfiles>
+                            <autoVersionSubmodules>true</autoVersionSubmodules>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <reporting>
         <plugins>
