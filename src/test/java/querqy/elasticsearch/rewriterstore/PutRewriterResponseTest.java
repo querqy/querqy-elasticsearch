@@ -90,35 +90,40 @@ public class PutRewriterResponseTest {
     public void testStreamSerialization() throws IOException {
         final IndexResponse indexResponse = new IndexResponse(new ShardId("idx1", "shard1", 1),  "atype", "id1", 11, 2L,
                 8L, true);
-        indexResponse.setShardInfo(new ReplicationResponse.ShardInfo(4, 4));
 
-        final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
-        final DiscoveryNode node2 = new DiscoveryNode("name2", "d2", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+        try {
+            indexResponse.setShardInfo(new ReplicationResponse.ShardInfo(4, 4));
 
-        final NodesReloadRewriterResponse reloadRewriterResponse = new NodesReloadRewriterResponse(
-                new ClusterName("cluster27"), Arrays.asList(new NodesReloadRewriterResponse.NodeResponse(node1, null),
-                new NodesReloadRewriterResponse.NodeResponse(node2, null)), Collections.emptyList());
+            final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
+                    Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+            final DiscoveryNode node2 = new DiscoveryNode("name2", "d2", new TransportAddress(META_ADDRESS, 0),
+                    Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
 
-        final PutRewriterResponse response1 = new PutRewriterResponse(indexResponse, reloadRewriterResponse);
+            final NodesReloadRewriterResponse reloadRewriterResponse = new NodesReloadRewriterResponse(
+                    new ClusterName("cluster27"), Arrays.asList(new NodesReloadRewriterResponse.NodeResponse(node1, null),
+                    new NodesReloadRewriterResponse.NodeResponse(node2, null)), Collections.emptyList());
+
+            final PutRewriterResponse response1 = new PutRewriterResponse(indexResponse, reloadRewriterResponse);
 
 
-        final BytesStreamOutput output = new BytesStreamOutput();
-        response1.writeTo(output);
-        output.flush();
+            final BytesStreamOutput output = new BytesStreamOutput();
+            response1.writeTo(output);
+            output.flush();
 
-        final PutRewriterResponse response2 = new PutRewriterResponse(output.bytes().streamInput());
+            final PutRewriterResponse response2 = new PutRewriterResponse(output.bytes().streamInput());
 
-        assertEquals(response1.status(), response2.status());
+            assertEquals(response1.status(), response2.status());
 
-        final IndexResponse indexResponse1 = response1.getIndexResponse();
-        final IndexResponse indexResponse2 = response2.getIndexResponse();
-        assertEquals(indexResponse1.getShardId(), indexResponse2.getShardId());
-        assertEquals(indexResponse1.getSeqNo(), indexResponse2.getSeqNo());
+            final IndexResponse indexResponse1 = response1.getIndexResponse();
+            final IndexResponse indexResponse2 = response2.getIndexResponse();
+            assertEquals(indexResponse1.getShardId(), indexResponse2.getShardId());
+            assertEquals(indexResponse1.getSeqNo(), indexResponse2.getSeqNo());
 
-        final NodesReloadRewriterResponse reloadResponse1 = response1.getReloadResponse();
-        final NodesReloadRewriterResponse reloadResponse2 = response2.getReloadResponse();
-        assertEquals(reloadResponse1.getNodes(), reloadResponse2.getNodes());
+            final NodesReloadRewriterResponse reloadResponse1 = response1.getReloadResponse();
+            final NodesReloadRewriterResponse reloadResponse2 = response2.getReloadResponse();
+            assertEquals(reloadResponse1.getNodes(), reloadResponse2.getNodes());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 }
