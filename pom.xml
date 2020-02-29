@@ -3,12 +3,16 @@
 
     <groupId>org.querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>1.0.es${es.major.version}${es.minor.version}${es.bugfix.version}.0-SNAPSHOT</version>
+    <version>1.1.es${es.major.version}${es.minor.version}${es.bugfix.version}.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
         <maven>3.3.0</maven>
     </prerequisites>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>Querqy library for query rewriting: Querqy for Elasticsearch</description>
+    <url>https://querqy.org</url>
 
     <licenses>
         <license>
@@ -52,7 +56,7 @@
         <jts.version>1.15.0</jts.version>
 
         <log4j.version>2.11.1</log4j.version>
-        <querqy.lucene.version>4.6.lucene810.0</querqy.lucene.version>
+        <querqy.lucene.version>4.7.lucene810.0</querqy.lucene.version>
         <es.major.version>7</es.major.version>
         <es.minor.version>6</es.minor.version>
         <es.bugfix.version>0</es.bugfix.version>
@@ -60,15 +64,6 @@
         <jacoco.version>0.8.5</jacoco.version>
 
     </properties>
-
-    <repositories>
-        <!-- TODO: remove once Querqy is on Maven Central -->
-        <repository>
-            <id>querqy-repo</id>
-            <name>Querqy repo</name>
-            <url>http://dl.bintray.com/renekrie/maven</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
@@ -247,6 +242,24 @@
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <keyname>${gpg.keyname}</keyname>
+                                    <passphraseServerId>${gpg.keyname}</passphraseServerId>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-release-plugin</artifactId>
                         <version>${maven-release-plugin.version}</version>
                         <configuration>
@@ -279,10 +292,13 @@
     </reporting>
 
     <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <repository>
-            <id>bintray-rene-maven</id>
-            <name>renekrie-maven-querqy-elasticsearch</name>
-            <url>https://api.bintray.com/maven/renekrie/maven/querqy-elasticsearch</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 
