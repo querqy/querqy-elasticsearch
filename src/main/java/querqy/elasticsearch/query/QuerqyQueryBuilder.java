@@ -206,7 +206,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
      * Indicates whether some other {@link org.elasticsearch.index.query.QueryBuilder} object of the same type is
      * "equal to" this one.
      *
-     * @param other
+     * @param other Check equality with that other QuerqyQueryBuilder
      */
     @Override
     protected boolean doEquals(final QuerqyQueryBuilder other) {

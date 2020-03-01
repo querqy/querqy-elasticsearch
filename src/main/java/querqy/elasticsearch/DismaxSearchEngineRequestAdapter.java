@@ -42,7 +42,7 @@ import java.util.Optional;
 
 
 /**
- *  Rewriters will access params using prefix 'querqy.<&lt;rewriter id&gt;....
+ *  Rewriters will access params using prefix 'querqy.&lt;rewriter id&gt;....
  */
 public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineRequestAdapter {
 
@@ -210,7 +210,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
     /**
      * Get the weight to be multiplied with the main Querqy query (the query entered by the user).
      *
-     * @return
+     * @return An optional weight for the main query
      */
     @Override
     public Optional<Float> getUserQueryWeight() {
