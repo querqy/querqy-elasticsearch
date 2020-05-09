@@ -30,6 +30,7 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
         super(rewriterId);
     }
 
+    @Override
     public void configure(final Map<String, Object> config) {
         final boolean ignoreCase = ConfigUtils.getArg(config, "ignoreCase", true);
 
