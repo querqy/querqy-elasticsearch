@@ -10,12 +10,12 @@ import org.elasticsearch.common.lucene.search.Queries;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryShardContext;
 import querqy.elasticsearch.query.BoostingQueries;
 import querqy.elasticsearch.query.Generated;
 import querqy.elasticsearch.query.PhraseBoosts;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
+import querqy.elasticsearch.query.QueryBuilderRawQuery;
 import querqy.elasticsearch.query.Rewriter;
 import querqy.elasticsearch.query.RewrittenQueries;
 import querqy.infologging.InfoLoggingContext;
@@ -307,11 +307,17 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Query parseRawQuery(final RawQuery rawQuery) throws SyntaxException {
+
         try {
+            if (rawQuery instanceof QueryBuilderRawQuery) {
+                return ((QueryBuilderRawQuery) rawQuery).getQueryBuilder().toQuery(shardContext);
+            }
+
             final XContentParser parser = XContentHelper.createParser(shardContext.getXContentRegistry(), null,
                     new BytesArray(rawQuery.getQueryString()), XContentType.JSON);
-            final QueryBuilder queryBuilder = shardContext.parseInnerQueryBuilder(parser);
-            return queryBuilder.toQuery(shardContext);
+
+            return shardContext.parseInnerQueryBuilder(parser).toQuery(shardContext);
+
         } catch (final IOException e) {
             throw new SyntaxException("Error parsing raw query", e);
         }

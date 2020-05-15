@@ -88,7 +88,9 @@ public class QuerqyProcessor {
                     final List<BooleanClause> clauses = bq.clauses();
                     final int minimumNumberShouldMatch = bq.getMinimumNumberShouldMatch();
 
-                    if (minimumNumberShouldMatch < 2 || clauses.size() <= minimumNumberShouldMatch) {
+                    if (clauses.size() < 2 || clauses.size() <= minimumNumberShouldMatch ||
+                            clauses.stream().allMatch(booleanClause ->
+                                    BooleanClause.Occur.MUST_NOT.equals(booleanClause.getOccur()))) {
 
                         for (final BooleanClause clause : clauses) {
                             if (clause.getOccur() == BooleanClause.Occur.MUST_NOT) {

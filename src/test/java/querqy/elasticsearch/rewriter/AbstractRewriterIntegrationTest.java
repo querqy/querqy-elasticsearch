@@ -12,7 +12,7 @@ import java.util.Map;
 
 import static java.util.Collections.singleton;
 
-public class AbstractRewriterIntegrationTest extends ESSingleNodeTestCase {
+public abstract class AbstractRewriterIntegrationTest extends ESSingleNodeTestCase {
 
     @Override
     protected Collection<Class<? extends Plugin>> getPlugins() {
@@ -25,21 +25,21 @@ public class AbstractRewriterIntegrationTest extends ESSingleNodeTestCase {
         return INDEX_NAME;
     }
 
-    public Map<String, String> doc(String... kv) {
+    public Map<String, Object> doc(Object... kv) {
         if (kv.length % 2 != 0) {
             throw new RuntimeException("Input size must be even");
         }
 
-        Map<String, String> doc = new HashMap<>();
+        Map<String, Object> doc = new HashMap<>();
         for (int i = 0; i < kv.length; i = i + 2) {
-            doc.put(kv[i], kv[i + 1]);
+            doc.put((String) kv[i], kv[i + 1]);
         }
 
         return doc;
     }
 
     @SafeVarargs
-    public final void indexDocs(Map<String, String>... docs) {
+    public final void indexDocs(Map<String, Object>... docs) {
         client().admin().indices().prepareCreate(getIndexName()).get();
 
         Arrays.stream(docs).forEach(doc ->
