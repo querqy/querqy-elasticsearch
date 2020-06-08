@@ -6,6 +6,7 @@ import org.elasticsearch.Version;
 import org.elasticsearch.action.FailedNodeException;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.cluster.node.DiscoveryNodeRole;
 import org.elasticsearch.common.io.stream.ByteBufferStreamInput;
 import org.elasticsearch.common.io.stream.DataOutputStreamOutput;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -23,6 +24,8 @@ public class NodesReloadRewriterResponseTest {
 
     @Test
     public void testWriteToReadFromStream() throws IOException {
+
+        DiscoveryNode.setPossibleRoles(DiscoveryNodeRole.BUILT_IN_ROLES);
 
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final DataOutputStreamOutput dos = new DataOutputStreamOutput(new DataOutputStream(bos));
