@@ -11,8 +11,7 @@ public class QueryBuilderRawQuery extends RawQuery {
     public QueryBuilderRawQuery(final BooleanParent parent, final QueryBuilder queryBuilder, final Occur occur,
                                 final boolean isGenerated) {
 
-        // TODO: string input needs to be removed after new querqy-core release
-        super(parent, "", occur, isGenerated);
+        super(parent, occur, isGenerated);
 
         this.queryBuilder = queryBuilder;
     }

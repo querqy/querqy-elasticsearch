@@ -26,6 +26,7 @@ import querqy.lucene.rewrite.SearchFieldsAndBoosting;
 import querqy.lucene.rewrite.cache.TermQueryCache;
 import querqy.model.QuerqyQuery;
 import querqy.model.RawQuery;
+import querqy.model.StringRawQuery;
 import querqy.parser.QuerqyParser;
 import querqy.rewrite.ContextAwareQueryRewriter;
 import querqy.rewrite.QueryRewriter;
@@ -312,11 +313,15 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
             if (rawQuery instanceof QueryBuilderRawQuery) {
                 return ((QueryBuilderRawQuery) rawQuery).getQueryBuilder().toQuery(shardContext);
             }
+            if (rawQuery instanceof StringRawQuery) {
+                final XContentParser parser = XContentHelper.createParser(shardContext.getXContentRegistry(), null,
+                        new BytesArray(((StringRawQuery) rawQuery).getQueryString()), XContentType.JSON);
 
-            final XContentParser parser = XContentHelper.createParser(shardContext.getXContentRegistry(), null,
-                    new BytesArray(rawQuery.getQueryString()), XContentType.JSON);
+                return shardContext.parseInnerQueryBuilder(parser).toQuery(shardContext);
+            }
 
-            return shardContext.parseInnerQueryBuilder(parser).toQuery(shardContext);
+            throw new IllegalArgumentException("Cannot handle RawQuery of type "+ rawQuery.getClass().getName());
+
 
         } catch (final IOException e) {
             throw new SyntaxException("Error parsing raw query", e);
