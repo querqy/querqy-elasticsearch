@@ -3,7 +3,7 @@
 
     <groupId>org.querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>1.2.es770.0-SNAPSHOT</version>
+    <version>1.2.es771.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -59,7 +59,7 @@
         <querqy.lucene.version>4.9.lucene810.0</querqy.lucene.version>
         <es.major.version>7</es.major.version>
         <es.minor.version>7</es.minor.version>
-        <es.bugfix.version>0</es.bugfix.version>
+        <es.bugfix.version>1</es.bugfix.version>
         <elasticsearch.version>${es.major.version}.${es.minor.version}.${es.bugfix.version}</elasticsearch.version>
         <jacoco.version>0.8.5</jacoco.version>
 
