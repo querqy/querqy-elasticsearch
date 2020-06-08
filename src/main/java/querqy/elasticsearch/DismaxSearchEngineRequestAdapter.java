@@ -300,10 +300,10 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
     }
 
     /**
-     * <p>Parse a {@link RawQuery}.</p>
+     * <p>Parse a {@link RawQuery}. The RawQuery must be of type {@link QueryBuilderRawQuery} or {@link StringRawQuery}.</p>
      *
      * @param rawQuery The raw query.
-     * @return The Query parsed from {@link RawQuery#queryString}
+     * @return The Query parsed from the RawQuery.
      * @throws SyntaxException @throws SyntaxException if the raw query query could not be parsed
      */
     @Override
