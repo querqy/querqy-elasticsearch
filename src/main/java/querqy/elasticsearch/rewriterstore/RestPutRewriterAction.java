@@ -9,6 +9,8 @@ import org.elasticsearch.rest.BaseRestHandler;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.action.RestStatusToXContentListener;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class RestPutRewriterAction extends BaseRestHandler {
@@ -18,6 +20,11 @@ public class RestPutRewriterAction extends BaseRestHandler {
     @Override
     public String getName() {
         return "Save a Querqy rewriter";
+    }
+
+    @Override
+    public List<Route> routes() {
+        return Collections.singletonList(new Route(RestRequest.Method.PUT, "/_querqy/rewriter/{rewriterId}"));
     }
 
     @Override

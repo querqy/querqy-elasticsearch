@@ -7,6 +7,9 @@ import org.elasticsearch.rest.BaseRestHandler;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.action.RestStatusToXContentListener;
 
+import java.util.Collections;
+import java.util.List;
+
 
 public class RestDeleteRewriterAction extends BaseRestHandler {
 
@@ -15,6 +18,11 @@ public class RestDeleteRewriterAction extends BaseRestHandler {
     @Override
     public String getName() {
         return "Delete a Querqy rewriter";
+    }
+
+    @Override
+    public List<Route> routes() {
+        return Collections.singletonList(new Route(RestRequest.Method.DELETE, "/_querqy/rewriter/{rewriterId}"));
     }
 
     @Override
