@@ -3,7 +3,7 @@
 
     <groupId>org.querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>1.1.es${es.major.version}${es.minor.version}${es.bugfix.version}.0-SNAPSHOT</version>
+    <version>1.2.es751.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -56,7 +56,7 @@
         <jts.version>1.15.0</jts.version>
 
         <log4j.version>2.11.1</log4j.version>
-        <querqy.lucene.version>4.7.lucene810.0</querqy.lucene.version>
+        <querqy.lucene.version>4.9.lucene810.0</querqy.lucene.version>
         <es.major.version>7</es.major.version>
         <es.minor.version>5</es.minor.version>
         <es.bugfix.version>1</es.bugfix.version>
@@ -107,6 +107,13 @@
             <version>${spatial4j.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.15.0</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>org.locationtech.jts</groupId>
