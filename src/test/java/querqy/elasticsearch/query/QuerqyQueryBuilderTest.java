@@ -25,6 +25,7 @@ import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.QueryShardContext;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.AbstractQueryTestCase;
+import org.elasticsearch.test.TestGeoShapeFieldMapperPlugin;
 import org.junit.Before;
 import org.junit.Test;
 import querqy.elasticsearch.QuerqyPlugin;
@@ -57,8 +58,11 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
         queryShardContext = mock(QueryShardContext.class);
     }
 
+    // we need to add TestGeoShapeFieldMapperPlugin, otherwise AbstractBuilderTestCase fails complaining about missing
+    // geo_shape field type
+    @SuppressWarnings("deprecation")
     protected Collection<Class<? extends Plugin>> getPlugins() {
-        return Collections.singletonList(QuerqyPlugin.class);
+        return Arrays.asList(TestGeoShapeFieldMapperPlugin.class, QuerqyPlugin.class);
     }
 
     @Override

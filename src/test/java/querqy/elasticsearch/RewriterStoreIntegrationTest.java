@@ -2,6 +2,7 @@ package querqy.elasticsearch;
 
 import org.elasticsearch.action.admin.cluster.node.info.NodeInfo;
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse;
+import org.elasticsearch.action.admin.cluster.node.info.PluginsAndModules;
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.settings.Settings;
@@ -47,14 +48,14 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
 
     public void testPluginIsLoaded() {
 
-        final NodesInfoResponse response = client().admin().cluster().prepareNodesInfo().setPlugins(true).get();
+        final NodesInfoResponse response = client().admin().cluster().prepareNodesInfo().addMetric("plugins").get();
         final List<NodeInfo> nodes = response.getNodes();
 
         assertThat(nodes.size(), greaterThan(0));
 
         for (final NodeInfo nodeInfo : nodes) {
             assertTrue(nodeInfo
-                    .getPlugins()
+                    .getInfo(PluginsAndModules.class)
                     .getPluginInfos()
                     .stream()
                     .anyMatch(info -> info.getName().equals(QuerqyPlugin.class.getName())));
