@@ -3,7 +3,7 @@
 
     <groupId>org.querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>1.2.es780.0-SNAPSHOT</version>
+    <version>1.2.es780.0</version>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -34,7 +34,7 @@
         <url>git@github.com:querqy/querqy-elasticsearch.git</url>
         <connection>scm:git:git@github.com:querqy/querqy-elasticsearch.git</connection>
         <developerConnection>scm:git:git@github.com:querqy/querqy-elasticsearch.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>querqy-elasticsearch-1.2.es780.0</tag>
     </scm>
 
     <properties>
