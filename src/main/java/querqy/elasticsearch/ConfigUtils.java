@@ -19,6 +19,12 @@ public interface ConfigUtils {
         return Optional.ofNullable((String) config.get(name));
     }
 
+    static <T extends Enum<T>> Optional<T> getEnumArg(final Map<String, Object> config, final String name,
+                                                  final Class<T> enumClass) {
+        final String value = (String) config.get(name);
+        return (value == null) ? Optional.empty() : Optional.of(Enum.valueOf(enumClass, value));
+    }
+
 
     static <T> T getArg(final Map<String, Object> config, final String name, final T defaultValue) {
         return (T) config.getOrDefault(name, defaultValue);

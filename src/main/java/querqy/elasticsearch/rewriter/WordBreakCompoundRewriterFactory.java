@@ -6,7 +6,10 @@ import org.elasticsearch.index.engine.Engine;
 import org.elasticsearch.index.shard.IndexShard;
 import querqy.elasticsearch.ConfigUtils;
 import querqy.elasticsearch.ESRewriterFactory;
-import querqy.lucene.contrib.rewrite.WordBreakCompoundRewriter;
+import querqy.lucene.contrib.rewrite.wordbreak.MorphologicalWordBreaker;
+import querqy.lucene.contrib.rewrite.wordbreak.Morphology;
+import querqy.lucene.contrib.rewrite.wordbreak.SpellCheckerCompounder;
+import querqy.lucene.contrib.rewrite.wordbreak.WordBreakCompoundRewriter;
 import querqy.model.ExpandedQuery;
 import querqy.model.Term;
 import querqy.rewrite.QueryRewriter;
@@ -34,6 +37,8 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
     // as we currently only send 2-grams to WBSP for compounding only max_changes = 1 is correctly supported
     static final int MAX_CHANGES = 1;
 
+    static final int MAX_EVALUATIONS = 100;
+
     static final int DEFAULT_MIN_SUGGESTION_FREQ = 1;
     static final int DEFAULT_MAX_COMBINE_LENGTH = 30;
     static final int DEFAULT_MIN_BREAK_LENGTH = 3;
@@ -49,6 +54,8 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
     private boolean alwaysAddReverseCompounds = DEFAULT_ALWAYS_ADD_REVERSE_COMPOUNDS;
 
     private WordBreakSpellChecker spellChecker;
+    private SpellCheckerCompounder compounder;
+    private MorphologicalWordBreaker wordBreaker;
     private TrieMap<Boolean> reverseCompoundTriggerWords;
     private int maxDecompoundExpansions = DEFAULT_MAX_DECOMPOUND_EXPANSIONS;
     private boolean verifyDecompoundCollation = DEFAULT_VERIFY_DECOMPOUND_COLLATION;
@@ -78,6 +85,13 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
         spellChecker.setMaxCombineWordLength(maxCombineLength);
         spellChecker.setMinBreakWordLength(minBreakLength);
         spellChecker.setMaxEvaluations(100);
+        compounder = new SpellCheckerCompounder(spellChecker, dictionaryField, lowerCaseInput);
+
+        final Morphology morphology = ConfigUtils.getEnumArg(config, "morphology", Morphology.class)
+                .orElse(Morphology.DEFAULT);
+
+        wordBreaker = new MorphologicalWordBreaker(morphology, dictionaryField, lowerCaseInput, minSuggestionFreq,
+                minBreakLength, MAX_EVALUATIONS);
 
         reverseCompoundTriggerWords = new TrieMap<>();
         final Collection<String> reverseCompoundTriggerWordsConf =
@@ -115,7 +129,7 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
                                                 final SearchEngineRequestAdapter searchEngineRequestAdapter) {
 
 
-                return new WordBreakCompoundRewriter(spellChecker, getShardIndexReader(indexShard), dictionaryField,
+                return new WordBreakCompoundRewriter(wordBreaker, compounder, getShardIndexReader(indexShard),
                         lowerCaseInput, alwaysAddReverseCompounds, reverseCompoundTriggerWords, maxDecompoundExpansions,
                         verifyDecompoundCollation);
 
@@ -160,19 +174,18 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
 
     private IndexReader getShardIndexReader(final IndexShard indexShard) {
 
-        Engine.Searcher searcher = null;
-
-        try {
-            searcher = indexShard.acquireSearcher("WordBreakCompoundRewriter");
+        try (final Engine.Searcher searcher = indexShard.acquireSearcher("WordBreakCompoundRewriter")) {
             return searcher.getTopReaderContext().reader();
-        } finally {
-            if (searcher != null) {
-                searcher.close();
-            }
         }
     }
 
+    public SpellCheckerCompounder getCompounder() {
+        return compounder;
+    }
 
+    public MorphologicalWordBreaker getWordBreaker() {
+        return wordBreaker;
+    }
 
 
 }
