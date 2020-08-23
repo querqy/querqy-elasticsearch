@@ -295,8 +295,13 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      * @throws SyntaxException if a multiplicative boost query could not be parsed
      */
     @Override
-    public List<Query> getMultiplicativeBoosts(QuerqyQuery<?> userQuery) throws SyntaxException {
+    public List<Query> getMultiplicativeBoosts(final QuerqyQuery<?> userQuery) throws SyntaxException {
         return null;
+    }
+
+    @Override
+    public Optional<Query> parseRankQuery() throws SyntaxException {
+        return Optional.empty();
     }
 
     /**
