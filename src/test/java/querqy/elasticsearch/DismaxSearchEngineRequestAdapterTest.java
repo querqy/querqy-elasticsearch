@@ -63,7 +63,7 @@ public class DismaxSearchEngineRequestAdapterTest {
     }
 
     @Test
-    public void testGetParamForKnownRewriterWithEmptytParams() {
+    public void testGetParamForKnownRewriterWithEmptyParams() {
 
         final QuerqyQueryBuilder builder = new QuerqyQueryBuilder();
 

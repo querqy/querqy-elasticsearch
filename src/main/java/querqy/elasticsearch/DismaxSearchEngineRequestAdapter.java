@@ -3,6 +3,7 @@ package querqy.elasticsearch;
 import static querqy.lucene.PhraseBoosting.makePhraseFieldsBoostQuery;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.DelegatingAnalyzerWrapper;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -10,6 +11,7 @@ import org.elasticsearch.common.lucene.search.Queries;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.index.query.QueryShardContext;
 import querqy.elasticsearch.query.BoostingQueries;
 import querqy.elasticsearch.query.Generated;
@@ -40,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 
 /**
@@ -107,7 +110,9 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Analyzer getQueryAnalyzer() {
-        return shardContext.getMapperService().searchAnalyzer();
+        return new MapperAnalyzerWrapper(mappedFieldType -> mappedFieldType.getTextSearchInfo().getSearchAnalyzer());
+
+
     }
 
     /**
@@ -527,4 +532,27 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
     public QueryShardContext getShardContext() {
         return shardContext;
     }
+
+    class MapperAnalyzerWrapper extends DelegatingAnalyzerWrapper {
+
+        private final Function<MappedFieldType, Analyzer> analyzerProvider;
+
+        MapperAnalyzerWrapper(final Function<MappedFieldType, Analyzer> analyzerProvider) {
+            super(Analyzer.PER_FIELD_REUSE_STRATEGY);
+            this.analyzerProvider = analyzerProvider;
+        }
+
+        @Override
+        protected Analyzer getWrappedAnalyzer(final String fieldName) {
+            final MappedFieldType fieldType = shardContext.getFieldType(fieldName);
+            if (fieldType != null) {
+                final Analyzer analyzer = analyzerProvider.apply(fieldType);
+                if (analyzer != null) {
+                    return analyzer;
+                }
+            }
+            return shardContext.getIndexAnalyzers().getDefaultSearchAnalyzer();
+        }
+    }
+
 }
