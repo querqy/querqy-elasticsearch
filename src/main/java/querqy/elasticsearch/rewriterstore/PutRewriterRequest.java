@@ -11,6 +11,7 @@ import querqy.elasticsearch.ESRewriterFactory;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,29 @@ public class PutRewriterRequest extends ActionRequest {
         } catch (final Exception e) {
             return ValidateActions.addValidationError("Invalid definition of rewriter 'class': " + e.getMessage(),
                     null);
+        }
+
+        final Map<String, Object> loggingConfig = (Map<String, Object>) content.get("info_logging");
+        if (loggingConfig != null) {
+            final Object sinksObj = loggingConfig.get("sinks");
+            if (sinksObj != null) {
+                if (sinksObj instanceof String) {
+                    if (!sinksObj.equals("log4j")) {
+                        final ActionRequestValidationException arve = new ActionRequestValidationException();
+                        arve.addValidationError("Can only log to sink named 'log4j' but not to " + sinksObj.toString());
+                        return arve;
+                    }
+                } else if (sinksObj instanceof Collection) {
+                    Collection<?> sinksCollection = (Collection<?>) sinksObj;
+                    if (sinksCollection.size() > 0) {
+                        if (sinksCollection.size() > 1 || !sinksCollection.iterator().next().equals("log4j")) {
+                            final ActionRequestValidationException arve = new ActionRequestValidationException();
+                            arve.addValidationError("Can only log to sink named 'log4j'");
+                            return arve;
+                        }
+                    }
+                }
+            }
         }
 
 
