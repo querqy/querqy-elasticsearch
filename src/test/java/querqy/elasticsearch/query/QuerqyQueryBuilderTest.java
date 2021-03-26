@@ -68,7 +68,7 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
     @Override
     protected QuerqyQueryBuilder doCreateTestQueryBuilder() {
 
-        QuerqyProcessor querqyProcessor = new QuerqyProcessor(null) {
+        QuerqyProcessor querqyProcessor = new QuerqyProcessor(null, null) {
             @Override
             public Query parseQuery(QuerqyQueryBuilder queryBuilder, QueryShardContext shardContext) {
 

@@ -40,12 +40,10 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     private static final ParseField FIELD_FIELD_BOOST_MODEL = new ParseField("field_boost_model");
 
     private static final ParseField FIELD_REWRITERS = new ParseField("rewriters");
-
-
+    private static final ParseField FIELD_INFO_LOGGING = new ParseField("info_logging");
 
     private static final ObjectParser<QuerqyQueryBuilder, Void> PARSER = new ObjectParser<>(NAME,
             QuerqyQueryBuilder::new);
-
 
     static {
         declareStandardFields(PARSER);
@@ -57,6 +55,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         PARSER.declareObject(QuerqyQueryBuilder::setGenerated, Generated.PARSER, FIELD_GENERATED);
         PARSER.declareObject(QuerqyQueryBuilder::setMatchingQuery, MatchingQuery.PARSER, FIELD_MATCHING_QUERY);
         PARSER.declareObject(QuerqyQueryBuilder::setBoostingQueries, BoostingQueries.PARSER, FIELD_BOOSTING_QUERIES);
+        PARSER.declareObject(QuerqyQueryBuilder::setInfoLoggingSpec, InfoLoggingSpec.PARSER, FIELD_INFO_LOGGING);
     }
 
 
@@ -73,6 +72,8 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     private List<Rewriter> rewriters = Collections.emptyList();
 
     private QuerqyProcessor querqyProcessor;
+
+    private InfoLoggingSpec infoLoggingSpec;
 
     public QuerqyQueryBuilder() {
         super();
@@ -106,6 +107,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         for (int i = 0; i < numRewriters; i++) {
             rewriters.add(new Rewriter(in));
         }
+        infoLoggingSpec = in.readOptionalWriteable(InfoLoggingSpec::new);
     }
 
     @Override
@@ -122,6 +124,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         for (final Rewriter rewriter : rewriters) {
             rewriter.writeTo(out);
         }
+        out.writeOptionalWriteable(infoLoggingSpec);
     }
 
     @Override
@@ -155,7 +158,6 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
             }
         }
 
-
         if (rewriters != null) {
 
             builder.startArray(FIELD_REWRITERS.getPreferredName());
@@ -164,6 +166,10 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
             }
 
             builder.endArray();
+        }
+
+        if (infoLoggingSpec != null) {
+            builder.field(FIELD_INFO_LOGGING.getPreferredName(), infoLoggingSpec);
         }
 
         builder.endObject();
@@ -219,13 +225,14 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
                 && Objects.equals(this.tieBreaker, other.tieBreaker)
                 && Objects.equals(this.fieldBoostModel, other.fieldBoostModel)
                 && Objects.equals(this.boostingQueries, other.boostingQueries)
+                && Objects.equals(this.infoLoggingSpec, other.infoLoggingSpec)
                 ;
     }
 
     @Override
     protected int doHashCode() {
         return Objects.hash(matchingQuery, queryFields, generated, minimumShouldMatch,
-                rewriters, tieBreaker, fieldBoostModel, boostingQueries);
+                rewriters, tieBreaker, fieldBoostModel, boostingQueries, infoLoggingSpec);
     }
 
     /**
@@ -315,5 +322,13 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
 
     public void setFieldBoostModel(final FieldBoostModel fieldFieldBoostModel) {
         this.fieldBoostModel = fieldFieldBoostModel;
+    }
+
+    public InfoLoggingSpec getInfoLoggingSpec() {
+        return infoLoggingSpec;
+    }
+
+    public void setInfoLoggingSpec(final InfoLoggingSpec infoLoggingSpec) {
+        this.infoLoggingSpec = infoLoggingSpec;
     }
 }
