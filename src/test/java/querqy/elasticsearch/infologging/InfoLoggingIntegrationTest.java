@@ -149,7 +149,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
     }
 
     @Test
-    public void testTwoRewritersLoggingDetails() throws Exception {
+    public void testTwoRewritersOfSameTypeLoggingDetails() throws Exception {
 
         index();
 
@@ -204,6 +204,67 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         LogEvent event = events.get(0);
         assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules1\":[{\"APPLIED_RULES\":[\"msg1\"]}]," +
                         "\"common_rules2\":[{\"APPLIED_RULES\":[\"msg2\"]}]}}",
+                event.getMessage().getFormattedMessage());
+
+        assertEquals(Log4jSink.MARKER_QUERQY_REWRITER_DETAIL, event.getMarker());
+
+    }
+
+    @Test
+    public void testTwoRewritersOfDifferentTypesLoggingDetails() throws Exception {
+
+        index();
+
+        final Map<String, Object> content1 = new HashMap<>();
+        content1.put("class", querqy.elasticsearch.rewriter.ReplaceRewriterFactory.class.getName());
+        final Map<String, Object> loggingConf1 = new HashMap<>();
+        loggingConf1.put("sinks", Collections.singletonList("log4j"));
+        content1.put("info_logging", loggingConf1);
+
+        final Map<String, Object> config1 = new HashMap<>();
+        config1.put("rules", "rr => k");
+        content1.put("config", config1);
+
+        final PutRewriterRequest request1 = new PutRewriterRequest("replace1", content1);
+
+        client().execute(PutRewriterAction.INSTANCE, request1).get();
+
+        final Map<String, Object> content2 = new HashMap<>();
+        content2.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
+        final Map<String, Object> loggingConf2 = new HashMap<>();
+        loggingConf2.put("sinks", "log4j");
+        content2.put("info_logging", loggingConf2);
+
+        final Map<String, Object> config2 = new HashMap<>();
+        config2.put("rules", "k =>\nSYNONYM: c\n@_log: \"msg2\"");
+        config2.put("ignoreCase", true);
+        config2.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
+        content2.put("config", config2);
+
+        final PutRewriterRequest request2 = new PutRewriterRequest("common_rules2", content2);
+
+        client().execute(PutRewriterAction.INSTANCE, request2).get();
+
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+        querqyQuery.setRewriters(Arrays.asList(new Rewriter("replace1"), new Rewriter("common_rules2")));
+        querqyQuery.setMatchingQuery(new MatchingQuery("a rr"));
+        querqyQuery.setQueryFieldsAndBoostings(Arrays.asList("field1", "field2"));
+        querqyQuery.setMinimumShouldMatch("1");
+        querqyQuery.setInfoLoggingSpec(new InfoLoggingSpec(LogPayloadType.DETAIL, "query-detail"));
+
+        final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder.setQuery(querqyQuery);
+
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+
+        assertEquals(2L, response.getHits().getTotalHits().value);
+
+        final List<LogEvent> events = APPENDER.getEvents();
+        assertNotNull(events);
+        assertEquals(1, events.size());
+        LogEvent event = events.get(0);
+        assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules2\":[{\"APPLIED_RULES\":[\"msg2\"]}],\"replace1\":" +
+                        "[{\"APPLIED_RULES\":[\"rr => [k]\"]}]}}",
                 event.getMessage().getFormattedMessage());
 
         assertEquals(Log4jSink.MARKER_QUERQY_REWRITER_DETAIL, event.getMarker());
