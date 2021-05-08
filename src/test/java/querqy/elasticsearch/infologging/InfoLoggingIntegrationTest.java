@@ -7,9 +7,11 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.AppenderRef;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.elasticsearch.action.ActionRequestValidationException;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESSingleNodeTestCase;
 import org.junit.After;
@@ -68,7 +70,11 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
     @After
     public void deleteRewriterIndex() {
-        client().admin().indices().prepareDelete(".querqy").get();
+        try {
+            client().admin().indices().prepareDelete(".querqy").get();
+        } catch (final IndexNotFoundException e) {
+            // Ignore
+        }
     }
 
     @Test
@@ -117,6 +123,32 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
     }
 
     @Test
+    public void testInvalidSinkName() {
+
+        final Map<String, Object> content = new HashMap<>();
+        content.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
+        final Map<String, Object> loggingConf = new HashMap<>();
+        loggingConf.put("sinks", "invalidSink");
+        content.put("info_logging", loggingConf);
+
+        final Map<String, Object> config = new HashMap<>();
+        config.put("rules", "k =>\nSYNONYM: c\n@_log: \"msg1\"");
+        config.put("ignoreCase", true);
+        config.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
+        content.put("config", config);
+
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
+
+        try {
+            client().execute(PutRewriterAction.INSTANCE, request).get();
+            fail("Invalid sink must not be excepted");
+        } catch (final Exception e) {
+            assertTrue((e instanceof ActionRequestValidationException)
+                    || (e.getCause() instanceof ActionRequestValidationException));
+        }
+    }
+
+    @Test
     public void testTwoRewritersLoggingDetails() throws Exception {
 
         index();
@@ -124,7 +156,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final Map<String, Object> content1 = new HashMap<>();
         content1.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
         final Map<String, Object> loggingConf1 = new HashMap<>();
-        loggingConf1.put("sinks", "log4j");
+        loggingConf1.put("sinks", Collections.singletonList("log4j"));
         content1.put("info_logging", loggingConf1);
 
         final Map<String, Object> config1 = new HashMap<>();
@@ -176,6 +208,44 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
         assertEquals(Log4jSink.MARKER_QUERQY_REWRITER_DETAIL, event.getMarker());
 
+    }
+
+    @Test
+    public void testThatInfoLoggingTypeNoneIsDefault() throws Exception {
+        index();
+
+        final Map<String, Object> content1 = new HashMap<>();
+        content1.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
+        final Map<String, Object> loggingConf1 = new HashMap<>();
+        loggingConf1.put("sinks", Collections.singletonList("log4j"));
+        content1.put("info_logging", loggingConf1);
+
+        final Map<String, Object> config1 = new HashMap<>();
+        config1.put("rules", "k =>\nSYNONYM: c\n@_log: \"msg1\"");
+        config1.put("ignoreCase", true);
+        config1.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
+        content1.put("config", config1);
+
+        final PutRewriterRequest request1 = new PutRewriterRequest("common_rules1", content1);
+
+        assertEquals(201, client().execute(PutRewriterAction.INSTANCE, request1).get().status().getStatus());
+
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+        querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules1")));
+        querqyQuery.setMatchingQuery(new MatchingQuery("a k"));
+        querqyQuery.setQueryFieldsAndBoostings(Arrays.asList("field1", "field2"));
+        querqyQuery.setMinimumShouldMatch("1");
+
+        final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder.setQuery(querqyQuery);
+
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        assertEquals(2L, response.getHits().getTotalHits().value);
+
+        final List<LogEvent> events = APPENDER.getEvents();
+        assertNotNull(events);
+        System.out.println(events);
+        assertTrue(events.isEmpty());
     }
 
     @Test

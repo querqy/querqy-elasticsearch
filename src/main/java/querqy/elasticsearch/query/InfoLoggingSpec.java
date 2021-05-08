@@ -11,6 +11,7 @@ import querqy.elasticsearch.infologging.LogPayloadType;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 public class InfoLoggingSpec implements NamedWriteable, ToXContent {
@@ -81,10 +82,13 @@ public class InfoLoggingSpec implements NamedWriteable, ToXContent {
     }
 
     public void setPayloadType(final String type) {
-        if (type == null || type.equalsIgnoreCase("NONE")) {
+        if (type == null){
             this.payloadType = LogPayloadType.NONE;
         } else {
             switch (type.toUpperCase(Locale.ROOT)) {
+                case "NONE":
+                    this.payloadType = LogPayloadType.NONE;
+                    break;
                 case "REWRITER_ID":
                     this.payloadType = LogPayloadType.REWRITER_ID;
                     break;
@@ -99,5 +103,18 @@ public class InfoLoggingSpec implements NamedWriteable, ToXContent {
 
     public LogPayloadType getPayloadType() {
         return payloadType;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof InfoLoggingSpec)) return false;
+        final InfoLoggingSpec that = (InfoLoggingSpec) o;
+        return Objects.equals(id, that.id) && payloadType == that.payloadType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, payloadType);
     }
 }

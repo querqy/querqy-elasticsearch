@@ -16,7 +16,7 @@ import java.util.TreeMap;
 public class Log4jSink implements Sink {
 
     private static final String CONTEXT_KEY = Log4jSink.class.getName() + ".MESSAGES";
-    private static final InfoLoggingSpec DEFAULT_SPEC = new InfoLoggingSpec(LogPayloadType.REWRITER_ID);
+    private static final InfoLoggingSpec DEFAULT_SPEC = new InfoLoggingSpec();
 
     private final Logger logger = LogManager.getLogger(Log4jSink.class);
     private static final Marker MARKER_QUERQY_REWRITER = MarkerManager.getMarker("QUERQY");
