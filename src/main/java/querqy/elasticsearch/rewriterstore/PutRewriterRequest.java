@@ -51,7 +51,7 @@ public class PutRewriterRequest extends ActionRequest {
                 if (sinksObj instanceof String) {
                     if (!sinksObj.equals("log4j")) {
                         final ActionRequestValidationException arve = new ActionRequestValidationException();
-                        arve.addValidationError("Can only log to sink named 'log4j' but not to " + sinksObj.toString());
+                        arve.addValidationError("Can only log to sink named 'log4j' but not to " + sinksObj);
                         return arve;
                     }
                 } else if (sinksObj instanceof Collection) {
