@@ -34,7 +34,7 @@ public class QuerqyProcessorTest {
 
         final BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
-        final QuerqyProcessor querqyProcessor = new QuerqyProcessor(mock(RewriterShardContexts.class));
+        final QuerqyProcessor querqyProcessor = new QuerqyProcessor(mock(RewriterShardContexts.class), null);
         querqyProcessor.appendFilterQueries(queries, builder);
         final BooleanQuery booleanQuery = builder.build();
         assertThat(booleanQuery.clauses(), everyItem(not(anyFilter())));
@@ -54,7 +54,7 @@ public class QuerqyProcessorTest {
 
         final BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
-        final QuerqyProcessor querqyProcessor = new QuerqyProcessor(mock(RewriterShardContexts.class));
+        final QuerqyProcessor querqyProcessor = new QuerqyProcessor(mock(RewriterShardContexts.class), null);
         querqyProcessor.appendFilterQueries(queries, builder);
         final BooleanQuery booleanQuery = builder.build();
         assertThat(booleanQuery.clauses(), everyItem(not(anyFilter())));
@@ -81,7 +81,7 @@ public class QuerqyProcessorTest {
         builder.add(new TermQuery(new Term("f1", "u")), BooleanClause.Occur.MUST);
 
 
-        final QuerqyProcessor querqyProcessor = new QuerqyProcessor(mock(RewriterShardContexts.class));
+        final QuerqyProcessor querqyProcessor = new QuerqyProcessor(mock(RewriterShardContexts.class), null);
         querqyProcessor.appendFilterQueries(queries, builder);
 
         final BooleanQuery booleanQuery = builder.build();

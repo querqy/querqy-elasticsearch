@@ -3,6 +3,7 @@ package querqy.elasticsearch;
 import static querqy.lucene.PhraseBoosting.makePhraseFieldsBoostQuery;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.DelegatingAnalyzerWrapper;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -10,14 +11,19 @@ import org.elasticsearch.common.lucene.search.Queries;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.index.query.QueryShardContext;
+import querqy.elasticsearch.infologging.ESInfoLoggingContext;
+import querqy.elasticsearch.infologging.InfoLoggingSpecProvider;
 import querqy.elasticsearch.query.BoostingQueries;
 import querqy.elasticsearch.query.Generated;
+import querqy.elasticsearch.query.InfoLoggingSpec;
 import querqy.elasticsearch.query.PhraseBoosts;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.query.QueryBuilderRawQuery;
 import querqy.elasticsearch.query.Rewriter;
 import querqy.elasticsearch.query.RewrittenQueries;
+import querqy.infologging.InfoLogging;
 import querqy.infologging.InfoLoggingContext;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.PhraseBoosting.PhraseBoostFieldParams;
@@ -40,24 +46,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 
 /**
  *  Rewriters will access params using prefix 'querqy.&lt;rewriter id&gt;....
  */
-public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineRequestAdapter {
+public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineRequestAdapter, InfoLoggingSpecProvider {
 
     private final RewriteChain rewriteChain;
     private final QueryShardContext shardContext;
+    final ESInfoLoggingContext infoLoggingContext;
     private final QuerqyQueryBuilder queryBuilder;
     private final Map<String, Object> context = new HashMap<>();
 
     public DismaxSearchEngineRequestAdapter(final QuerqyQueryBuilder queryBuilder,
                                             final RewriteChain rewriteChain,
-                                            final QueryShardContext shardContext) {
+                                            final QueryShardContext shardContext,
+                                            final InfoLogging infoLogging) {
         this.shardContext = shardContext;
         this.rewriteChain = rewriteChain;
         this.queryBuilder = queryBuilder;
+        this.infoLoggingContext = (infoLogging != null) ? new ESInfoLoggingContext(infoLogging, this) : null;
     }
 
     /**
@@ -508,13 +518,13 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Optional<InfoLoggingContext> getInfoLoggingContext() {
-        return Optional.empty();
+        return Optional.ofNullable(infoLoggingContext);
     }
 
     /**
      * <p>Should debug information be collected while rewriting the query?</p>
      * <p>Debug information will be kept in the context map under the
-     * {@link ContextAwareQueryRewriter#CONTEXT_KEY_DEBUG_DATA} key.</p>
+     * {@link querqy.rewrite.AbstractLoggingRewriter#CONTEXT_KEY_DEBUG_DATA} key.</p>
      *
      * @return true if debug information shall be collected, false otherwise
      * @see #getContext()
@@ -527,4 +537,10 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
     public QueryShardContext getShardContext() {
         return shardContext;
     }
+
+    @Override
+    public Optional<InfoLoggingSpec> getInfoLoggingSpec() {
+        return infoLoggingContext != null ? Optional.ofNullable(queryBuilder.getInfoLoggingSpec()) : Optional.empty();
+    }
+
 }
