@@ -172,7 +172,8 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
 
         final List<LogEvent> events = APPENDER.getEvents();
         assertNotNull(events);
-        assertEquals(2, events.size());
+        // max 1 event per shard
+        assertTrue((2 >= events.size()) && (!events.isEmpty()));
         LogEvent event = events.get(0);
         assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules\":[{\"APPLIED_RULES\":[\"msg1\"]}]}}",
                 event.getMessage().getFormattedMessage());
