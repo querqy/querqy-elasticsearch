@@ -1,0 +1,13 @@
+{
+  "properties": {
+    "field0": {
+      "type":     "text",
+      "analyzer": "standard"
+    },
+    "field1": {
+      "type":     "text",
+      "analyzer": "standard",
+      "search_analyzer": "keyword"
+    }
+  }
+}

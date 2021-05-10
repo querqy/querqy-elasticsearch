@@ -32,7 +32,8 @@ public class RewriterShardContexts implements IndexEventListener {
         shardContexts = new ConcurrentHashMap<>();
     }
 
-    public RewriteChain getRewriteChain(final List<String> rewriterIds, final QueryShardContext queryShardContext) {
+    public RewriteChainAndLogging getRewriteChain(final List<String> rewriterIds,
+                                                  final QueryShardContext queryShardContext) {
 
         final ShardId shardId = new ShardId(queryShardContext.getFullyQualifiedIndex(), queryShardContext.getShardId());
         RewriterShardContext shardContext = shardContexts.get(shardId);
