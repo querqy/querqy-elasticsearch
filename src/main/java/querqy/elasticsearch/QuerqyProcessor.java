@@ -49,15 +49,20 @@ public class QuerqyProcessor {
         } else {
 
             final RewriteChainAndLogging rewriteChainAndLogging = rewriterShardContexts.getRewriteChain(
-                        rewriters.stream().map(Rewriter::getName).collect(Collectors.toList()), shardContext);
+                    rewriters.stream().map(Rewriter::getName).collect(Collectors.toList()), shardContext);
 
             rewriteChain = rewriteChainAndLogging.rewriteChain;
             final InfoLoggingSpec infoLoggingSpec = queryBuilder.getInfoLoggingSpec();
 
-            rewritersEnabledForLogging = (infoLoggingSpec == null
-                            || infoLoggingSpec.getPayloadType() != LogPayloadType.NONE)
-                    ? rewriteChainAndLogging.rewritersEnabledForLogging
-                    : Collections.emptySet();
+            if ((infoLoggingSpec != null) && (infoLoggingSpec.getPayloadType() != LogPayloadType.NONE)
+                    && !infoLoggingSpec.isLogged()) {
+
+                infoLoggingSpec.setLogged(true);
+                rewritersEnabledForLogging = rewriteChainAndLogging.rewritersEnabledForLogging;
+
+            } else {
+                rewritersEnabledForLogging = Collections.emptySet();
+            }
 
         }
 

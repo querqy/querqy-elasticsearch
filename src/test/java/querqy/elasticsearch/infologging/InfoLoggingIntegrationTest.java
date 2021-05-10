@@ -15,6 +15,7 @@ import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESSingleNodeTestCase;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -60,6 +61,14 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         config.addLogger(Log4jSink.class.getName(), loggerConfig);
         ctx.updateLoggers();
 
+    }
+
+    @AfterClass
+    public static void removeAppender() {
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final Configuration config = ctx.getConfiguration();
+        config.removeLogger(Log4jSink.class.getName());
+        ctx.updateLoggers();
     }
 
     @After
@@ -305,7 +314,6 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
         final List<LogEvent> events = APPENDER.getEvents();
         assertNotNull(events);
-        System.out.println(events);
         assertTrue(events.isEmpty());
     }
 
