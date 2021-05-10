@@ -1,12 +1,12 @@
 package querqy.elasticsearch;
 
 import org.elasticsearch.SpecialPermission;
-import org.elasticsearch.index.query.QueryShardContext;
-import querqy.rewrite.RewriterFactory;
+import querqy.trie.TrieMap;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,9 +22,26 @@ public interface ConfigUtils {
         return Optional.ofNullable((String) config.get(name));
     }
 
+    static <T extends Enum<T>> Optional<T> getEnumArg(final Map<String, Object> config, final String name,
+                                                  final Class<T> enumClass) {
+        final String value = (String) config.get(name);
+        return (value == null) ? Optional.empty() : Optional.of(Enum.valueOf(enumClass, value));
+    }
+
 
     static <T> T getArg(final Map<String, Object> config, final String name, final T defaultValue) {
         return (T) config.getOrDefault(name, defaultValue);
+    }
+
+    static TrieMap<Boolean> getTrieSetArg(final Map<String, Object> config, final String name) {
+        final TrieMap<Boolean> result = new TrieMap<>();
+        final Collection<String> collectionArg = (Collection<String>) config.get(name);
+        if (collectionArg != null) {
+            for (final String word : new HashSet<>(collectionArg)) {
+                result.put(word, Boolean.TRUE);
+            }
+        }
+        return result;
     }
 
     static <V> V getInstanceFromArg(final Map<String, Object> config, final String name, final V defaultValue) {

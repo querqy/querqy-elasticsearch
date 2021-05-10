@@ -4,7 +4,6 @@ import static org.elasticsearch.common.transport.TransportAddress.META_ADDRESS;
 import static org.junit.Assert.*;
 
 import org.elasticsearch.Version;
-import org.elasticsearch.action.FailedNodeException;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;

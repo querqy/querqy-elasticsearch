@@ -6,12 +6,14 @@ import static querqy.elasticsearch.rewriterstore.Constants.QUERQY_INDEX_NAME;
 import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX_NUM_REPLICAS;
 import static querqy.elasticsearch.rewriterstore.PutRewriterAction.*;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequestBuilder;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
 import org.elasticsearch.action.index.IndexAction;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -20,11 +22,14 @@ import org.elasticsearch.action.support.HandledTransportAction;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.cluster.service.ClusterService;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.tasks.Task;
 import org.elasticsearch.transport.TransportService;
 
@@ -37,9 +42,12 @@ import java.util.Scanner;
 
 public class TransportPutRewriterAction extends HandledTransportAction<PutRewriterRequest, PutRewriterResponse> {
 
+    private static final Logger LOGGER = LogManager.getLogger(TransportPutRewriterAction.class);
+
     private final Client client;
     private final ClusterService clusterService;
     private final Settings settings;
+    private boolean mappingsVersionChecked = false;
 
     @Inject
     public TransportPutRewriterAction(final TransportService transportService, final ActionFilters actionFilters,
@@ -56,45 +64,82 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
                              final ActionListener<PutRewriterResponse> listener) {
 
         final IndicesAdminClient indicesClient = client.admin().indices();
-        final IndicesExistsRequestBuilder existsRequestBuilder = indicesClient.prepareExists(QUERQY_INDEX_NAME);
 
-        indicesClient.exists(existsRequestBuilder.request(), new ActionListener<IndicesExistsResponse>() {
+        indicesClient.prepareGetMappings(QUERQY_INDEX_NAME).execute(new ActionListener<GetMappingsResponse>() {
+
             @Override
-            public void onResponse(final IndicesExistsResponse indicesExistsResponse) {
-                if (!indicesExistsResponse.isExists()) {
+            public void onResponse(final GetMappingsResponse getMappingsResponse) {
+                final ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> mappings = getMappingsResponse
+                        .getMappings();
 
-                    indicesClient.create(buildCreateQuerqyIndexRequest(indicesClient),
-                            new ActionListener<CreateIndexResponse>() {
+                if (!mappingsVersionChecked) {
 
-                        @Override
-                        public void onResponse(final CreateIndexResponse createIndexResponse) {
-                            try {
-                                saveRewriter(task, request, listener);
-                            } catch (final IOException e) {
-                                listener.onFailure(e);
+                    final Map<String, Object> properties = (Map<String, Object>) mappings.get(QUERQY_INDEX_NAME)
+                        .get("querqy-rewriter").getSourceAsMap().get("properties");
+                    if (!properties.containsKey("info_logging")) {
+                        final PutMappingRequest request = new PutMappingRequest(QUERQY_INDEX_NAME).source(
+                                "{\n" +
+                                        "    \"properties\": {\n" +
+                                        "      \"info_logging\": {\n" +
+                                        "        \"properties\": {\n" +
+                                        "          \"sinks\": {\"type\" : \"keyword\" }\n" +
+                                        "        }\n" +
+                                        "      }" +
+                                        "    }\n" +
+                                        "}", XContentType.JSON
+                        ).type("querqy-rewriter");
+                        try {
+                            if (!indicesClient.putMapping(request).get().isAcknowledged()) {
+                                listener.onFailure(new IllegalStateException("Adding info_logging to mappings not " +
+                                        "acknowledged"));
+                                return;
                             }
-                        }
-
-                        @Override
-                        public void onFailure(final Exception e) {
+                            mappingsVersionChecked = true;
+                            LOGGER.info("Added info_logging property to index {}", QUERQY_INDEX_NAME);
+                        } catch (final Exception e) {
                             listener.onFailure(e);
                         }
-                    });
 
-                } else {
-                    try {
-                        saveRewriter(task, request, listener);
-                    } catch (IOException e) {
-                        listener.onFailure(e);
                     }
                 }
+                try {
+                    saveRewriter(task, request, listener);
+                } catch (final IOException e) {
+                    listener.onFailure(e);
+                }
+
             }
 
             @Override
             public void onFailure(final Exception e) {
-                listener.onFailure(e);
+                if ((e instanceof IndexNotFoundException) || (e.getCause() instanceof IndexNotFoundException)) {
+
+                    indicesClient.create(buildCreateQuerqyIndexRequest(indicesClient),
+                            new ActionListener<CreateIndexResponse>() {
+
+                                @Override
+                                public void onResponse(final CreateIndexResponse createIndexResponse) {
+                                    LOGGER.info("Created index {}", QUERQY_INDEX_NAME);
+                                    mappingsVersionChecked = true;
+                                    try {
+                                        saveRewriter(task, request, listener);
+                                    } catch (final IOException e) {
+                                        listener.onFailure(e);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(final Exception e) {
+                                    listener.onFailure(e);
+                                }
+                            });
+
+                } else {
+                    listener.onFailure(e);
+                }
             }
         });
+
     }
 
     protected CreateIndexRequest buildCreateQuerqyIndexRequest(final IndicesAdminClient indicesClient) {
@@ -116,7 +161,7 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
                 new ActionListener<IndexResponse>() {
                     @Override
                     public void onResponse(final IndexResponse indexResponse) {
-
+                        LOGGER.info("Saved rewriter {}", request.getRewriterId());
                         client.execute(NodesReloadRewriterAction.INSTANCE,
                                 new NodesReloadRewriterRequest(request.getRewriterId()),
                                 wrap(
@@ -128,6 +173,7 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
                     @Override
                     public void onFailure(final Exception e) {
+                        LOGGER.error("Could not save rewriter " + request.getRewriterId(), e);
                         listener.onFailure(e);
                     }
                 })
