@@ -17,9 +17,12 @@ import querqy.rewrite.RewriterFactory;
 import querqy.rewrite.SearchEngineRequestAdapter;
 import querqy.trie.TrieMap;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,6 +60,7 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
     private SpellCheckerCompounder compounder;
     private MorphologicalWordBreaker wordBreaker;
     private TrieMap<Boolean> reverseCompoundTriggerWords;
+    private TrieMap<Boolean> protectedWords;
     private int maxDecompoundExpansions = DEFAULT_MAX_DECOMPOUND_EXPANSIONS;
     private boolean verifyDecompoundCollation = DEFAULT_VERIFY_DECOMPOUND_COLLATION;
 
@@ -93,14 +97,8 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
         wordBreaker = new MorphologicalWordBreaker(morphology, dictionaryField, lowerCaseInput, minSuggestionFreq,
                 minBreakLength, MAX_EVALUATIONS);
 
-        reverseCompoundTriggerWords = new TrieMap<>();
-        final Collection<String> reverseCompoundTriggerWordsConf =
-                (Collection<String>) config.get("reverseCompoundTriggerWords");
-        if (reverseCompoundTriggerWordsConf != null) {
-            for (final String word : new HashSet<>(reverseCompoundTriggerWordsConf)) {
-                reverseCompoundTriggerWords.put(word, Boolean.TRUE);
-            }
-        }
+        reverseCompoundTriggerWords = ConfigUtils.getTrieSetArg(config, "reverseCompoundTriggerWords");
+        protectedWords = ConfigUtils.getTrieSetArg(config, "protectedWords");
 
         Map<String, Object> decompoundConf = (Map<String, Object>) config.get("decompound");
         if (decompoundConf == null) {
@@ -115,9 +113,22 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
 
     @Override
     public List<String> validateConfiguration(final Map<String, Object> config) {
+
+        final List<String> errors = new LinkedList<>();
         final Optional<String> optValue = ConfigUtils.getStringArg(config, "dictionaryField").map(String::trim)
                 .filter(s -> !s.isEmpty());
-        return optValue.isPresent() ? null : Collections.singletonList("Missing config:  dictionaryField");
+        if (!optValue.isPresent()) {
+            errors.add("Missing config:  dictionaryField");
+        }
+
+        ConfigUtils.getStringArg(config, "morphology").ifPresent(morphologyName -> {
+            if (Arrays.stream(Morphology.values()).map(Enum::name).noneMatch(name -> name.equals(morphologyName))) {
+                errors.add("Unknown morphology: " + morphologyName);
+            }
+        });
+
+        return errors;
+
     }
 
     @Override
@@ -131,7 +142,7 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
 
                 return new WordBreakCompoundRewriter(wordBreaker, compounder, getShardIndexReader(indexShard),
                         lowerCaseInput, alwaysAddReverseCompounds, reverseCompoundTriggerWords, maxDecompoundExpansions,
-                        verifyDecompoundCollation);
+                        verifyDecompoundCollation, protectedWords);
 
 
             }
@@ -162,6 +173,10 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
 
     public TrieMap<Boolean> getReverseCompoundTriggerWords() {
         return reverseCompoundTriggerWords;
+    }
+
+    public TrieMap<Boolean> getProtectedWords() {
+        return protectedWords;
     }
 
     public int getMaxDecompoundExpansions() {

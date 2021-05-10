@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import querqy.elasticsearch.QuerqyPlugin;
 import querqy.elasticsearch.QuerqyProcessor;
+import querqy.elasticsearch.infologging.LogPayloadType;
 import querqy.lucene.rewrite.DependentTermQueryBuilder;
 import querqy.lucene.rewrite.DocumentFrequencyCorrection;
 import querqy.lucene.rewrite.IndependentFieldBoost;
@@ -64,7 +65,7 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
     @Override
     protected QuerqyQueryBuilder doCreateTestQueryBuilder() {
 
-        QuerqyProcessor querqyProcessor = new QuerqyProcessor(null) {
+        QuerqyProcessor querqyProcessor = new QuerqyProcessor(null, null) {
             @Override
             public Query parseQuery(QuerqyQueryBuilder queryBuilder, QueryShardContext shardContext) {
 
@@ -236,6 +237,11 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
 
         writeQuerqyQueryBuilder.setBoostingQueries(boostingQueries);
 
+        InfoLoggingSpec infoLoggingSpec = new InfoLoggingSpec();
+        infoLoggingSpec.setPayloadType("DETAIL");
+        infoLoggingSpec.setId("RID");
+        writeQuerqyQueryBuilder.setInfoLoggingSpec(infoLoggingSpec);
+
         final BytesStreamOutput out = new BytesStreamOutput();
         writeQuerqyQueryBuilder.writeTo(out);
         out.flush();
@@ -290,6 +296,11 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
         boostingQueries.setRewrittenQueries(rewrittenQueries);
 
         writeQuerqyQueryBuilder.setBoostingQueries(boostingQueries);
+
+        InfoLoggingSpec infoLoggingSpec = new InfoLoggingSpec();
+        infoLoggingSpec.setPayloadType("DETAIL");
+        infoLoggingSpec.setId("RID");
+        writeQuerqyQueryBuilder.setInfoLoggingSpec(infoLoggingSpec);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
@@ -362,6 +373,7 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
         assertEquals(builder1.getRewriters(), builder2.getRewriters());
         assertEquals(builder1.getTieBreaker(), builder2.getTieBreaker());
         assertEquals(builder1.getBoostingQueries(), builder2.getBoostingQueries());
+        assertEquals(builder1.getInfoLoggingSpec(), builder2.getInfoLoggingSpec());
 
     }
 

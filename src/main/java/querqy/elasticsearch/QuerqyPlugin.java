@@ -30,6 +30,7 @@ import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.script.ScriptService;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.watcher.ResourceWatcherService;
+import querqy.elasticsearch.infologging.Log4jSink;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.rewriterstore.DeleteRewriterAction;
 import querqy.elasticsearch.rewriterstore.NodesClearRewriterCacheAction;
@@ -56,7 +57,7 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
 
     public QuerqyPlugin(final Settings settings) {
         rewriterShardContexts = new RewriterShardContexts(settings);
-        querqyProcessor = new QuerqyProcessor(rewriterShardContexts);
+        querqyProcessor = new QuerqyProcessor(rewriterShardContexts, new Log4jSink());
     }
 
     @Override

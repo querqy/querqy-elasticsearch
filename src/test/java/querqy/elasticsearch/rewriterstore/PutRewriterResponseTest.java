@@ -12,7 +12,6 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
-import org.elasticsearch.cluster.node.DiscoveryNodeRole;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -50,8 +49,6 @@ public class PutRewriterResponseTest {
     @Test
     public void testToJson() throws IOException {
 
-        DiscoveryNode.setPossibleRoles(DiscoveryNodeRole.BUILT_IN_ROLES);
-
         final IndexResponse indexResponse = new IndexResponse(new ShardId("idx1", "shard1", 1),  ".querqy", "id1", 11,
                 2L, 8L, true);
 
@@ -88,8 +85,6 @@ public class PutRewriterResponseTest {
 
     @Test
     public void testStreamSerialization() throws IOException {
-
-        DiscoveryNode.setPossibleRoles(DiscoveryNodeRole.BUILT_IN_ROLES);
 
         final IndexResponse indexResponse = new IndexResponse(new ShardId("idx1", "shard1", 1),  "atype", "id1", 11, 2L,
                 8L, true);
