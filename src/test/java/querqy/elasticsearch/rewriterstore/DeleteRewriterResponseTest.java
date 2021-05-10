@@ -11,7 +11,6 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
-import org.elasticsearch.cluster.node.DiscoveryNodeRole;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -48,7 +47,6 @@ public class DeleteRewriterResponseTest {
 
     @Test
     public void testStreamSerialization() throws IOException {
-        DiscoveryNode.setPossibleRoles(DiscoveryNodeRole.BUILT_IN_ROLES);
 
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
                 Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
@@ -87,8 +85,6 @@ public class DeleteRewriterResponseTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testToJson() throws IOException {
-
-        DiscoveryNode.setPossibleRoles(DiscoveryNodeRole.BUILT_IN_ROLES);
 
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
                 Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
