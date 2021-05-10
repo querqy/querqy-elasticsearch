@@ -2,6 +2,11 @@
     "properties": {
       "class": {"type": "keyword"},
       "type": {"type": "keyword"},
+      "info_logging": {
+        "properties": {
+          "sinks": {"type" : "keyword" }
+        }
+      },
       "config": {
         "type" : "keyword",
         "index": false
