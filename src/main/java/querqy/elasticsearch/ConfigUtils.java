@@ -1,9 +1,12 @@
 package querqy.elasticsearch;
 
 import org.elasticsearch.SpecialPermission;
+import querqy.trie.TrieMap;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,6 +31,17 @@ public interface ConfigUtils {
 
     static <T> T getArg(final Map<String, Object> config, final String name, final T defaultValue) {
         return (T) config.getOrDefault(name, defaultValue);
+    }
+
+    static TrieMap<Boolean> getTrieSetArg(final Map<String, Object> config, final String name) {
+        final TrieMap<Boolean> result = new TrieMap<>();
+        final Collection<String> collectionArg = (Collection<String>) config.get(name);
+        if (collectionArg != null) {
+            for (final String word : new HashSet<>(collectionArg)) {
+                result.put(word, Boolean.TRUE);
+            }
+        }
+        return result;
     }
 
     static <V> V getInstanceFromArg(final Map<String, Object> config, final String name, final V defaultValue) {

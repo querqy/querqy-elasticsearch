@@ -23,7 +23,7 @@ public class DismaxSearchEngineRequestAdapterTest {
     public void testThatGetParamsReturnsNoneIfItsNotARewriterParamName() {
         // no rewriter at all
         final QuerqyQueryBuilder builder = new QuerqyQueryBuilder();
-        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null);
+        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null, null);
         assertEquals(Optional.empty(), adapter.getParam("not.a.rewriter"));
 
         // some rewriter
@@ -37,7 +37,8 @@ public class DismaxSearchEngineRequestAdapterTest {
     public void testGetParamForUnknownRewriter() {
         // no rewriter at all
         final QuerqyQueryBuilder builder = new QuerqyQueryBuilder();
-        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null);
+        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null,
+                null);
         assertEquals(Optional.empty(), adapter.getParam("querqy.rid1"));
         assertEquals(Optional.empty(), adapter.getParam("querqy.rid1.x"));
 
@@ -55,7 +56,8 @@ public class DismaxSearchEngineRequestAdapterTest {
         final QuerqyQueryBuilder builder = new QuerqyQueryBuilder();
         builder.setRewriters(Collections.singletonList(rewriter));
 
-        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null);
+        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null,
+                null);
         assertEquals(Optional.empty(), adapter.getParam("querqy.rid1"));
         assertEquals(Optional.empty(), adapter.getParam("querqy.rid1.x"));
 
@@ -63,7 +65,7 @@ public class DismaxSearchEngineRequestAdapterTest {
     }
 
     @Test
-    public void testGetParamForKnownRewriterWithEmptytParams() {
+    public void testGetParamForKnownRewriterWithEmptyParams() {
 
         final QuerqyQueryBuilder builder = new QuerqyQueryBuilder();
 
@@ -71,7 +73,8 @@ public class DismaxSearchEngineRequestAdapterTest {
         rewriter.setParams(new HashMap<>());
         builder.setRewriters(Collections.singletonList(rewriter));
 
-        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null);
+        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null,
+                null);
         assertEquals(Optional.empty(), adapter.getParam("querqy.rid1"));
         assertEquals(Optional.empty(), adapter.getParam("querqy.rid1.x"));
 
@@ -90,7 +93,8 @@ public class DismaxSearchEngineRequestAdapterTest {
 
         builder.setRewriters(Collections.singletonList(rewriter));
 
-        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null);
+        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null,
+                null);
         assertEquals(Optional.empty(), adapter.getParam("querqy.rid1"));
         assertEquals(Optional.of("Value1"), adapter.getParam("querqy.rid1.x"));
 
@@ -120,7 +124,8 @@ public class DismaxSearchEngineRequestAdapterTest {
 
         builder.setRewriters(Collections.singletonList(rewriter));
 
-        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null);
+        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null,
+                null);
         assertThat(adapter.getRequestParams("querqy.rid1"), emptyArray());
         assertThat(adapter.getRequestParams("querqy.rid1.x"), arrayContaining("Value11", "Value12"));
 
@@ -153,7 +158,8 @@ public class DismaxSearchEngineRequestAdapterTest {
 
         builder.setRewriters(Collections.singletonList(rewriter));
 
-        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null);
+        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null,
+                null);
         assertEquals(Optional.empty(), adapter.getBooleanRequestParam("querqy.rid1"));
         assertEquals(Optional.of(Boolean.FALSE), adapter.getBooleanRequestParam("querqy.rid1.x"));
 
@@ -182,7 +188,8 @@ public class DismaxSearchEngineRequestAdapterTest {
 
         builder.setRewriters(Collections.singletonList(rewriter));
 
-        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null);
+        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null,
+                null);
         assertEquals(Optional.empty(), adapter.getIntegerRequestParam("querqy.rid1"));
         assertEquals(Optional.of(8), adapter.getIntegerRequestParam("querqy.rid1.x"));
 
@@ -211,7 +218,8 @@ public class DismaxSearchEngineRequestAdapterTest {
 
         builder.setRewriters(Collections.singletonList(rewriter));
 
-        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null);
+        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null,
+                null);
         assertEquals(Optional.empty(), adapter.getFloatRequestParam("querqy.rid1"));
         assertEquals(Optional.of(0.01f), adapter.getFloatRequestParam("querqy.rid1.x"));
 
@@ -240,7 +248,8 @@ public class DismaxSearchEngineRequestAdapterTest {
 
         builder.setRewriters(Collections.singletonList(rewriter));
 
-        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null);
+        final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(builder, null, null,
+                null);
         assertEquals(Optional.empty(), adapter.getDoubleRequestParam("querqy.rid1"));
         assertEquals(Optional.of(0.01), adapter.getDoubleRequestParam("querqy.rid1.x"));
 

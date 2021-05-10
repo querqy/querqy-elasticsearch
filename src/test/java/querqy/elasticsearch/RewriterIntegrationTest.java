@@ -35,12 +35,12 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         index();
 
         final Map<String, Object> content = new HashMap<>();
-        content.put("class", "querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory");
+        content.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
 
         final Map<String, Object> config = new HashMap<>();
         config.put("rules", "k =>\nSYNONYM: c");
         config.put("ignoreCase", true);
-        config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
+        config.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
         content.put("config", config);
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
@@ -66,12 +66,12 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         index();
 
         final Map<String, Object> content = new HashMap<>();
-        content.put("class", "querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory");
+        content.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
 
         final Map<String, Object> config = new HashMap<>();
         config.put("rules", "");
         config.put("ignoreCase", true);
-        config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
+        config.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
         content.put("config", config);
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
@@ -92,12 +92,12 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
 
         final Map<String, Object> content2 = new HashMap<>();
-        content2.put("class", "querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory");
+        content2.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
 
         final Map<String, Object> config2 = new HashMap<>();
         config2.put("rules", "k =>\nSYNONYM: c");
         config2.put("ignoreCase", true);
-        config2.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
+        config2.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
         content2.put("config", config2);
 
         final PutRewriterRequest request2 = new PutRewriterRequest("common_rules", content2);
@@ -123,12 +123,12 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         index();
 
         final Map<String, Object> content = new HashMap<>();
-        content.put("class", "querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory");
+        content.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
 
         final Map<String, Object> config = new HashMap<>();
         config.put("rules", "k =>\nSYNONYM: c");
         config.put("ignoreCase", true);
-        config.put("querqyParser", "querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory");
+        config.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
         content.put("config", config);
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
