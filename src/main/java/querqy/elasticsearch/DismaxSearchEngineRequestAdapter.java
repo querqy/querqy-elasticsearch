@@ -12,7 +12,7 @@ import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.mapper.MappedFieldType;
-import org.elasticsearch.index.query.QueryShardContext;
+import org.elasticsearch.index.query.SearchExecutionContext;
 import querqy.elasticsearch.infologging.ESInfoLoggingContext;
 import querqy.elasticsearch.infologging.InfoLoggingSpecProvider;
 import querqy.elasticsearch.query.BoostingQueries;
@@ -55,14 +55,14 @@ import java.util.function.Function;
 public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineRequestAdapter, InfoLoggingSpecProvider {
 
     private final RewriteChain rewriteChain;
-    private final QueryShardContext shardContext;
+    private final SearchExecutionContext shardContext;
     final ESInfoLoggingContext infoLoggingContext;
     private final QuerqyQueryBuilder queryBuilder;
     private final Map<String, Object> context = new HashMap<>();
 
     public DismaxSearchEngineRequestAdapter(final QuerqyQueryBuilder queryBuilder,
                                             final RewriteChain rewriteChain,
-                                            final QueryShardContext shardContext,
+                                            final SearchExecutionContext shardContext,
                                             final InfoLogging infoLogging) {
         this.shardContext = shardContext;
         this.rewriteChain = rewriteChain;
@@ -536,7 +536,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
         return false;
     }
 
-    public QueryShardContext getShardContext() {
+    public SearchExecutionContext getSearchExecutionContext() {
         return shardContext;
     }
 

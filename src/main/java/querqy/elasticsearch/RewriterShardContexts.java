@@ -6,12 +6,11 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.index.query.QueryShardContext;
+import org.elasticsearch.index.query.SearchExecutionContext;
 import org.elasticsearch.index.shard.IndexEventListener;
 import org.elasticsearch.index.shard.IndexShard;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.indices.IndicesService;
-import querqy.rewrite.RewriteChain;
 
 import java.util.List;
 import java.util.Map;
@@ -33,25 +32,25 @@ public class RewriterShardContexts implements IndexEventListener {
     }
 
     public RewriteChainAndLogging getRewriteChain(final List<String> rewriterIds,
-                                                  final QueryShardContext queryShardContext) {
+                                                  final SearchExecutionContext context) {
 
-        final ShardId shardId = new ShardId(queryShardContext.getFullyQualifiedIndex(), queryShardContext.getShardId());
+        final ShardId shardId = new ShardId(context.getFullyQualifiedIndex(), context.getShardId());
         RewriterShardContext shardContext = shardContexts.get(shardId);
 
         if (shardContext == null) {
-            shardContext = loadShardContext(shardId, queryShardContext);
+            shardContext = loadShardContext(shardId, context);
         }
 
         return shardContext.getRewriteChain(rewriterIds);
     }
 
     protected synchronized RewriterShardContext loadShardContext(final ShardId shardId,
-                                                                 final QueryShardContext queryShardContext) {
+                                                                 final SearchExecutionContext context) {
         RewriterShardContext shardContext = shardContexts.get(shardId);
 
         if (shardContext == null) {
             shardContext = new RewriterShardContext(shardId, indicesService.indexService(shardId.getIndex()),  settings,
-                    queryShardContext.getClient());
+                    context.getClient());
             shardContexts.put(shardId, shardContext);
         }
 

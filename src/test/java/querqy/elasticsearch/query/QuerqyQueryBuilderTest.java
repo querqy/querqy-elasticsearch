@@ -22,7 +22,7 @@ import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
-import org.elasticsearch.index.query.QueryShardContext;
+import org.elasticsearch.index.query.SearchExecutionContext;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.AbstractQueryTestCase;
 import org.elasticsearch.test.TestGeoShapeFieldMapperPlugin;
@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 import querqy.elasticsearch.QuerqyPlugin;
 import querqy.elasticsearch.QuerqyProcessor;
-import querqy.elasticsearch.infologging.LogPayloadType;
 import querqy.lucene.rewrite.DependentTermQueryBuilder;
 import querqy.lucene.rewrite.DocumentFrequencyCorrection;
 import querqy.lucene.rewrite.IndependentFieldBoost;
@@ -50,13 +49,13 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
 
     Query query;
 
-    QueryShardContext queryShardContext;
+    SearchExecutionContext searchExecutionContext;
 
     @Before
     public void setUpMocks() {
         querqyProcessor = mock(QuerqyProcessor.class);
         query = mock(Query.class);
-        queryShardContext = mock(QueryShardContext.class);
+        searchExecutionContext = mock(SearchExecutionContext.class);
     }
 
     // we need to add TestGeoShapeFieldMapperPlugin, otherwise AbstractBuilderTestCase fails complaining about missing
@@ -71,7 +70,7 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
 
         QuerqyProcessor querqyProcessor = new QuerqyProcessor(null, null) {
             @Override
-            public Query parseQuery(QuerqyQueryBuilder queryBuilder, QueryShardContext shardContext) {
+            public Query parseQuery(QuerqyQueryBuilder queryBuilder, final SearchExecutionContext shardContext) {
 
                 final Map<String, Float> boosts = new HashMap<>();
                 boosts.put("f1", 1f);
@@ -97,7 +96,7 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
 
     @Override
     protected void doAssertLuceneQuery(final QuerqyQueryBuilder querqyQueryBuilder, final Query query,
-                                       QueryShardContext queryShardContext)  {
+                                       final SearchExecutionContext shardContext)  {
         assertThat(query, AbstractLuceneQueryTest.bq(AbstractLuceneQueryTest.dtq(BooleanClause.Occur.MUST, "f1",
                 "test1")));
     }
@@ -129,11 +128,11 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
         writeQuerqyQueryBuilder.setMatchingQuery(new MatchingQuery("minimum query string"));
         writeQuerqyQueryBuilder.setQueryFieldsAndBoostings(Collections.singletonList("f1"));
 
-        when(querqyProcessor.parseQuery(eq(writeQuerqyQueryBuilder), eq(queryShardContext))).thenReturn(query);
+        when(querqyProcessor.parseQuery(eq(writeQuerqyQueryBuilder), eq(searchExecutionContext))).thenReturn(query);
 
-        writeQuerqyQueryBuilder.doToQuery(queryShardContext);
+        writeQuerqyQueryBuilder.doToQuery(searchExecutionContext);
 
-        verify(querqyProcessor, times(1)).parseQuery(eq(writeQuerqyQueryBuilder), eq(queryShardContext));
+        verify(querqyProcessor, times(1)).parseQuery(eq(writeQuerqyQueryBuilder), eq(searchExecutionContext));
 
     }
 

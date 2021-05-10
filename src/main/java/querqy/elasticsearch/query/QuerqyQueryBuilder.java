@@ -13,7 +13,7 @@ import org.elasticsearch.common.xcontent.ObjectParser;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
-import org.elasticsearch.index.query.QueryShardContext;
+import org.elasticsearch.index.query.SearchExecutionContext;
 import querqy.elasticsearch.QuerqyProcessor;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.rewrite.SearchFieldsAndBoosting.FieldBoostModel;
@@ -200,7 +200,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     }
 
     @Override
-    protected Query doToQuery(final QueryShardContext context) throws IOException {
+    protected Query doToQuery(final SearchExecutionContext context) throws IOException {
         try {
             return querqyProcessor.parseQuery(this, context);
         } catch (final LuceneSearchEngineRequestAdapter.SyntaxException e) {

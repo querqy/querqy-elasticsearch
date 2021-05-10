@@ -3,7 +3,7 @@ package querqy.elasticsearch;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
-import org.elasticsearch.index.query.QueryShardContext;
+import org.elasticsearch.index.query.SearchExecutionContext;
 import querqy.elasticsearch.infologging.LogPayloadType;
 import querqy.elasticsearch.infologging.SingleSinkInfoLogging;
 import querqy.elasticsearch.query.InfoLoggingSpec;
@@ -34,7 +34,7 @@ public class QuerqyProcessor {
         this.infoLoggingSink = infoLoggingSink;
     }
 
-    public Query parseQuery(final QuerqyQueryBuilder queryBuilder, final QueryShardContext shardContext)
+    public Query parseQuery(final QuerqyQueryBuilder queryBuilder, final SearchExecutionContext context)
             throws LuceneSearchEngineRequestAdapter.SyntaxException {
 
         final List<Rewriter> rewriters = queryBuilder.getRewriters();
@@ -49,7 +49,7 @@ public class QuerqyProcessor {
         } else {
 
             final RewriteChainAndLogging rewriteChainAndLogging = rewriterShardContexts.getRewriteChain(
-                    rewriters.stream().map(Rewriter::getName).collect(Collectors.toList()), shardContext);
+                    rewriters.stream().map(Rewriter::getName).collect(Collectors.toList()), context);
 
             rewriteChain = rewriteChainAndLogging.rewriteChain;
             final InfoLoggingSpec infoLoggingSpec = queryBuilder.getInfoLoggingSpec();
@@ -70,7 +70,7 @@ public class QuerqyProcessor {
                 ? null : new SingleSinkInfoLogging(infoLoggingSink, rewritersEnabledForLogging);
 
         final DismaxSearchEngineRequestAdapter requestAdapter =
-                new DismaxSearchEngineRequestAdapter(queryBuilder, rewriteChain, shardContext, infoLogging);
+                new DismaxSearchEngineRequestAdapter(queryBuilder, rewriteChain, context, infoLogging);
 
         final QueryParsingController controller = new QueryParsingController(requestAdapter);
         final LuceneQueries queries = controller.process();
