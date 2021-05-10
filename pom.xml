@@ -56,7 +56,7 @@
         <jts.version>1.15.0</jts.version>
 
         <log4j.version>2.11.1</log4j.version>
-        <querqy.lucene.version>4.10.lucene810.2</querqy.lucene.version>
+        <querqy.lucene.version>5.1.lucene810.0</querqy.lucene.version>
         <es.major.version>7</es.major.version>
         <es.minor.version>10</es.minor.version>
         <es.bugfix.version>2</es.bugfix.version>

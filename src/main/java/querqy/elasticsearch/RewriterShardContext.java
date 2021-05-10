@@ -17,8 +17,11 @@ import querqy.rewrite.RewriteChain;
 import querqy.rewrite.RewriterFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 public class RewriterShardContext {
@@ -38,7 +41,7 @@ public class RewriterShardContext {
 
     private static final Logger LOGGER = LogManager.getLogger(RewriterShardContext.class);
 
-    final Cache<String, RewriterFactory> factories;
+    final Cache<String, RewriterFactoryAndLogging> factories;
     final Client client;
     final IndexService indexService;
     final ShardId shardId;
@@ -52,19 +55,24 @@ public class RewriterShardContext {
         LOGGER.info("Context loaded for shard {} {}", shardId, shardId.getIndex());
     }
 
-    public RewriteChain getRewriteChain(final List<String> rewriterIds) {
+    public RewriteChainAndLogging getRewriteChain(final List<String> rewriterIds) {
         final List<RewriterFactory> rewriterFactories = new ArrayList<>(rewriterIds.size());
+        final Set<String> loggingEnabledRewriters = new HashSet<>();
+
         for (final String id : rewriterIds) {
 
-            RewriterFactory factory = factories.get(id);
-            if (factory == null) {
-                factory = loadFactory(id, false);
+            RewriterFactoryAndLogging factoryAndLogging = factories.get(id);
+            if (factoryAndLogging == null) {
+                factoryAndLogging = loadFactory(id, false);
             }
-            rewriterFactories.add(factory);
+            rewriterFactories.add(factoryAndLogging.rewriterFactory);
+            if (factoryAndLogging.loggingEnabled) {
+                loggingEnabledRewriters.add(id);
+            }
 
         }
 
-        return new RewriteChain(rewriterFactories);
+        return new RewriteChainAndLogging(new RewriteChain(rewriterFactories), loggingEnabledRewriters);
     }
 
     public void clearRewriter(final String rewriterId) {
@@ -81,11 +89,11 @@ public class RewriterShardContext {
         }
     }
 
-    public synchronized RewriterFactory loadFactory(final String rewriterId, final boolean forceLoad) {
+    public synchronized RewriterFactoryAndLogging loadFactory(final String rewriterId, final boolean forceLoad) {
 
-        RewriterFactory factory = factories.get(rewriterId);
+        RewriterFactoryAndLogging factoryAndLogging = factories.get(rewriterId);
 
-        if (forceLoad || (factory == null)) {
+        if (forceLoad || (factoryAndLogging == null)) {
 
             final GetResponse response;
 
@@ -104,16 +112,43 @@ public class RewriterShardContext {
             if (!"rewriter".equals(source.get("type"))) {
                 throw new InvalidTypeNameException("Not a rewriter: " + rewriterId);
             }
-            factory = ESRewriterFactory.loadConfiguredInstance(rewriterId, source, "class")
+
+            final Map<String, Object> infoLogging = (Map<String, Object>) source.get("info_logging");
+            final boolean loggingEnabled;
+            if (infoLogging != null) {
+                final Object sinksObj = infoLogging.get("sinks");
+                if (sinksObj instanceof String) {
+                    loggingEnabled = "log4j".equals(sinksObj);
+                } else if (sinksObj instanceof Collection<?>) {
+                    Collection<?> sinksCollection = (Collection<?>) sinksObj;
+                    loggingEnabled = (sinksCollection.size() > 0) && sinksCollection.contains("log4j");
+                } else {
+                    loggingEnabled = false;
+                }
+            } else {
+                loggingEnabled = false;
+            }
+
+            final RewriterFactory factory = ESRewriterFactory.loadConfiguredInstance(rewriterId, source, "class")
                     .createRewriterFactory(indexService.getShard(shardId.id()));
-            factories.put(rewriterId, factory);
+            factoryAndLogging = new RewriterFactoryAndLogging(factory, loggingEnabled);
+            factories.put(rewriterId, factoryAndLogging);
 
 
         }
 
-        return factory;
+        return factoryAndLogging;
 
     }
 
 
+    public static class RewriterFactoryAndLogging {
+        public final RewriterFactory rewriterFactory;
+        public final boolean loggingEnabled;
+
+        public RewriterFactoryAndLogging(final RewriterFactory rewriterFactory, final boolean loggingEnabled) {
+            this.rewriterFactory = rewriterFactory;
+            this.loggingEnabled = loggingEnabled;
+        }
+    }
 }

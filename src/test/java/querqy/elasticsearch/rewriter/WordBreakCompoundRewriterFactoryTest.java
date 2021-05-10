@@ -3,6 +3,7 @@ package querqy.elasticsearch.rewriter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -30,6 +31,7 @@ import org.apache.lucene.search.QueryCachingPolicy;
 import org.apache.lucene.search.spell.WordBreakSpellChecker;
 import org.elasticsearch.index.engine.Engine;
 import org.elasticsearch.index.shard.IndexShard;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -82,6 +84,17 @@ public class WordBreakCompoundRewriterFactoryTest {
         final WordBreakCompoundRewriterFactory factory = new WordBreakCompoundRewriterFactory("r1");
         final List<String> errors = factory.validateConfiguration(Collections.singletonMap("dictionaryField", "f1"));
         assertTrue(errors == null || errors.isEmpty());
+    }
+
+    @Test
+    public void testValidateRefusesInvalidMorphology() {
+        final WordBreakCompoundRewriterFactory factory = new WordBreakCompoundRewriterFactory("r1");
+        final Map<String, Object> config = new HashMap<>();
+        config.put("dictionaryField", "f1");
+        config.put("morphology", "IDIOLECT");
+
+        final List<String> errors = factory.validateConfiguration(config);
+        assertThat(errors, Matchers.contains("Unknown morphology: IDIOLECT"));
     }
 
     @Test
@@ -139,6 +152,7 @@ public class WordBreakCompoundRewriterFactoryTest {
         config.put("lowerCaseInput", !DEFAULT_LOWER_CASE_INPUT);
         config.put("alwaysAddReverseCompounds", !DEFAULT_ALWAYS_ADD_REVERSE_COMPOUNDS);
         config.put("reverseCompoundTriggerWords", Arrays.asList("für", "aus"));
+        config.put("protectedWords", Arrays.asList("blumen"));
         config.put("morphology", "GERMAN");
 
         Map<String, Object> decompoundConf = new HashMap<>();
@@ -170,6 +184,10 @@ public class WordBreakCompoundRewriterFactoryTest {
         assertNotNull(words);
         assertTrue(words.get("für").getStateForCompleteSequence().isFinal());
         assertTrue(words.get("aus").getStateForCompleteSequence().isFinal());
+
+        final TrieMap<Boolean> protectedWords = factory.getProtectedWords();
+        assertNotNull(protectedWords);
+        assertTrue(protectedWords.get("blumen").getStateForCompleteSequence().isFinal());
 
         final MorphologicalWordBreaker wordBreaker = factory.getWordBreaker();
         assertNotNull(wordBreaker);

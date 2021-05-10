@@ -1,6 +1,6 @@
 ![Querqy for ES Build](https://github.com/querqy/querqy-elasticsearch/workflows/Querqy%20ES%20CI/badge.svg) [ ![Download](https://img.shields.io/maven-central/v/org.querqy/querqy-elasticsearch.svg?label=Querqy%20for%20Elasticsearch) ](https://search.maven.org/search?q=g:%22org.querqy%22%20AND%20a:%22querqy-elasticsearch%22)
 
-Support & Community:  [![Gitter community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/querqy/users)
+Developer channel: Join #querqy-dev on the [E-commerce search Slack space](https://ecom-search.slack.com)
 
 
 # Querqy for Elasticsearch
