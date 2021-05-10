@@ -30,8 +30,10 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
         super(rewriterId);
     }
 
+    @Override
     public void configure(final Map<String, Object> config) {
         final boolean ignoreCase = ConfigUtils.getArg(config, "ignoreCase", true);
+        final boolean allowBooleanInput = ConfigUtils.getArg(config, "allowBooleanInput", false);
 
         final QuerqyParserFactory querqyParser = ConfigUtils
                 .getInstanceFromArg(config, "querqyParser", DEFAULT_RHS_QUERY_PARSER);
@@ -43,8 +45,8 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
 
         try {
             delegate = new querqy.rewrite.commonrules.SimpleCommonRulesRewriterFactory(rewriterId,
-                    new StringReader(rules), querqyParser, ignoreCase, selectionStrategyFactories,
-                    DEFAULT_SELECTION_STRATEGY_FACTORY);
+                    new StringReader(rules), allowBooleanInput, querqyParser, ignoreCase, selectionStrategyFactories,
+                    DEFAULT_SELECTION_STRATEGY_FACTORY, false);
         } catch (final IOException e) {
             throw new ElasticsearchException(e);
         }
@@ -67,10 +69,11 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
 
 
         final boolean ignoreCase = ConfigUtils.getArg(config, "ignoreCase", true);
+        final boolean allowBooleanInput = ConfigUtils.getArg(config, "allowBooleanInput", false);
         try {
             new querqy.rewrite.commonrules.SimpleCommonRulesRewriterFactory(rewriterId,
-                    new StringReader(rules), querqyParser, ignoreCase, Collections.emptyMap(),
-                    DEFAULT_SELECTION_STRATEGY_FACTORY);
+                    new StringReader(rules), allowBooleanInput, querqyParser, ignoreCase, Collections.emptyMap(),
+                    DEFAULT_SELECTION_STRATEGY_FACTORY, false);
         } catch (final IOException e) {
             return Collections.singletonList("Cannot create rewriter: " + e.getMessage());
         }
