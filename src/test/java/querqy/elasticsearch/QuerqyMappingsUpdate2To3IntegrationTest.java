@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QuerqyMappingsUpdateIntegrationTest extends ESSingleNodeTestCase {
+public class QuerqyMappingsUpdate2To3IntegrationTest extends ESSingleNodeTestCase {
 
     @Override
     protected Collection<Class<? extends Plugin>> getPlugins() {
@@ -42,12 +42,17 @@ public class QuerqyMappingsUpdateIntegrationTest extends ESSingleNodeTestCase {
     }
 
     @Test
-    public void testUpdate() throws Exception {
+    public void testUpdate2To3() throws Exception {
 
-        final String v1Mapping = "{\n" +
+        final String v2Mapping = "{\n" +
                 "    \"properties\": {\n" +
                 "      \"class\": {\"type\": \"keyword\"},\n" +
                 "      \"type\": {\"type\": \"keyword\"},\n" +
+                "      \"info_logging\": {\n" +
+                "        \"properties\": {\n" +
+                "          \"sinks\": {\"type\" : \"keyword\" }\n" +
+                "        }\n" +
+                "      },\n" +
                 "      \"config\": {\n" +
                 "        \"type\" : \"keyword\",\n" +
                 "        \"index\": false\n" +
@@ -60,7 +65,7 @@ public class QuerqyMappingsUpdateIntegrationTest extends ESSingleNodeTestCase {
 
         final CreateIndexRequestBuilder createIndexRequestBuilder = indicesClient.prepareCreate(QUERQY_INDEX_NAME);
         final CreateIndexRequest createIndexRequest = createIndexRequestBuilder
-                .addMapping("querqy-rewriter", v1Mapping, XContentType.JSON)
+                .addMapping("querqy-rewriter", v2Mapping, XContentType.JSON)
                 .setSettings(Settings.builder().put("number_of_replicas", 2))
                 .request();
         indicesClient.create(createIndexRequest).get();
@@ -88,6 +93,10 @@ public class QuerqyMappingsUpdateIntegrationTest extends ESSingleNodeTestCase {
         assertNotNull(info_logging_props);
 
         assertThat( (Map<String, Object>) info_logging_props.get("sinks"), hasEntry("type", "keyword"));
+
+        final Map<String, Object> config_v_003_mapping = (Map<String, Object>) properties.get("config_v_003");
+        assertNotNull(config_v_003_mapping);
+        assertEquals(false, config_v_003_mapping.get("doc_values"));
 
     }
 }
