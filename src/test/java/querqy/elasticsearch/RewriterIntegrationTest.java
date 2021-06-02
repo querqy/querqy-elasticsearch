@@ -1,18 +1,23 @@
 package querqy.elasticsearch;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.plugins.Plugin;
+import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.test.ESSingleNodeTestCase;
 import org.junit.After;
+import org.junit.Test;
 import querqy.elasticsearch.query.MatchingQuery;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.query.Rewriter;
@@ -20,6 +25,7 @@ import querqy.elasticsearch.rewriterstore.DeleteRewriterAction;
 import querqy.elasticsearch.rewriterstore.DeleteRewriterRequest;
 import querqy.elasticsearch.rewriterstore.PutRewriterAction;
 import querqy.elasticsearch.rewriterstore.PutRewriterRequest;
+import querqy.elasticsearch.rewriterstore.PutRewriterResponse;
 
 public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
@@ -58,6 +64,34 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
+
+    }
+
+    @Test
+    public void testLargeConfig() throws Exception {
+        index();
+
+        final Map<String, Object> content = new HashMap<>();
+        content.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
+
+        final String rules;
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
+                getClass().getClassLoader().getResourceAsStream("commonrules/rules-large.txt")))) {
+
+            rules = reader.lines().collect(Collectors.joining("\n"));
+        }
+
+        final Map<String, Object> config = new HashMap<>();
+        config.put("rules", rules);
+        config.put("ignoreCase", true);
+        config.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
+        content.put("config", config);
+
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
+
+        final PutRewriterResponse response = client().execute(PutRewriterAction.INSTANCE, request).get();
+
+        assertEquals(RestStatus.CREATED, response.status());
 
     }
 
