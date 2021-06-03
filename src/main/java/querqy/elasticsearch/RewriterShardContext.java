@@ -13,6 +13,8 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.IndexService;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.indices.InvalidTypeNameException;
+import querqy.elasticsearch.rewriterstore.LoadRewriterConfig;
+import querqy.elasticsearch.rewriterstore.RewriterConfigMapping;
 import querqy.rewrite.RewriteChain;
 import querqy.rewrite.RewriterFactory;
 
@@ -109,11 +111,13 @@ public class RewriterShardContext {
                 throw new ResourceNotFoundException("Rewriter not found: " + rewriterId);
             }
 
-            if (!"rewriter".equals(source.get("type"))) {
+            if (!"rewriter".equals(source.get(RewriterConfigMapping.PROP_TYPE))) {
                 throw new InvalidTypeNameException("Not a rewriter: " + rewriterId);
             }
 
-            final Map<String, Object> infoLogging = (Map<String, Object>) source.get("info_logging");
+            final LoadRewriterConfig loadConfig = new LoadRewriterConfig(rewriterId, source);
+
+            final Map<String, Object> infoLogging = loadConfig.getInfoLoggingConfig();
             final boolean loggingEnabled;
             if (infoLogging != null) {
                 final Object sinksObj = infoLogging.get("sinks");
@@ -129,7 +133,7 @@ public class RewriterShardContext {
                 loggingEnabled = false;
             }
 
-            final RewriterFactory factory = ESRewriterFactory.loadConfiguredInstance(rewriterId, source, "class")
+            final RewriterFactory factory = ESRewriterFactory.loadConfiguredInstance(loadConfig)
                     .createRewriterFactory(indexService.getShard(shardId.id()));
             factoryAndLogging = new RewriterFactoryAndLogging(factory, loggingEnabled);
             factories.put(rewriterId, factoryAndLogging);
