@@ -57,9 +57,9 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
     }
 
     @Override
-    protected Settings nodeSettings(final int nodeOrdinal) {
+    protected Settings nodeSettings(final int nodeOrdinal, final Settings otherSettings) {
 
-        return Settings.builder().put(super.nodeSettings(nodeOrdinal))
+        return Settings.builder().put(super.nodeSettings(nodeOrdinal, otherSettings))
                 .put(SETTINGS_QUERQY_INDEX_NUM_REPLICAS, NUM_DOT_QUERY_REPLICAS)
                 .build();
     }
