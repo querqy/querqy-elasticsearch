@@ -3,7 +3,7 @@
 
     <groupId>org.querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>1.5.es7121.0-SNAPSHOT</version>
+    <version>1.4.es7130.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
