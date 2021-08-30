@@ -9,7 +9,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.cache.Cache;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.IndexService;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.indices.InvalidTypeNameException;

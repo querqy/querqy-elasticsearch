@@ -3,7 +3,7 @@ package querqy.elasticsearch.query;
 import static querqy.elasticsearch.query.RequestUtils.paramToQuerySimilarityScoring;
 import static querqy.elasticsearch.query.RequestUtils.querySimilarityScoringToString;
 
-import org.elasticsearch.common.ParseField;
+import org.elasticsearch.common.xcontent.ParseField;
 import org.elasticsearch.common.io.stream.NamedWriteable;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
