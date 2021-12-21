@@ -15,8 +15,6 @@ import static querqy.elasticsearch.rewriter.WordBreakCompoundRewriterFactory.DEF
 import static querqy.elasticsearch.rewriter.WordBreakCompoundRewriterFactory.DEFAULT_VERIFY_DECOMPOUND_COLLATION;
 import static querqy.elasticsearch.rewriter.WordBreakCompoundRewriterFactory.MAX_CHANGES;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,14 +25,15 @@ import java.util.Map;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexReaderContext;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.QueryCachingPolicy;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.spell.WordBreakSpellChecker;
-import org.elasticsearch.index.engine.Engine;
+import org.elasticsearch.index.query.SearchExecutionContext;
 import org.elasticsearch.index.shard.IndexShard;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import querqy.elasticsearch.DismaxSearchEngineRequestAdapter;
 import querqy.lucene.contrib.rewrite.wordbreak.MorphologicalWordBreaker;
 import querqy.lucene.contrib.rewrite.wordbreak.WordBreakCompoundRewriter;
 import querqy.rewrite.RewriterFactory;
@@ -215,8 +214,6 @@ public class WordBreakCompoundRewriterFactoryTest {
 
     }
 
-
-
     @Test
     public void testCreateRewriter() throws Exception {
 
@@ -224,11 +221,8 @@ public class WordBreakCompoundRewriterFactoryTest {
         factory.configure(Collections.singletonMap("dictionaryField", "f1"));
         final IndexShard indexShard = mock(IndexShard.class);
         final IndexReader indexReader = mock(IndexReader.class);
-        final Closeable closeable = mock(Closeable.class);
-        final QueryCachingPolicy queryCachingPolicy = mock(QueryCachingPolicy.class);
         final IndexReaderContext topReaderContext = mock(IndexReaderContext.class);
 
-        when(indexReader.getContext()).thenReturn(topReaderContext);
         when(topReaderContext.reader()).thenReturn(indexReader);
 
         // This is horrible, but there seems to be no way to mock top level IndexReaderContext
@@ -237,14 +231,21 @@ public class WordBreakCompoundRewriterFactoryTest {
         field.setBoolean(topReaderContext, true);
         field.setAccessible(false);
 
-        final Engine.Searcher searcher = new Engine.Searcher("source", indexReader, null, null, queryCachingPolicy,
-                closeable);
+        final SearchExecutionContext searchExecutionContext = mock(SearchExecutionContext.class);
+        final IndexSearcher searcher = mock(IndexSearcher.class);
+        when(searchExecutionContext.searcher()).thenReturn(searcher);
 
-        when(indexShard.acquireSearcher("WordBreakCompoundRewriter")).thenReturn(searcher);
+        when(searcher.getTopReaderContext()).thenReturn(topReaderContext);
+
+        final DismaxSearchEngineRequestAdapter searchEngineRequestAdapter =
+                mock(DismaxSearchEngineRequestAdapter.class);
+
+        when(searchEngineRequestAdapter.getSearchExecutionContext()).thenReturn(searchExecutionContext);
 
         final RewriterFactory rewriterFactory = factory.createRewriterFactory(indexShard);
 
-        assertTrue(rewriterFactory.createRewriter(null, null) instanceof WordBreakCompoundRewriter);
+        assertTrue(rewriterFactory.createRewriter(null, searchEngineRequestAdapter) instanceof
+                WordBreakCompoundRewriter);
 
     }
 
