@@ -7,12 +7,11 @@ import static querqy.elasticsearch.rewriterstore.RestPutRewriterAction.PARAM_REW
 
 import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.test.rest.FakeRestRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.nio.ByteBuffer;
 import java.util.Collections;

@@ -9,16 +9,14 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import querqy.lucene.LuceneQueries;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QuerqyProcessorTest {

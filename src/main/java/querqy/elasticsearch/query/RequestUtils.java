@@ -3,7 +3,7 @@ package querqy.elasticsearch.query;
 import static org.elasticsearch.index.query.AbstractQueryBuilder.DEFAULT_BOOST;
 import static querqy.lucene.rewrite.SearchFieldsAndBoosting.*;
 
-import org.elasticsearch.common.xcontent.ParseField;
+import org.elasticsearch.xcontent.ParseField;
 import querqy.lucene.QuerySimilarityScoring;
 
 import java.util.Collections;

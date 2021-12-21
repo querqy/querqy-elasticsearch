@@ -1,11 +1,11 @@
 package querqy.elasticsearch.query;
 
 import static org.elasticsearch.common.xcontent.XContentHelper.*;
-import static org.elasticsearch.common.xcontent.XContentType.*;
+import static org.elasticsearch.xcontent.XContentType.*;
 import static org.junit.Assert.*;
 
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
-import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.xcontent.XContentParser;
 import org.junit.Test;
 
 import java.io.IOException;
