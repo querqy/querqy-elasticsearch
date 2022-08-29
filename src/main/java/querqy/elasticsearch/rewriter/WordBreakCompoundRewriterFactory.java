@@ -66,9 +66,6 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
     private int maxDecompoundExpansions = DEFAULT_MAX_DECOMPOUND_EXPANSIONS;
     private boolean verifyDecompoundCollation = DEFAULT_VERIFY_DECOMPOUND_COLLATION;
 
-    private querqy.lucene.contrib.rewrite.wordbreak.WordBreakCompoundRewriterFactory delegate = null;
-
-
     public WordBreakCompoundRewriterFactory(final String rewriterId) {
         super(rewriterId);
     }
@@ -116,7 +113,8 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
             spellChecker.setMaxEvaluations(100);
             compounder = new SpellCheckerCompounder(spellChecker, dictionaryField, lowerCaseInput);
         } else {
-            compounder = new MorphologicalCompounder(compoundMorphology.get(), dictionaryField, lowerCaseInput, minSuggestionFreq);
+            compounder = new MorphologicalCompounder(compoundMorphology.get(), dictionaryField, lowerCaseInput,
+                    minSuggestionFreq);
         }
 
 
