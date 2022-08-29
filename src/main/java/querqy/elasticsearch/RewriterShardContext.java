@@ -100,7 +100,7 @@ public class RewriterShardContext {
             final GetResponse response;
 
             try {
-                response = client.prepareGet(".querqy", null, rewriterId).execute().get();
+                response = client.prepareGet(".querqy", rewriterId).execute().get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new ElasticsearchException("Could not load rewriter " + rewriterId, e);
             }

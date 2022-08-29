@@ -1,9 +1,9 @@
 package querqy.elasticsearch.rewriterstore;
 
-import org.elasticsearch.action.support.nodes.BaseNodeRequest;
 import org.elasticsearch.action.support.nodes.BaseNodesRequest;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.transport.TransportRequest;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -41,7 +41,7 @@ public class NodesClearRewriterCacheRequest extends BaseNodesRequest<NodesClearR
         return new NodeRequest(rewriterId);
     }
 
-    public static class NodeRequest extends BaseNodeRequest {
+    public static class NodeRequest extends TransportRequest {
 
         final String rewriterId;
 

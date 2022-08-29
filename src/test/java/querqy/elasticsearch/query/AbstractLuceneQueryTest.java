@@ -16,6 +16,7 @@ import querqy.lucene.rewrite.FieldBoost;
 import querqy.lucene.rewrite.IndependentFieldBoost;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public  class AbstractLuceneQueryTest {
@@ -231,7 +232,7 @@ public  class AbstractLuceneQueryTest {
                 return false;
             }
 
-            List<Query> dmqDisjuncts = dmq.getDisjuncts();
+            Collection<Query> dmqDisjuncts = dmq.getDisjuncts();
             if (dmqDisjuncts.size() != disjuncts.length) {
                 return false;
             }

@@ -67,13 +67,13 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
             @Override
             public void onResponse(final GetMappingsResponse getMappingsResponse) {
-                final ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetadata>> mappings = getMappingsResponse
-                        .getMappings();
+
+                final ImmutableOpenMap<String, MappingMetadata> mappings = getMappingsResponse.getMappings();
 
                 if (!mappingsVersionChecked) {
 
                     final Map<String, Object> properties = (Map<String, Object>) mappings.get(QUERQY_INDEX_NAME)
-                        .get("querqy-rewriter").getSourceAsMap().get("properties");
+                            .getSourceAsMap().get("properties");
                     if (!properties.containsKey("info_logging")) {
                         try {
                             update1To3(indicesClient);
@@ -151,7 +151,7 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
                         "      }" +
                         "    }\n" +
                         "}", XContentType.JSON
-        ).type("querqy-rewriter");
+        );
 
         if (!indicesClient.putMapping(request).get().isAcknowledged()) {
             throw new IllegalStateException("Adding info_logging to mappings not " +
@@ -174,7 +174,7 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
                         "      }" +
                         "    }\n" +
                         "}", XContentType.JSON
-        ).type("querqy-rewriter");
+        );
 
         if (!indicesClient.putMapping(request).get().isAcknowledged()) {
             throw new IllegalStateException("Adding config_v_003 to mappings not " +
@@ -189,8 +189,7 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
         final CreateIndexRequestBuilder createIndexRequestBuilder = indicesClient.prepareCreate(QUERQY_INDEX_NAME);
         final int numReplicas = settings.getAsInt(SETTINGS_QUERQY_INDEX_NUM_REPLICAS, DEFAULT_QUERQY_INDEX_NUM_REPLICAS);
-        return  createIndexRequestBuilder
-                .addMapping("querqy-rewriter", readUtf8Resource("querqy-mapping.json"), XContentType.JSON)
+        return  createIndexRequestBuilder.setMapping(readUtf8Resource("querqy-mapping.json"))
                 .setSettings(Settings.builder().put("number_of_replicas", numReplicas))
                 .request();
     }
@@ -225,7 +224,8 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
     private IndexRequest buildIndexRequest(final Task parentTask, final PutRewriterRequest request) throws IOException {
 
-        final IndexRequest indexRequest = client.prepareIndex(QUERQY_INDEX_NAME, null, request.getRewriterId())
+        final IndexRequest indexRequest = client.prepareIndex(QUERQY_INDEX_NAME)
+                .setId(request.getRewriterId())
                 .setCreate(false)
                 .setSource(RewriterConfigMapping.toLuceneSource(request.getContent()))
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)

@@ -60,7 +60,7 @@ public class QuerqyMappingsUpdate1To3IntegrationTest extends ESSingleNodeTestCas
 
         final CreateIndexRequestBuilder createIndexRequestBuilder = indicesClient.prepareCreate(QUERQY_INDEX_NAME);
         final CreateIndexRequest createIndexRequest = createIndexRequestBuilder
-                .addMapping("querqy-rewriter", v1Mapping, XContentType.JSON)
+                .setMapping(v1Mapping)
                 .setSettings(Settings.builder().put("number_of_replicas", 2))
                 .request();
         indicesClient.create(createIndexRequest).get();
@@ -77,10 +77,10 @@ public class QuerqyMappingsUpdate1To3IntegrationTest extends ESSingleNodeTestCas
         client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("common_rules", content)).get();
 
         final GetMappingsRequest getMappingsRequest = new GetMappingsRequest().indices(".querqy");
-        final ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetadata>> mappings = indicesClient
-                .getMappings(getMappingsRequest).get().getMappings();
+        final ImmutableOpenMap<String, MappingMetadata> mappings = indicesClient.getMappings(getMappingsRequest).get()
+                .getMappings();
         final Map<String, Object> properties = (Map<String, Object>) mappings.get(QUERQY_INDEX_NAME)
-                .get("querqy-rewriter").getSourceAsMap().get("properties");
+                .getSourceAsMap().get("properties");
         assertNotNull(properties);
         final Map<String, Object> info_logging = (Map<String, Object>) properties.get("info_logging");
         assertNotNull(info_logging);

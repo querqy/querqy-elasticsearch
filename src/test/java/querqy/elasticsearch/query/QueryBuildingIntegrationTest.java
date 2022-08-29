@@ -574,21 +574,21 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
     public void index() {
         client().admin().indices().prepareCreate(INDEX_NAME).get();
-        client().prepareIndex(INDEX_NAME, null)
+        client().prepareIndex(INDEX_NAME)
                 .setSource("id", "1", "field1", "aa bb cc dd ee ff gg hh")
                 .get();
-        client().prepareIndex(INDEX_NAME, null)
+        client().prepareIndex(INDEX_NAME)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("id", "2", "field1", "ii jj cc kk ee ll gg hh")
                 .get();
 
-        client().prepareIndex(INDEX_NAME, null)
+        client().prepareIndex(INDEX_NAME)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("id", "3", "field2", "aa xx bb yy cc zz dd ee ff gg hh 11")
                 .get();
 
 
-        client().prepareIndex(INDEX_NAME, null)
+        client().prepareIndex(INDEX_NAME)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("id", "4", "field2", "aa bb cc dd ee ff gg hh xx yy zz 22")
                 .get();

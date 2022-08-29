@@ -22,7 +22,8 @@ import static org.elasticsearch.test.ESIntegTestCase.Scope.SUITE;
 import static org.hamcrest.Matchers.greaterThan;
 import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX_NUM_REPLICAS;
 
-@ESIntegTestCase.ClusterScope(scope = SUITE, numClientNodes = 1, minNumDataNodes = 4, maxNumDataNodes = 6)
+@ESIntegTestCase.ClusterScope(scope = SUITE, numClientNodes = 1, minNumDataNodes = 4, maxNumDataNodes = 6,
+        supportsDedicatedMasters = false)
 public class RewriterStoreIntegrationTest extends ESIntegTestCase {
 
     private static final int NUM_DOT_QUERY_REPLICAS = 2 + new Random().nextInt(4);
@@ -30,11 +31,6 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
 
     @Override
     protected Collection<Class<? extends Plugin>> nodePlugins() {
-        return Collections.singleton(QuerqyPlugin.class);
-    }
-
-    @Override
-    protected Collection<Class<? extends Plugin>> transportClientPlugins() {
         return Collections.singleton(QuerqyPlugin.class);
     }
 
@@ -48,7 +44,7 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
 
     public void testPluginIsLoaded() {
 
-        final NodesInfoResponse response = client().admin().cluster().prepareNodesInfo().addMetric("plugins").get();
+        final NodesInfoResponse response = client().admin().cluster().prepareNodesInfo().setPlugins(true).get();
         final List<NodeInfo> nodes = response.getNodes();
 
         assertThat(nodes.size(), greaterThan(0));
@@ -118,10 +114,10 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
     public void index() {
         final String indexName = "idx";
         client().admin().indices().prepareCreate(indexName).get();
-        client().prepareIndex(indexName, null)
+        client().prepareIndex(indexName)
                 .setSource("field1", "a b", "field2", "a c")
                 .get();
-        client().prepareIndex(indexName, null)
+        client().prepareIndex(indexName)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("field1", "b c")
                 .get();

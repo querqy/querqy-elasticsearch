@@ -133,8 +133,12 @@ public class WordBreakCompoundRewriterFactoryTest {
 
         wordBreaker.breakWord("abcdef", indexReader, 2, true);
         verify(indexReader, times(1)).docFreq(eq(new Term("f1", "def")));
-        verify(indexReader, times(1)).docFreq(eq(new Term("f1", "cdef")));
+        verify(indexReader, times(1)).docFreq(eq(new Term("f1", "abc")));
+
+        // min break length is 3:
+        verify(indexReader, times(0)).docFreq(eq(new Term("f1", "ab")));
         // this will not be called by DEFAULT morphology:
+        verify(indexReader, times(0)).docFreq(eq(new Term("f1", "cdef")));
         verify(indexReader, times(0)).docFreq(eq(new Term("f1", "abce")));
 
     }

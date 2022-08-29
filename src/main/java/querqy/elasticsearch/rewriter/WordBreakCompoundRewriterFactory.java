@@ -6,8 +6,11 @@ import org.elasticsearch.index.shard.IndexShard;
 import querqy.elasticsearch.ConfigUtils;
 import querqy.elasticsearch.DismaxSearchEngineRequestAdapter;
 import querqy.elasticsearch.ESRewriterFactory;
+import querqy.lucene.contrib.rewrite.wordbreak.LuceneCompounder;
+import querqy.lucene.contrib.rewrite.wordbreak.MorphologicalCompounder;
 import querqy.lucene.contrib.rewrite.wordbreak.MorphologicalWordBreaker;
 import querqy.lucene.contrib.rewrite.wordbreak.Morphology;
+import querqy.lucene.contrib.rewrite.wordbreak.MorphologyProvider;
 import querqy.lucene.contrib.rewrite.wordbreak.SpellCheckerCompounder;
 import querqy.lucene.contrib.rewrite.wordbreak.WordBreakCompoundRewriter;
 import querqy.model.ExpandedQuery;
@@ -17,11 +20,7 @@ import querqy.rewrite.RewriterFactory;
 import querqy.rewrite.SearchEngineRequestAdapter;
 import querqy.trie.TrieMap;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +49,9 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
     static final boolean DEFAULT_ALWAYS_ADD_REVERSE_COMPOUNDS = false;
     static final boolean DEFAULT_VERIFY_DECOMPOUND_COLLATION = false;
 
+    static final String DEFAULT_MORPHOLOGY_NAME = "DEFAULT";
+
+    private static final MorphologyProvider MORPHOLOGY_PROVIDER = new MorphologyProvider();
 
     private String dictionaryField;
 
@@ -57,12 +59,14 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
     private boolean alwaysAddReverseCompounds = DEFAULT_ALWAYS_ADD_REVERSE_COMPOUNDS;
 
     private WordBreakSpellChecker spellChecker;
-    private SpellCheckerCompounder compounder;
+    private LuceneCompounder compounder;
     private MorphologicalWordBreaker wordBreaker;
     private TrieMap<Boolean> reverseCompoundTriggerWords;
     private TrieMap<Boolean> protectedWords;
     private int maxDecompoundExpansions = DEFAULT_MAX_DECOMPOUND_EXPANSIONS;
     private boolean verifyDecompoundCollation = DEFAULT_VERIFY_DECOMPOUND_COLLATION;
+
+    private querqy.lucene.contrib.rewrite.wordbreak.WordBreakCompoundRewriterFactory delegate = null;
 
 
     public WordBreakCompoundRewriterFactory(final String rewriterId) {
@@ -89,21 +93,48 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
         spellChecker.setMaxCombineWordLength(maxCombineLength);
         spellChecker.setMinBreakWordLength(minBreakLength);
         spellChecker.setMaxEvaluations(100);
-        compounder = new SpellCheckerCompounder(spellChecker, dictionaryField, lowerCaseInput);
 
-        final Morphology morphology = ConfigUtils.getEnumArg(config, "morphology", Morphology.class)
-                .orElse(Morphology.DEFAULT);
+        final String defaultMorphologyName = ConfigUtils.getStringArg(config, "morphology", DEFAULT_MORPHOLOGY_NAME);
 
-        wordBreaker = new MorphologicalWordBreaker(morphology, dictionaryField, lowerCaseInput, minSuggestionFreq,
-                minBreakLength, MAX_EVALUATIONS);
+        Map<String, Object> compoundConf = (Map<String, Object>) config.get("compound");
+        if (compoundConf == null) {
+            compoundConf = Collections.emptyMap();
+        }
 
-        reverseCompoundTriggerWords = ConfigUtils.getTrieSetArg(config, "reverseCompoundTriggerWords");
-        protectedWords = ConfigUtils.getTrieSetArg(config, "protectedWords");
+        final String compoundMorphologyName = ConfigUtils.getStringArg(compoundConf, "morphology",
+                defaultMorphologyName);
+
+        final Optional<Morphology> compoundMorphology = MORPHOLOGY_PROVIDER.get(compoundMorphologyName);
+
+        if (compoundMorphology.isEmpty() || compoundMorphology.get() == MorphologyProvider.DEFAULT) {
+            // use WordBreakSpellChecker when DEFAULT for backwards compatibility
+            final WordBreakSpellChecker spellChecker = new WordBreakSpellChecker();
+            spellChecker.setMaxChanges(MAX_CHANGES);
+            spellChecker.setMinSuggestionFrequency(minSuggestionFreq);
+            spellChecker.setMaxCombineWordLength(maxCombineLength);
+            spellChecker.setMinBreakWordLength(minBreakLength);
+            spellChecker.setMaxEvaluations(100);
+            compounder = new SpellCheckerCompounder(spellChecker, dictionaryField, lowerCaseInput);
+        } else {
+            compounder = new MorphologicalCompounder(compoundMorphology.get(), dictionaryField, lowerCaseInput, minSuggestionFreq);
+        }
+
 
         Map<String, Object> decompoundConf = (Map<String, Object>) config.get("decompound");
         if (decompoundConf == null) {
             decompoundConf = Collections.emptyMap();
         }
+        final String decompoundMorphologyName = ConfigUtils.getStringArg(decompoundConf, "morphology",
+                defaultMorphologyName);
+        final Optional<Morphology> decompoundMorphology = MORPHOLOGY_PROVIDER.get(decompoundMorphologyName);
+
+
+        wordBreaker = new MorphologicalWordBreaker(decompoundMorphology.get(), dictionaryField, lowerCaseInput,
+                minSuggestionFreq, minBreakLength, MAX_EVALUATIONS);
+
+        reverseCompoundTriggerWords = ConfigUtils.getTrieSetArg(config, "reverseCompoundTriggerWords");
+        protectedWords = ConfigUtils.getTrieSetArg(config, "protectedWords");
+
         maxDecompoundExpansions = ConfigUtils.getArg(decompoundConf, "maxExpansions",
                 DEFAULT_MAX_DECOMPOUND_EXPANSIONS);
         verifyDecompoundCollation =  ConfigUtils.getArg(decompoundConf, "verifyCollation",
@@ -122,10 +153,29 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
         }
 
         ConfigUtils.getStringArg(config, "morphology").ifPresent(morphologyName -> {
-            if (Arrays.stream(Morphology.values()).map(Enum::name).noneMatch(name -> name.equals(morphologyName))) {
+            if (!MORPHOLOGY_PROVIDER.exists(morphologyName)) {
                 errors.add("Unknown morphology: " + morphologyName);
             }
         });
+
+        final Map<String, Object> decompoundConf = (Map<String, Object>) config.get("decompound");
+        if (decompoundConf != null) {
+            ConfigUtils.getStringArg(decompoundConf, "morphology").ifPresent(morphologyName -> {
+                if (!MORPHOLOGY_PROVIDER.exists(morphologyName)) {
+                    errors.add("Unknown decompound morphology: " + morphologyName);
+                }
+            });
+        }
+
+        final Map<String, Object> compoundConf = (Map<String, Object>) config.get("compound");
+        if (compoundConf != null) {
+            ConfigUtils.getStringArg(compoundConf, "morphology").ifPresent(morphologyName -> {
+                if (!MORPHOLOGY_PROVIDER.exists(morphologyName)) {
+                    errors.add("Unknown compound morphology: " + morphologyName);
+                }
+            });
+        }
+
 
         return errors;
 
@@ -192,7 +242,7 @@ public class WordBreakCompoundRewriterFactory extends ESRewriterFactory {
         return searchEngineRequestAdapter.getSearchExecutionContext().searcher().getTopReaderContext().reader();
     }
 
-    public SpellCheckerCompounder getCompounder() {
+    public LuceneCompounder getCompounder() {
         return compounder;
     }
 

@@ -43,7 +43,7 @@ public abstract class AbstractRewriterIntegrationTest extends ESSingleNodeTestCa
         client().admin().indices().prepareCreate(getIndexName()).get();
 
         Arrays.stream(docs).forEach(doc ->
-                client().prepareIndex(getIndexName(), null)
+                client().prepareIndex(getIndexName())
                         .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                         .setSource(doc)
                         .get());
