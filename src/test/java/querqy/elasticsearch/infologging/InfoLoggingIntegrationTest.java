@@ -469,10 +469,10 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
     public void index() {
         client().admin().indices().prepareCreate(INDEX_NAME).get();
-        client().prepareIndex(INDEX_NAME, null)
+        client().prepareIndex(INDEX_NAME)
                 .setSource("field1", "a b", "field2", "a c")
                 .get();
-        client().prepareIndex(INDEX_NAME, null)
+        client().prepareIndex(INDEX_NAME)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("field1", "b c")
                 .get();

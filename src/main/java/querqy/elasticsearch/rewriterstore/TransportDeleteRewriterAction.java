@@ -14,8 +14,6 @@ import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.tasks.Task;
 import org.elasticsearch.transport.TransportService;
 
-import java.util.function.Supplier;
-
 public class TransportDeleteRewriterAction  extends HandledTransportAction<DeleteRewriterRequest, DeleteRewriterResponse> {
 
     private final Client client;
@@ -32,8 +30,7 @@ public class TransportDeleteRewriterAction  extends HandledTransportAction<Delet
     protected void doExecute(final Task task, final DeleteRewriterRequest request,
                              final ActionListener<DeleteRewriterResponse> listener) {
 
-        final DeleteRequestBuilder deleteRequest = client.prepareDelete(QUERQY_INDEX_NAME, null,
-                request.getRewriterId());
+        final DeleteRequestBuilder deleteRequest = client.prepareDelete(QUERQY_INDEX_NAME, request.getRewriterId());
 
         deleteRequest.execute(new ActionListener<DeleteResponse>() {
 

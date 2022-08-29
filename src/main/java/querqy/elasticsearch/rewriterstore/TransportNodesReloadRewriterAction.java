@@ -9,6 +9,7 @@ import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.indices.IndicesService;
+import org.elasticsearch.tasks.Task;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 import querqy.elasticsearch.RewriterShardContexts;
@@ -59,7 +60,7 @@ public class TransportNodesReloadRewriterAction extends TransportNodesAction<Nod
 
     @Override
     protected NodesReloadRewriterResponse.NodeResponse nodeOperation(
-            final NodesReloadRewriterRequest.NodeRequest request) {
+            final NodesReloadRewriterRequest.NodeRequest request, final Task task) {
         try {
             rewriterShardContexts.reloadRewriter(request.getRewriterId());
             return new NodesReloadRewriterResponse.NodeResponse(clusterService.localNode(), null);
