@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static querqy.elasticsearch.rewriterstore.RestPutRewriterAction.PARAM_REWRITER_ID;
 
-import org.elasticsearch.client.node.NodeClient;
+import org.elasticsearch.client.internal.node.NodeClient;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.test.rest.FakeRestRequest;

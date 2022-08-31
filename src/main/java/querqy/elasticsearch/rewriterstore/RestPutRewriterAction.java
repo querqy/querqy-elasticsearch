@@ -1,8 +1,8 @@
 package querqy.elasticsearch.rewriterstore;
 
 import org.elasticsearch.action.ActionRequestBuilder;
-import org.elasticsearch.client.ElasticsearchClient;
-import org.elasticsearch.client.node.NodeClient;
+import org.elasticsearch.client.internal.ElasticsearchClient;
+import org.elasticsearch.client.internal.node.NodeClient;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.rest.BaseRestHandler;

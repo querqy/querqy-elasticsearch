@@ -1,8 +1,8 @@
 package querqy.elasticsearch.rewriterstore;
 
 import org.elasticsearch.action.ActionRequestBuilder;
-import org.elasticsearch.client.ElasticsearchClient;
-import org.elasticsearch.client.node.NodeClient;
+import org.elasticsearch.client.internal.ElasticsearchClient;
+import org.elasticsearch.client.internal.node.NodeClient;
 import org.elasticsearch.rest.BaseRestHandler;
 import org.elasticsearch.rest.RestRequest;
 import org.elasticsearch.rest.action.RestStatusToXContentListener;
@@ -55,7 +55,7 @@ public class RestDeleteRewriterAction extends BaseRestHandler {
             extends ActionRequestBuilder<DeleteRewriterRequest, DeleteRewriterResponse> {
 
         public DeleteRewriterRequestBuilder(final ElasticsearchClient client, final DeleteRewriterAction action,
-                                         final DeleteRewriterRequest request) {
+                                            final DeleteRewriterRequest request) {
             super(client, action, request);
         }
 
