@@ -337,7 +337,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
                 return ((QueryBuilderRawQuery) rawQuery).getQueryBuilder().toQuery(shardContext);
             }
             if (rawQuery instanceof StringRawQuery) {
-                final XContentParser parser = XContentHelper.createParser(shardContext.getXContentRegistry(), null,
+                final XContentParser parser = XContentHelper.createParser(shardContext.getParserConfig(),
                         new BytesArray(((StringRawQuery) rawQuery).getQueryString()), XContentType.JSON);
 
                 return shardContext.parseInnerQueryBuilder(parser).toQuery(shardContext);

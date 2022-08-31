@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ResourceNotFoundException;
 import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.client.Client;
+import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.common.cache.Cache;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;

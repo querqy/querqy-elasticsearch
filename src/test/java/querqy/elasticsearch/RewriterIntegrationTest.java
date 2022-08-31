@@ -15,6 +15,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.test.ESSingleNodeTestCase;
 import org.junit.After;
 import org.junit.Test;
@@ -65,6 +66,37 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
 
+    }
+
+    public void testRawQuery() throws Exception {
+        index();
+
+        final Map<String, Object> content = new HashMap<>();
+        content.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
+
+        final Map<String, Object> config = new HashMap<>();
+        config.put("rules", "a =>\nFILTER: * {\"term\":{\"field2\":\"c\" }}");
+        config.put("ignoreCase", true);
+        config.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
+        content.put("config", config);
+
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
+
+        client().execute(PutRewriterAction.INSTANCE, request).get();
+
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+        querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
+        querqyQuery.setMatchingQuery(new MatchingQuery("a"));
+        querqyQuery.setQueryFieldsAndBoostings(Arrays.asList("field1", "field2"));
+
+
+        final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder.setQuery(querqyQuery);
+
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        final SearchHits hits = response.getHits();
+        assertEquals(1L, hits.getTotalHits().value);
+        assertEquals("a c", hits.getHits()[0].getSourceAsMap().get("field2"));
     }
 
     @Test
