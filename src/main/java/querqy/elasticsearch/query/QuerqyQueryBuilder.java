@@ -5,6 +5,7 @@ import static querqy.elasticsearch.query.RequestUtils.paramToFieldBoostModel;
 import static querqy.elasticsearch.query.RequestUtils.paramToQueryFieldsAndBoosting;
 
 import org.apache.lucene.search.Query;
+import org.elasticsearch.Version;
 import org.elasticsearch.xcontent.ParseField;
 import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.io.stream.StreamInput;
@@ -241,6 +242,11 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
     @Override
     public String getWriteableName() {
         return NAME;
+    }
+
+    @Override
+    public Version getMinimalSupportedVersion() {
+        return Version.V_7_12_1; // We added infoLogging at that point
     }
 
     public void setQuerqyProcessor(final QuerqyProcessor querqyProcessor) {

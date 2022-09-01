@@ -3,7 +3,7 @@
 
     <groupId>org.querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>1.7.es813.0-SNAPSHOT</version>
+    <version>1.6.es823.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -57,7 +57,7 @@
 
         <querqy.lucene.version>5.4.lucene900.0</querqy.lucene.version>
         <es.major.version>8</es.major.version>
-        <es.minor.version>1</es.minor.version>
+        <es.minor.version>2</es.minor.version>
         <es.bugfix.version>3</es.bugfix.version>
         <elasticsearch.version>${es.major.version}.${es.minor.version}.${es.bugfix.version}</elasticsearch.version>
         <jacoco.version>0.8.8</jacoco.version>
@@ -71,12 +71,6 @@
             <groupId>org.querqy</groupId>
             <artifactId>querqy-lucene</artifactId>
             <version>${querqy.lucene.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
