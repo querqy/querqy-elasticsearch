@@ -51,7 +51,7 @@ public class Rewriter implements NamedWriteable, ToXContent {
         out.writeString(name);
         if (params != null) {
             out.writeBoolean(true);
-            out.writeMap(params);
+            out.writeGenericMap(params);
         } else {
             out.writeBoolean(false);
         }
