@@ -117,9 +117,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Analyzer getQueryAnalyzer() {
-        return new MapperAnalyzerWrapper(mappedFieldType -> mappedFieldType.getTextSearchInfo().getSearchAnalyzer());
-
-
+        return new MapperAnalyzerWrapper(mappedFieldType -> mappedFieldType.getTextSearchInfo().searchAnalyzer());
     }
 
     /**

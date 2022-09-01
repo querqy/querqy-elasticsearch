@@ -24,7 +24,6 @@ import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.client.internal.IndicesAdminClient;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.cluster.service.ClusterService;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.xcontent.XContentType;
@@ -68,7 +67,7 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
             @Override
             public void onResponse(final GetMappingsResponse getMappingsResponse) {
 
-                final ImmutableOpenMap<String, MappingMetadata> mappings = getMappingsResponse.getMappings();
+                final Map<String, MappingMetadata> mappings = getMappingsResponse.getMappings();
 
                 if (!mappingsVersionChecked) {
 
