@@ -8,7 +8,6 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
 import org.elasticsearch.client.internal.IndicesAdminClient;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.plugins.Plugin;
@@ -76,8 +75,7 @@ public class QuerqyMappingsUpdate1To3IntegrationTest extends ESSingleNodeTestCas
         client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("common_rules", content)).get();
 
         final GetMappingsRequest getMappingsRequest = new GetMappingsRequest().indices(".querqy");
-        final ImmutableOpenMap<String, MappingMetadata> mappings = indicesClient.getMappings(getMappingsRequest).get()
-                .getMappings();
+        final Map<String, MappingMetadata> mappings = indicesClient.getMappings(getMappingsRequest).get().getMappings();
         final Map<String, Object> properties = (Map<String, Object>) mappings.get(QUERQY_INDEX_NAME)
                 .getSourceAsMap().get("properties");
         assertNotNull(properties);

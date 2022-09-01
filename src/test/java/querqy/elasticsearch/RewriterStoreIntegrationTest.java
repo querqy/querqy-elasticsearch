@@ -54,7 +54,7 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
                     .getInfo(PluginsAndModules.class)
                     .getPluginInfos()
                     .stream()
-                    .anyMatch(info -> info.getName().equals(QuerqyPlugin.class.getName())));
+                    .anyMatch(info -> info.descriptor().getName().equals(QuerqyPlugin.class.getName())));
 
 
         }
