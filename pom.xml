@@ -52,7 +52,7 @@
         <junit.version>4.12</junit.version>
         <hamcrest.version>2.1</hamcrest.version>
         <mockito.version>2.27.0</mockito.version>
-        <spatial4j.version>0.7</spatial4j.version>
+        <spatial4j.version>0.8</spatial4j.version>
         <jts.version>1.19.0</jts.version>
 
         <querqy.lucene.version>5.4.lucene900.0</querqy.lucene.version>
