@@ -55,7 +55,7 @@
         <spatial4j.version>0.7</spatial4j.version>
         <jts.version>1.15.0</jts.version>
 
-        <querqy.lucene.version>5.4.lucene900.0</querqy.lucene.version>
+        <querqy.lucene.version>5.4.lucene900.1</querqy.lucene.version>
         <es.major.version>8</es.major.version>
         <es.minor.version>4</es.minor.version>
         <es.bugfix.version>1</es.bugfix.version>
