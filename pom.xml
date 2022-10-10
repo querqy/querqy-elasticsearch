@@ -59,7 +59,7 @@
         <es.major.version>8</es.major.version>
         <es.minor.version>4</es.minor.version>
         <es.bugfix.version>1</es.bugfix.version>
-        <elasticsearch.version>${es.major.version}.${es.minor.version}.${es.bugfix.version}</elasticsearch.version>
+        <elasticsearch.version>8.4.3</elasticsearch.version>
         <jacoco.version>0.8.8</jacoco.version>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
