@@ -406,13 +406,9 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
             }
         }
 
-        final Set<String> rewriterIds = rewriteChain.getFactories().stream()
-                .map(RewriterFactory::getRewriterId)
-                .collect(Collectors.toSet());
-
-
         if (infoLogging != null) {
-            builder.includedRewriters(rewriterIds.stream()
+            builder.includedRewriters(rewriteChain.getFactories().stream()
+                    .map(RewriterFactory::getRewriterId)
                     .filter(infoLogging::isLoggingEnabledForRewriter)
                     .collect(Collectors.toSet()));
         }
