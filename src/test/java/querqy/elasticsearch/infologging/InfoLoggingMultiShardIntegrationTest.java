@@ -171,7 +171,9 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
         // max 1 event per shard
         assertTrue((2 >= events.size()) && (!events.isEmpty()));
         LogEvent event = events.get(0);
-        assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules\":[{\"APPLIED_RULES\":[\"msg1\"]}]}}",
+        assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules\":[[{\"message\":\"msg1\",\"match\":" +
+                        "{\"term\":\"k\",\"type\":\"exact\"},\"instructions\":[{\"type\":\"synonym\"," +
+                        "\"value\":\"c\"}]}]]}}",
                 event.getMessage().getFormattedMessage());
 
         assertEquals(Log4jSink.MARKER_QUERQY_REWRITER_DETAIL, event.getMarker());

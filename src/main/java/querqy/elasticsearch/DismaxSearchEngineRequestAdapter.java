@@ -23,20 +23,21 @@ import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.query.QueryBuilderRawQuery;
 import querqy.elasticsearch.query.Rewriter;
 import querqy.elasticsearch.query.RewrittenQueries;
-import querqy.infologging.InfoLogging;
-import querqy.infologging.InfoLoggingContext;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.PhraseBoosting.PhraseBoostFieldParams;
 import querqy.lucene.QuerySimilarityScoring;
 import querqy.lucene.rewrite.SearchFieldsAndBoosting;
 import querqy.lucene.rewrite.cache.TermQueryCache;
+import querqy.lucene.rewrite.infologging.InfoLogging;
+import querqy.lucene.rewrite.infologging.InfoLoggingContext;
 import querqy.model.QuerqyQuery;
 import querqy.model.RawQuery;
 import querqy.model.StringRawQuery;
 import querqy.parser.QuerqyParser;
-import querqy.rewrite.ContextAwareQueryRewriter;
 import querqy.rewrite.QueryRewriter;
 import querqy.rewrite.RewriteChain;
+import querqy.rewrite.RewriteLoggingConfig;
+import querqy.rewrite.RewriterFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,7 +47,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 /**
@@ -57,6 +60,9 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
     private final RewriteChain rewriteChain;
     private final SearchExecutionContext shardContext;
     final ESInfoLoggingContext infoLoggingContext;
+
+    private final RewriteLoggingConfig rewriteLoggingConfig;
+
     private final QuerqyQueryBuilder queryBuilder;
     private final Map<String, Object> context = new HashMap<>();
 
@@ -68,6 +74,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
         this.rewriteChain = rewriteChain;
         this.queryBuilder = queryBuilder;
         this.infoLoggingContext = (infoLogging != null) ? new ESInfoLoggingContext(infoLogging, this) : null;
+        rewriteLoggingConfig = createRewriteLoggingConfig(infoLogging, queryBuilder.getInfoLoggingSpec());
     }
 
     /**
@@ -338,7 +345,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
                 final XContentParser parser = XContentHelper.createParser(shardContext.getParserConfig(),
                         new BytesArray(((StringRawQuery) rawQuery).getQueryString()), XContentType.JSON);
 
-                return shardContext.parseInnerQueryBuilder(parser).toQuery(shardContext);
+                return SearchExecutionContext.parseInnerQueryBuilder(parser).toQuery(shardContext);
             }
 
             throw new IllegalArgumentException("Cannot handle RawQuery of type "+ rawQuery.getClass().getName());
@@ -369,11 +376,54 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      * <p>Get a map to hold context information while rewriting the query.</p>
      *
      * @return A non-null context map.
-     * @see ContextAwareQueryRewriter
      */
     @Override
     public Map<String, Object> getContext() {
         return context;
+    }
+
+    private RewriteLoggingConfig createRewriteLoggingConfig(final InfoLogging infoLogging,
+                                                            final InfoLoggingSpec infoLoggingSpec) {
+        final RewriteLoggingConfig.RewriteLoggingConfigBuilder builder = RewriteLoggingConfig.builder();
+
+        if (infoLoggingSpec == null) {
+            builder.isActive(false);
+            builder.hasDetails(false);
+        } else {
+            switch (infoLoggingSpec.getPayloadType()) {
+                case DETAIL -> {
+                    builder.isActive(true);
+                    builder.hasDetails(true);
+                }
+                case REWRITER_ID -> {
+                    builder.isActive(true);
+                    builder.hasDetails(false);
+                }
+                default -> {
+                    builder.isActive(false);
+                    builder.hasDetails(false);
+                }
+            }
+        }
+
+        final Set<String> rewriterIds = rewriteChain.getFactories().stream()
+                .map(RewriterFactory::getRewriterId)
+                .collect(Collectors.toSet());
+
+
+        if (infoLogging != null) {
+            builder.includedRewriters(rewriterIds.stream()
+                    .filter(infoLogging::isLoggingEnabledForRewriter)
+                    .collect(Collectors.toSet()));
+        }
+
+
+        return builder.build();
+    }
+
+    @Override
+    public RewriteLoggingConfig getRewriteLoggingConfig() {
+        return rewriteLoggingConfig;
     }
 
     /**
@@ -529,8 +579,6 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
 
     /**
      * <p>Should debug information be collected while rewriting the query?</p>
-     * <p>Debug information will be kept in the context map under the
-     * {@link querqy.rewrite.AbstractLoggingRewriter#CONTEXT_KEY_DEBUG_DATA} key.</p>
      *
      * @return true if debug information shall be collected, false otherwise
      * @see #getContext()
