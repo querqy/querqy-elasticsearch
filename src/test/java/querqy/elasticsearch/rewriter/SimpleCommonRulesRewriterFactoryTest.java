@@ -69,5 +69,66 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
 
     }
 
+    public void testRuleSelectionCriteria() throws ExecutionException, InterruptedException {
+        indexDocs(
+                doc("id", "1", "field1", "a"),
+                doc("id", "2", "field1", "c")
+        );
+
+        final Map<String, Object> content = new HashMap<>();
+        content.put("class", SimpleCommonRulesRewriterFactory.class.getName());
+
+        final Map<String, Object> config = new HashMap<>();
+        config.put("allowBooleanInput", true);
+        config.put("rules", "a=>\nSYNONYM: c\n@lang:\"l1\"");
+        content.put("config", config);
+
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
+
+        client().execute(PutRewriterAction.INSTANCE, request).get();
+
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+
+        final Map<String, Object> criteria = new HashMap<>();
+        criteria.put("filter", "$[?(@.lang == 'l1')]");
+        final Map<String, Object> params = new HashMap<>();
+        params.put("criteria", criteria);
+
+        final Rewriter rewriter = new Rewriter("common_rules");
+        rewriter.setParams(params);
+
+        querqyQuery.setRewriters(singletonList(rewriter));
+        querqyQuery.setMatchingQuery(new MatchingQuery("a"));
+        querqyQuery.setMinimumShouldMatch("1");
+        querqyQuery.setQueryFieldsAndBoostings(singletonList("field1"));
+
+        SearchRequestBuilder searchRequestBuilder = client().prepareSearch(getIndexName());
+        searchRequestBuilder.setQuery(querqyQuery);
+
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        SearchHits hits = response.getHits();
+
+        assertEquals(2L, hits.getTotalHits().value);
+
+
+        querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+        criteria.put("filter", "$[?(@.lang == 'l2')]");
+
+        querqyQuery.setRewriters(singletonList(rewriter));
+        querqyQuery.setMatchingQuery(new MatchingQuery("a"));
+        querqyQuery.setMinimumShouldMatch("1");
+        querqyQuery.setQueryFieldsAndBoostings(singletonList("field1"));
+
+        searchRequestBuilder = client().prepareSearch(getIndexName());
+        searchRequestBuilder.setQuery(querqyQuery);
+
+        response = client().search(searchRequestBuilder.request()).get();
+        hits = response.getHits();
+
+        assertEquals(1L, hits.getTotalHits().value);
+
+
+
+    }
 
 }

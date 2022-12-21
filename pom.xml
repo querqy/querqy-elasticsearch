@@ -54,6 +54,7 @@
         <mockito.version>2.27.0</mockito.version>
         <spatial4j.version>0.8</spatial4j.version>
         <jts.version>1.19.0</jts.version>
+        <json-path.version>2.7.0</json-path.version>
 
         <querqy.lucene.version>5.4.lucene900.1</querqy.lucene.version>
         <es.major.version>8</es.major.version>
@@ -71,6 +72,18 @@
             <groupId>org.querqy</groupId>
             <artifactId>querqy-lucene</artifactId>
             <version>${querqy.lucene.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.jayway.jsonpath</groupId>
+                    <artifactId>json-path</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>${json-path.version}</version>
         </dependency>
 
         <dependency>
