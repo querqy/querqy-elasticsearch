@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import querqy.elasticsearch.query.InfoLoggingSpec;
-import querqy.infologging.Sink;
+import querqy.lucene.rewrite.infologging.Sink;
 import querqy.rewrite.SearchEngineRequestAdapter;
 
 import java.util.ArrayList;
