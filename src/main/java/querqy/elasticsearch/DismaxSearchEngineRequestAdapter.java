@@ -23,6 +23,7 @@ import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.query.QueryBuilderRawQuery;
 import querqy.elasticsearch.query.Rewriter;
 import querqy.elasticsearch.query.RewrittenQueries;
+import querqy.lucene.LuceneRawQuery;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.PhraseBoosting.PhraseBoostFieldParams;
 import querqy.lucene.QuerySimilarityScoring;
@@ -47,7 +48,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -335,8 +335,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      * @throws SyntaxException @throws SyntaxException if the raw query query could not be parsed
      */
     @Override
-    public Query parseRawQuery(final RawQuery rawQuery) throws SyntaxException {
-
+    public Query rawQueryToQuery(final RawQuery rawQuery) throws SyntaxException {
         try {
             if (rawQuery instanceof QueryBuilderRawQuery) {
                 return ((QueryBuilderRawQuery) rawQuery).getQueryBuilder().toQuery(shardContext);
@@ -346,6 +345,9 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
                         new BytesArray(((StringRawQuery) rawQuery).getQueryString()), XContentType.JSON);
 
                 return SearchExecutionContext.parseInnerQueryBuilder(parser).toQuery(shardContext);
+            }
+            if (rawQuery instanceof LuceneRawQuery) {
+                return ((LuceneRawQuery) rawQuery).getQuery();
             }
 
             throw new IllegalArgumentException("Cannot handle RawQuery of type "+ rawQuery.getClass().getName());
@@ -548,7 +550,8 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Optional<Float> getFloatRequestParam(final String name) {
-        return getParam(name);
+        Optional<Number> param = getParam(name);
+        return param.map(Number::floatValue);
     }
 
     /**
@@ -559,7 +562,8 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
      */
     @Override
     public Optional<Double> getDoubleRequestParam(final String name) {
-        return getParam(name);
+        Optional<Number> param = getParam(name);
+        return param.map(Number::doubleValue);
     }
 
     /**

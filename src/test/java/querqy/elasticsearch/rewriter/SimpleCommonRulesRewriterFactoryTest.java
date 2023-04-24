@@ -20,7 +20,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
 
 
     public void testBooleanInput() throws ExecutionException, InterruptedException {
-        indexDocs(
+        createIndexWithDocs(
                 doc("id", "1", "field1", "a"),
                 doc("id", "2", "field1", "a test1 some other tokens that bring down normalised tf")
         );
@@ -70,7 +70,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
     }
 
     public void testRuleSelectionCriteria() throws ExecutionException, InterruptedException {
-        indexDocs(
+        createIndexWithDocs(
                 doc("id", "1", "field1", "a"),
                 doc("id", "2", "field1", "c")
         );

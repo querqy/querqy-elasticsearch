@@ -10,6 +10,7 @@ import querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory;
 import querqy.rewrite.commonrules.model.BoostInstruction;
 import querqy.rewrite.commonrules.select.ExpressionCriteriaSelectionStrategyFactory;
 import querqy.rewrite.commonrules.select.SelectionStrategyFactory;
+import querqy.rewrite.lookup.preprocessing.LookupPreprocessorType;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -44,10 +45,13 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
         // TODO: we might want to configure named selection strategies in the future
         final Map<String, SelectionStrategyFactory> selectionStrategyFactories = Collections.emptyMap();
 
+
         try {
             delegate = new querqy.rewrite.commonrules.SimpleCommonRulesRewriterFactory(rewriterId,
                     new StringReader(rules), allowBooleanInput, BoostInstruction.BoostMethod.ADDITIVE,
-                    querqyParser, ignoreCase, selectionStrategyFactories, DEFAULT_SELECTION_STRATEGY_FACTORY, false);
+                    querqyParser, selectionStrategyFactories, DEFAULT_SELECTION_STRATEGY_FACTORY, false,
+                    // TODO: Expose LookupPreprocessors
+                    LookupPreprocessorType.NONE);
         } catch (final IOException e) {
             throw new ElasticsearchException(e);
         }
@@ -74,7 +78,8 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
         try {
             new querqy.rewrite.commonrules.SimpleCommonRulesRewriterFactory(rewriterId,
                     new StringReader(rules), allowBooleanInput, BoostInstruction.BoostMethod.ADDITIVE,
-                    querqyParser, ignoreCase, Collections.emptyMap(), DEFAULT_SELECTION_STRATEGY_FACTORY, false);
+                    querqyParser, Collections.emptyMap(), DEFAULT_SELECTION_STRATEGY_FACTORY, false,
+                    LookupPreprocessorType.NONE);
         } catch (final IOException e) {
             return Collections.singletonList("Cannot create rewriter: " + e.getMessage());
         }

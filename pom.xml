@@ -56,7 +56,7 @@
         <jts.version>1.19.0</jts.version>
         <json-path.version>2.7.0</json-path.version>
 
-        <querqy.lucene.version>5.5.lucene900.1</querqy.lucene.version>
+        <querqy.lucene.version>5.7.lucene942.0-SNAPSHOT</querqy.lucene.version>
         <elasticsearch.version>8.5.3</elasticsearch.version>
         <jacoco.version>0.8.8</jacoco.version>
         <maven.compiler.source>16</maven.compiler.source>
@@ -122,6 +122,13 @@
                     <artifactId>xercesImpl</artifactId>
                 </exclusion>
             </exclusions>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8</artifactId>
+            <version>2.35.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

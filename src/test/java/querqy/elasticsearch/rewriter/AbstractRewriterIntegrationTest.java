@@ -38,10 +38,22 @@ public abstract class AbstractRewriterIntegrationTest extends ESSingleNodeTestCa
         return doc;
     }
 
+    public void createIndex() {
+        client().admin().indices().prepareCreate(getIndexName()).get();
+    }
+
+    public void createIndexWithMapping(String mapping) {
+        client().admin().indices().prepareCreate(getIndexName()).setMapping(mapping).get();
+    }
+
+    @SafeVarargs
+    public final void createIndexWithDocs(Map<String, Object>... docs) {
+        createIndex();
+        indexDocs(docs);
+    }
+
     @SafeVarargs
     public final void indexDocs(Map<String, Object>... docs) {
-        client().admin().indices().prepareCreate(getIndexName()).get();
-
         Arrays.stream(docs).forEach(doc ->
                 client().prepareIndex(getIndexName())
                         .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)

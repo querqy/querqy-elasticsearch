@@ -179,7 +179,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
 
     private void indexDocs() {
 
-        indexDocs(
+        createIndexWithDocs(
                 doc("identifier", "1", "f1", "tv", "f2", "tele", "depth", 2, "width", 200, "screen_size", 55.0),
                 doc("identifier", "2", "f1", "tv", "height", 130, "depth", 2, "width", 190, "screen_size", 54.6),
                 doc("identifier", "3", "f1", "tv", "height", 110, "depth", 10, "width", 160, "screen_size", 50.0),

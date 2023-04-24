@@ -19,7 +19,7 @@ import static java.util.Collections.singletonList;
 public class ReplaceRewriterIntegrationTest extends AbstractRewriterIntegrationTest {
 
     public void testReplaceRewriterRules() throws ExecutionException, InterruptedException {
-        indexDocs(
+        createIndexWithDocs(
                 doc("id", "1", "field1", "test1"),
                 doc("id", "2", "field1", "test2"),
                 doc("id", "3", "field1", "test1")
