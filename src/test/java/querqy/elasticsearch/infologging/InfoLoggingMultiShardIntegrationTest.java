@@ -51,10 +51,6 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
         return Collections.singleton(QuerqyPlugin.class);
     }
 
-    @Override
-    protected Collection<Class<? extends Plugin>> transportClientPlugins() {
-        return Collections.singleton(QuerqyPlugin.class);
-    }
 
     @Override
     protected Settings nodeSettings(final int nodeOrdinal, final Settings otherSettings) {
@@ -111,10 +107,10 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
                 "            \"number_of_shards\" : 2, \n" +
                 "            \"number_of_replicas\" : 1 \n" +
                 "    }}", XContentType.JSON).get();
-        client().prepareIndex(INDEX_NAME, null)
+        client().prepareIndex(INDEX_NAME)
                 .setSource("field1", "a b", "field2", "a c")
                 .get();
-        client().prepareIndex(INDEX_NAME, null)
+        client().prepareIndex(INDEX_NAME)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("field1", "b c")
                 .get();
@@ -175,7 +171,9 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
         // max 1 event per shard
         assertTrue((2 >= events.size()) && (!events.isEmpty()));
         LogEvent event = events.get(0);
-        assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules\":[{\"APPLIED_RULES\":[\"msg1\"]}]}}",
+        assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules\":[[{\"message\":\"msg1\",\"match\":" +
+                        "{\"term\":\"k\",\"type\":\"exact\"},\"instructions\":[{\"type\":\"synonym\"," +
+                        "\"value\":\"c\"}]}]]}}",
                 event.getMessage().getFormattedMessage());
 
         assertEquals(Log4jSink.MARKER_QUERQY_REWRITER_DETAIL, event.getMarker());

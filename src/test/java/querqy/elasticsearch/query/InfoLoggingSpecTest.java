@@ -1,12 +1,11 @@
 package querqy.elasticsearch.query;
 
-import static org.elasticsearch.xcontent.DeprecationHandler.THROW_UNSUPPORTED_OPERATION;
 import static org.junit.Assert.*;
 
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
-import org.elasticsearch.xcontent.NamedXContentRegistry;
 import org.elasticsearch.xcontent.XContentBuilder;
 import org.elasticsearch.xcontent.XContentParser;
+import org.elasticsearch.xcontent.XContentParserConfiguration;
 import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.xcontent.json.JsonXContent;
 import org.junit.Test;
@@ -93,8 +92,7 @@ public class InfoLoggingSpecTest {
     }
 
     private InfoLoggingSpec fromJsonInnerObject(final byte[] bytes) throws IOException {
-        XContentParser parser = XContentType.JSON.xContent()
-                .createParser(NamedXContentRegistry.EMPTY, THROW_UNSUPPORTED_OPERATION, bytes);
+        XContentParser parser = XContentType.JSON.xContent().createParser(XContentParserConfiguration.EMPTY, bytes);
         return InfoLoggingSpec.PARSER.parse(parser, null);
     }
 

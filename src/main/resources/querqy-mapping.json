@@ -1,22 +1,31 @@
 {
+  "_doc": {
     "properties": {
-      "class": {"type": "keyword"},
-      "type": {"type": "keyword"},
-      "version": {"type":  "integer"},
+      "class": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "version": {
+        "type": "integer"
+      },
       "info_logging": {
         "properties": {
-          "sinks": {"type" : "keyword" }
+          "sinks": {
+            "type": "keyword"
+          }
         }
       },
       "config": {
-        "type" : "keyword",
+        "type": "keyword",
         "index": false
       },
       "config_v_003": {
-        "type" : "keyword",
+        "type": "keyword",
         "doc_values": false,
         "index": false
       }
-
     }
+  }
 }

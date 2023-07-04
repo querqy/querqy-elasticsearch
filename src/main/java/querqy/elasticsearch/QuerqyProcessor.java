@@ -9,11 +9,11 @@ import querqy.elasticsearch.infologging.SingleSinkInfoLogging;
 import querqy.elasticsearch.query.InfoLoggingSpec;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.query.Rewriter;
-import querqy.infologging.InfoLogging;
-import querqy.infologging.Sink;
 import querqy.lucene.LuceneQueries;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.QueryParsingController;
+import querqy.lucene.rewrite.infologging.InfoLogging;
+import querqy.lucene.rewrite.infologging.Sink;
 import querqy.rewrite.RewriteChain;
 
 import java.util.Collections;

@@ -1,7 +1,7 @@
 package querqy.elasticsearch.infologging;
 
-import querqy.infologging.InfoLogging;
-import querqy.infologging.InfoLoggingContext;
+import querqy.lucene.rewrite.infologging.InfoLogging;
+import querqy.lucene.rewrite.infologging.InfoLoggingContext;
 import querqy.rewrite.SearchEngineRequestAdapter;
 
 public class ESInfoLoggingContext extends InfoLoggingContext {

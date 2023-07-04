@@ -6,11 +6,9 @@ import static querqy.elasticsearch.rewriterstore.Constants.QUERQY_INDEX_NAME;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
-import org.elasticsearch.client.IndicesAdminClient;
+import org.elasticsearch.client.internal.IndicesAdminClient;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESSingleNodeTestCase;
@@ -60,7 +58,7 @@ public class QuerqyMappingsUpdate1To3IntegrationTest extends ESSingleNodeTestCas
 
         final CreateIndexRequestBuilder createIndexRequestBuilder = indicesClient.prepareCreate(QUERQY_INDEX_NAME);
         final CreateIndexRequest createIndexRequest = createIndexRequestBuilder
-                .addMapping("querqy-rewriter", v1Mapping, XContentType.JSON)
+                .setMapping(v1Mapping)
                 .setSettings(Settings.builder().put("number_of_replicas", 2))
                 .request();
         indicesClient.create(createIndexRequest).get();
@@ -77,10 +75,9 @@ public class QuerqyMappingsUpdate1To3IntegrationTest extends ESSingleNodeTestCas
         client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("common_rules", content)).get();
 
         final GetMappingsRequest getMappingsRequest = new GetMappingsRequest().indices(".querqy");
-        final ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetadata>> mappings = indicesClient
-                .getMappings(getMappingsRequest).get().getMappings();
+        final Map<String, MappingMetadata> mappings = indicesClient.getMappings(getMappingsRequest).get().getMappings();
         final Map<String, Object> properties = (Map<String, Object>) mappings.get(QUERQY_INDEX_NAME)
-                .get("querqy-rewriter").getSourceAsMap().get("properties");
+                .getSourceAsMap().get("properties");
         assertNotNull(properties);
         final Map<String, Object> info_logging = (Map<String, Object>) properties.get("info_logging");
         assertNotNull(info_logging);

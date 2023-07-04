@@ -1,7 +1,7 @@
 package querqy.elasticsearch.infologging;
 
-import querqy.infologging.InfoLogging;
-import querqy.infologging.Sink;
+import querqy.lucene.rewrite.infologging.InfoLogging;
+import querqy.lucene.rewrite.infologging.Sink;
 import querqy.rewrite.SearchEngineRequestAdapter;
 
 import java.util.Collections;

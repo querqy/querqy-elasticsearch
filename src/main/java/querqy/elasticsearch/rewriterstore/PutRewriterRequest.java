@@ -104,7 +104,7 @@ public class PutRewriterRequest extends ActionRequest {
     public void writeTo(final StreamOutput out) throws IOException {
         super.writeTo(out);
         out.writeString(rewriterId);
-        out.writeMap(content);
+        out.writeGenericMap(content);
     }
 
     public String getRewriterId() {

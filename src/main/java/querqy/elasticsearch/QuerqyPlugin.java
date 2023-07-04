@@ -6,9 +6,10 @@ import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX
 
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
-import org.elasticsearch.client.Client;
+import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.node.DiscoveryNodes;
+import org.elasticsearch.cluster.routing.allocation.decider.AllocationDeciders;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
 import org.elasticsearch.common.settings.ClusterSettings;
@@ -16,6 +17,7 @@ import org.elasticsearch.common.settings.IndexScopedSettings;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.SettingsFilter;
+import org.elasticsearch.tracing.Tracer;
 import org.elasticsearch.xcontent.NamedXContentRegistry;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.env.NodeEnvironment;
@@ -111,8 +113,9 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
                                                final NamedXContentRegistry xContentRegistry,
                                                final Environment environment, final NodeEnvironment nodeEnvironment,
                                                final NamedWriteableRegistry namedWriteableRegistry,
-                                               IndexNameExpressionResolver indexNameExpressionResolver,
-                                               Supplier<RepositoriesService> repositoriesServiceSupplier) {
+                                               final IndexNameExpressionResolver indexNameExpressionResolver,
+                                               final Supplier<RepositoriesService> repositoriesServiceSupplier,
+                                               final Tracer tracer, final AllocationDeciders allocationDeciders) {
         return Arrays.asList(rewriterShardContexts, querqyProcessor);
     }
 

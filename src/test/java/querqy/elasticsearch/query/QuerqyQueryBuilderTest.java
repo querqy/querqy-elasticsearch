@@ -1,6 +1,5 @@
 package querqy.elasticsearch.query;
 
-import static org.elasticsearch.xcontent.DeprecationHandler.THROW_UNSUPPORTED_OPERATION;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -14,12 +13,12 @@ import org.apache.lucene.search.Query;
 import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
-import org.elasticsearch.xcontent.NamedXContentRegistry;
 import org.elasticsearch.xcontent.ObjectParser;
 import org.elasticsearch.xcontent.ParseField;
 import org.elasticsearch.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.xcontent.XContentParser;
+import org.elasticsearch.xcontent.XContentParserConfiguration;
 import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.SearchExecutionContext;
@@ -322,8 +321,8 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
     public void testThatMissingMatchingQueryCausesParsingException() throws IOException {
 
         try {
-            QuerqyQueryBuilder.fromXContent(XContentHelper.createParser(null, null, new BytesArray("{}"),
-                    XContentType.JSON), null);
+            QuerqyQueryBuilder.fromXContent(XContentHelper.createParser(XContentParserConfiguration.EMPTY,
+                    new BytesArray("{}"), XContentType.JSON), null);
             fail("missing matching_query must cause Exception");
         } catch (final ParsingException e) {
             assertTrue(e.getMessage().contains("matching_query"));
@@ -335,9 +334,8 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
     public void testThatMissingQueryStringCausesParsingException() throws IOException {
 
         try {
-            QuerqyQueryBuilder.fromXContent(XContentHelper.createParser(null, null, new BytesArray("{" +
-                            "\"matching_query\": {}}"),
-                    XContentType.JSON), null);
+            QuerqyQueryBuilder.fromXContent(XContentHelper.createParser(XContentParserConfiguration.EMPTY,
+                    new BytesArray("{\"matching_query\": {}}"), XContentType.JSON), null);
             fail("missing query string must cause Exception");
         } catch (final ParsingException e) {
             assertTrue(e.getMessage().contains("[querqy] requires a query"));
@@ -349,7 +347,8 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
     public void testThatMissingQueryFieldsCausesParsingException() throws IOException {
 
         try {
-            QuerqyQueryBuilder.fromXContent(XContentHelper.createParser(null, null, new BytesArray("{" +
+            QuerqyQueryBuilder.fromXContent(XContentHelper.createParser(XContentParserConfiguration.EMPTY,
+                    new BytesArray("{" +
                             "\"matching_query\": {" +
                             "\"query\": \"hello\"" +
                             "}}"),
@@ -381,8 +380,7 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
     }
 
     private QuerqyQueryBuilder fromJsonInnerObject(final byte[] bytes) throws IOException {
-        XContentParser parser = XContentType.JSON.xContent()
-                .createParser(NamedXContentRegistry.EMPTY, THROW_UNSUPPORTED_OPERATION, bytes);
+        XContentParser parser = XContentType.JSON.xContent().createParser(XContentParserConfiguration.EMPTY, bytes);
 
 
 

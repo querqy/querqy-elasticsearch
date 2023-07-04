@@ -124,12 +124,63 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         assertNotNull(events);
         assertEquals(1, events.size());
         LogEvent event = events.get(0);
-        assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules\":[{\"APPLIED_RULES\":[\"msg1\"]}]}}",
+        assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules\":[[{\"message\":\"msg1\",\"match\":" +
+                        "{\"term\":\"k\",\"type\":\"exact\"},\"instructions\":" +
+                        "[{\"type\":\"synonym\",\"value\":\"c\"}]}]]}}",
                 event.getMessage().getFormattedMessage());
 
         assertEquals(Log4jSink.MARKER_QUERQY_REWRITER_DETAIL, event.getMarker());
 
     }
+
+    @Test
+    public void testOneCommonRulesRewriterLoggingForTwoMatchingRules() throws Exception {
+
+        index();
+
+        final Map<String, Object> content = new HashMap<>();
+        content.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
+        final Map<String, Object> loggingConf = new HashMap<>();
+        loggingConf.put("sinks", "log4j");
+        content.put("info_logging", loggingConf);
+
+        final Map<String, Object> config = new HashMap<>();
+        config.put("rules", "k =>\nSYNONYM: c\n@_log: \"msg1\"\nx =>\nSYNONYM: y\n@_log: \"msg2\"");
+        config.put("ignoreCase", true);
+        config.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
+        content.put("config", config);
+
+        final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
+
+        client().execute(PutRewriterAction.INSTANCE, request).get();
+
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
+        querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
+        querqyQuery.setMatchingQuery(new MatchingQuery("x k"));
+        querqyQuery.setQueryFieldsAndBoostings(Arrays.asList("field1", "field2"));
+        querqyQuery.setMinimumShouldMatch("1");
+        querqyQuery.setInfoLoggingSpec(new InfoLoggingSpec(LogPayloadType.DETAIL, "query-detail"));
+
+        final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
+        searchRequestBuilder.setQuery(querqyQuery);
+
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        assertEquals(2L, response.getHits().getTotalHits().value);
+
+        final List<LogEvent> events = APPENDER.getEvents();
+        assertNotNull(events);
+        assertEquals(1, events.size());
+        LogEvent event = events.get(0);
+        assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules\":[[{\"message\":\"msg1\",\"match\":" +
+                        "{\"term\":\"k\",\"type\":\"exact\"},\"instructions\":[{\"type\":\"synonym\"," +
+                        "\"value\":\"c\"}]},{\"message\":\"msg2\",\"match\":{\"term\":\"x\",\"type\":\"exact\"}," +
+                        "\"instructions\":[{\"type\":\"synonym\",\"value\":\"y\"}]}]]}}",
+                event.getMessage().getFormattedMessage());
+
+        assertEquals(Log4jSink.MARKER_QUERQY_REWRITER_DETAIL, event.getMarker());
+
+    }
+
 
     @Test
     public void testInvalidSinkName() {
@@ -211,8 +262,10 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         assertNotNull(events);
         assertEquals(1, events.size());
         LogEvent event = events.get(0);
-        assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules1\":[{\"APPLIED_RULES\":[\"msg1\"]}]," +
-                        "\"common_rules2\":[{\"APPLIED_RULES\":[\"msg2\"]}]}}",
+        assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules1\":[[{\"message\":\"msg1\",\"match\":" +
+                        "{\"term\":\"k\",\"type\":\"exact\"},\"instructions\":[{\"type\":\"synonym\"," +
+                        "\"value\":\"c\"}]}]],\"common_rules2\":[[{\"message\":\"msg2\",\"match\":{\"term\":\"k\"," +
+                        "\"type\":\"exact\"},\"instructions\":[{\"type\":\"up\",\"value\":\"q\"}]}]]}}",
                 event.getMessage().getFormattedMessage());
 
         assertEquals(Log4jSink.MARKER_QUERQY_REWRITER_DETAIL, event.getMarker());
@@ -272,8 +325,10 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         assertNotNull(events);
         assertEquals(1, events.size());
         LogEvent event = events.get(0);
-        assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules2\":[{\"APPLIED_RULES\":[\"msg2\"]}],\"replace1\":" +
-                        "[{\"APPLIED_RULES\":[\"rr => [k]\"]}]}}",
+        assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules2\":[[{\"message\":\"msg2\",\"match\":" +
+                        "{\"term\":\"k\",\"type\":\"exact\"},\"instructions\":[{\"type\":\"synonym\"," +
+                        "\"value\":\"c\"}]}]],\"replace1\":[[{\"message\":\"rr => k\",\"match\":{\"term\":\"rr\"," +
+                        "\"type\":\"exact\"},\"instructions\":[{\"type\":\"replace\",\"value\":\"k\"}]}]]}}",
                 event.getMessage().getFormattedMessage());
 
         assertEquals(Log4jSink.MARKER_QUERQY_REWRITER_DETAIL, event.getMarker());
@@ -469,10 +524,10 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
     public void index() {
         client().admin().indices().prepareCreate(INDEX_NAME).get();
-        client().prepareIndex(INDEX_NAME, null)
+        client().prepareIndex(INDEX_NAME)
                 .setSource("field1", "a b", "field2", "a c")
                 .get();
-        client().prepareIndex(INDEX_NAME, null)
+        client().prepareIndex(INDEX_NAME)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("field1", "b c")
                 .get();

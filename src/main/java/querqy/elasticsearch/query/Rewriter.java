@@ -51,7 +51,7 @@ public class Rewriter implements NamedWriteable, ToXContent {
         out.writeString(name);
         if (params != null) {
             out.writeBoolean(true);
-            out.writeMap(params);
+            out.writeGenericMap(params);
         } else {
             out.writeBoolean(false);
         }
@@ -104,7 +104,7 @@ public class Rewriter implements NamedWriteable, ToXContent {
         return params;
     }
 
-    public void setParams(Map<String, Object> params) {
+    public void setParams(final Map<String, Object> params) {
         this.params = params;
     }
 
