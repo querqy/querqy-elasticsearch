@@ -1,9 +1,5 @@
 package querqy.elasticsearch;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
-import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX_NUM_REPLICAS;
-
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.client.Client;
@@ -16,7 +12,6 @@ import org.elasticsearch.common.settings.IndexScopedSettings;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.SettingsFilter;
-import org.elasticsearch.xcontent.NamedXContentRegistry;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.env.NodeEnvironment;
 import org.elasticsearch.index.IndexModule;
@@ -30,24 +25,32 @@ import org.elasticsearch.rest.RestHandler;
 import org.elasticsearch.script.ScriptService;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.watcher.ResourceWatcherService;
+import org.elasticsearch.xcontent.NamedXContentRegistry;
+import querqy.elasticsearch.aggregation.InternalQuerqy;
+import querqy.elasticsearch.aggregation.QuerqyAggregationBuilder;
 import querqy.elasticsearch.infologging.Log4jSink;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.rewriterstore.DeleteRewriterAction;
 import querqy.elasticsearch.rewriterstore.NodesClearRewriterCacheAction;
 import querqy.elasticsearch.rewriterstore.NodesReloadRewriterAction;
+import querqy.elasticsearch.rewriterstore.PutRewriterAction;
 import querqy.elasticsearch.rewriterstore.RestDeleteRewriterAction;
 import querqy.elasticsearch.rewriterstore.RestPutRewriterAction;
-import querqy.elasticsearch.rewriterstore.PutRewriterAction;
 import querqy.elasticsearch.rewriterstore.TransportDeleteRewriterAction;
 import querqy.elasticsearch.rewriterstore.TransportNodesClearRewriterCacheAction;
 import querqy.elasticsearch.rewriterstore.TransportNodesReloadRewriterAction;
 import querqy.elasticsearch.rewriterstore.TransportPutRewriterAction;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
+import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX_NUM_REPLICAS;
 
 public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
 
@@ -57,7 +60,7 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
 
     public QuerqyPlugin(final Settings settings) {
         rewriterShardContexts = new RewriterShardContexts(settings);
-        querqyProcessor = new QuerqyProcessor(rewriterShardContexts, new Log4jSink());
+        querqyProcessor = new QuerqyProcessor(rewriterShardContexts, new Log4jSink(), settings);
     }
 
     @Override
@@ -122,4 +125,18 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
                 Setting.Property.NodeScope));
 
     }
+
+    @Override
+    public ArrayList<AggregationSpec> getAggregations() {
+        ArrayList<AggregationSpec> r = new ArrayList<>();
+        r.add(
+                new AggregationSpec(
+                        QuerqyAggregationBuilder.NAME,
+                        (in) -> new QuerqyAggregationBuilder(in, querqyProcessor),
+                        QuerqyAggregationBuilder.PARSER
+                ).addResultReader(InternalQuerqy::new)
+        );
+        return r;
+    }
+
 }

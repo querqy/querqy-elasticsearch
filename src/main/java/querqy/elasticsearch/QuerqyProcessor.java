@@ -3,6 +3,10 @@ package querqy.elasticsearch;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.elasticsearch.common.cache.Cache;
+import org.elasticsearch.common.settings.Setting;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.SearchExecutionContext;
 import querqy.elasticsearch.infologging.LogPayloadType;
 import querqy.elasticsearch.infologging.SingleSinkInfoLogging;
@@ -15,23 +19,46 @@ import querqy.lucene.LuceneQueries;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.QueryParsingController;
 import querqy.rewrite.RewriteChain;
+import querqy.rewrite.commonrules.model.DecorateInstruction;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 
 public class QuerqyProcessor {
 
+    public static final Setting<TimeValue> CACHE_DECORATIONS_EXPIRE_AFTER_WRITE = Setting.timeSetting(
+            "querqy.caches.decorations.expire_after_write",
+            TimeValue.timeValueSeconds(10L), // 10s
+            TimeValue.timeValueSeconds(10L),
+            Setting.Property.NodeScope);
+
+    public static final Setting<TimeValue> CACHE_DECORATIONS_EXPIRE_AFTER_READ = Setting.timeSetting(
+            "querqy.caches.decorations.expire_after_read",
+            TimeValue.timeValueSeconds(10L), // 10ns
+            TimeValue.timeValueSeconds(10L),
+            Setting.Property.NodeScope);
+
     private static final RewriteChain EMPTY_REWRITE_CHAIN = new RewriteChain(Collections.emptyList());
+
+    //private final Map<Query, Map<String, Object>> querqyQueryCache;
+    private final Cache<Query, Map<String, Object>> querqyQueryCache;
 
     private RewriterShardContexts rewriterShardContexts;
     private Sink infoLoggingSink;
 
     public QuerqyProcessor(final RewriterShardContexts rewriterShardContexts, final Sink infoLoggingSink) {
+        this(rewriterShardContexts, infoLoggingSink, Settings.EMPTY);
+    }
+
+    public QuerqyProcessor(final RewriterShardContexts rewriterShardContexts, final Sink infoLoggingSink, final Settings settings) {
         this.rewriterShardContexts = rewriterShardContexts;
         this.infoLoggingSink = infoLoggingSink;
+        //querqyInfoCache = new HashMap<>();
+        querqyQueryCache = Caches.buildCache(CACHE_DECORATIONS_EXPIRE_AFTER_READ.get(settings), CACHE_DECORATIONS_EXPIRE_AFTER_WRITE.get(settings));
     }
 
     public Query parseQuery(final QuerqyQueryBuilder queryBuilder, final SearchExecutionContext context)
@@ -75,10 +102,6 @@ public class QuerqyProcessor {
         final QueryParsingController controller = new QueryParsingController(requestAdapter);
         final LuceneQueries queries = controller.process();
 
-
-//        // TODO: make decos part of the general Querqy object model
-//        final Set<Object> decorations = (Set<Object>) requestAdapter.getContext().get(DecorateInstruction.CONTEXT_KEY);
-
         if ((queries.querqyBoostQueries == null || queries.querqyBoostQueries.isEmpty())
                 && (queries.filterQueries == null || queries.filterQueries.isEmpty())
                 && queries.mainQuery instanceof BooleanQuery) {
@@ -108,10 +131,21 @@ public class QuerqyProcessor {
         if (infoLogging != null) {
             infoLogging.endOfRequest(requestAdapter);
         }
+
+        final Set<Object> decorations = (Set<Object>) requestAdapter.getContext().get(DecorateInstruction.DECORATION_CONTEXT_KEY);
+        if (decorations != null) {
+            querqyQueryCache.put(query, Collections.singletonMap("decorations", decorations));
+        }
+
         return query;
 
     }
 
+    public Map<String, Object> getQuerqyInfoForQuery(Query query) {
+        final Map<String, Object> querqyInfo = querqyQueryCache.get(query);
+        querqyQueryCache.invalidate(query);
+        return querqyInfo;
+    }
 
     void appendFilterQueries(final LuceneQueries queries, final BooleanQuery.Builder builder) {
 
