@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 @ESIntegTestCase.ClusterScope(scope = SUITE, supportsDedicatedMasters = false, numClientNodes = 1, numDataNodes = 2)
@@ -152,13 +151,11 @@ public class RewriterShardContextsTest extends ESIntegTestCase {
                 .get();
     }
 
-    private static final Random RAND = new Random();
-
     /**
      * The first (= 0th) node provided by the test framework would just use the passed in QuerqyQueryBuilder object
      * so that the builder would not have its QuerqyProcessor set by the plugin. We always return a client of the
      * first node (instead of a random node) and query the other nodes via preferences which will generate a new
-     * QueryBuilder and allow to set set the QuerqyProcessor
+     * QueryBuilder and allow to set the QuerqyProcessor
      *
      * @return A client of node node_s0
      */

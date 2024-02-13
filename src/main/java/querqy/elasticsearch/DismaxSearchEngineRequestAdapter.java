@@ -9,6 +9,7 @@ import org.apache.lucene.search.Query;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.lucene.search.Queries;
 import org.elasticsearch.common.xcontent.XContentHelper;
+import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.xcontent.XContentParser;
 import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.index.mapper.MappedFieldType;
@@ -345,7 +346,7 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
                 final XContentParser parser = XContentHelper.createParser(shardContext.getParserConfig(),
                         new BytesArray(((StringRawQuery) rawQuery).getQueryString()), XContentType.JSON);
 
-                return SearchExecutionContext.parseInnerQueryBuilder(parser).toQuery(shardContext);
+                return AbstractQueryBuilder.parseTopLevelQuery(parser).toQuery(shardContext);
             }
 
             throw new IllegalArgumentException("Cannot handle RawQuery of type "+ rawQuery.getClass().getName());

@@ -18,6 +18,7 @@ import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 
 public class NodesReloadRewriterResponseTest {
 
@@ -33,12 +34,14 @@ public class NodesReloadRewriterResponseTest {
                         new ClusterName("c1"),
                         Arrays.asList(
                                 new NodesReloadRewriterResponse.NodeResponse(
-                                    new DiscoveryNode("n1",
+                                    new DiscoveryNode("n1", "n1",
                                             new TransportAddress(TransportAddress.META_ADDRESS, 9234),
+                                            Collections.emptyMap(), Collections.emptySet(),
                                             Version.CURRENT), npe),
                                 new NodesReloadRewriterResponse.NodeResponse(
-                                        new DiscoveryNode("n2",
+                                        new DiscoveryNode("n2", "n2",
                                                 new TransportAddress(TransportAddress.META_ADDRESS, 9235),
+                                                Collections.emptyMap(), Collections.emptySet(),
                                                 Version.CURRENT), null)
 
                         ), Collections.singletonList(new FailedNodeException("n3", "node 3 down",
