@@ -60,7 +60,7 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
 
     public QuerqyPlugin(final Settings settings) {
         rewriterShardContexts = new RewriterShardContexts(settings);
-        querqyProcessor = new QuerqyProcessor(rewriterShardContexts, new Log4jSink(), settings);
+        querqyProcessor = new QuerqyProcessor(rewriterShardContexts, new Log4jSink());
     }
 
     @Override
@@ -127,12 +127,12 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
     }
 
     @Override
-    public ArrayList<AggregationSpec> getAggregations() {
-        ArrayList<AggregationSpec> r = new ArrayList<>();
+    public List<AggregationSpec> getAggregations() {
+        List<AggregationSpec> r = new ArrayList<>();
         r.add(
                 new AggregationSpec(
                         QuerqyAggregationBuilder.NAME,
-                        (in) -> new QuerqyAggregationBuilder(in, querqyProcessor),
+                        QuerqyAggregationBuilder::new,
                         QuerqyAggregationBuilder.PARSER
                 ).addResultReader(InternalQuerqy::new)
         );
