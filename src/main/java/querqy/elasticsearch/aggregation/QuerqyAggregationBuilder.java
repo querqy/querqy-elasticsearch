@@ -8,31 +8,20 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregatorFactories.Builder;
 import org.elasticsearch.search.aggregations.AggregatorFactory;
 import org.elasticsearch.search.aggregations.support.AggregationContext;
-import org.elasticsearch.xcontent.ConstructingObjectParser;
 import org.elasticsearch.xcontent.ObjectParser;
 import org.elasticsearch.xcontent.ParseField;
 import org.elasticsearch.xcontent.XContentBuilder;
 import org.elasticsearch.xcontent.XContentParser;
-import querqy.elasticsearch.QuerqyProcessor;
-import querqy.elasticsearch.query.QuerqyQueryBuilder;
-import querqy.elasticsearch.query.Rewriter;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-
-import static querqy.elasticsearch.query.RequestUtils.fieldBoostModelToString;
 
 public class QuerqyAggregationBuilder extends AbstractAggregationBuilder<QuerqyAggregationBuilder> {
 
-    public static final String NAME = "querqy";
+    public static final String NAME = "decorations";
 
     private static final ParseField PARAMS_FIELD = new ParseField("params");
-
-    private QuerqyProcessor querqyProcessor;
 
     public static final ObjectParser<QuerqyAggregationBuilder, String> PARSER =
             new ObjectParser<>(NAME, QuerqyAggregationBuilder::new);
@@ -51,21 +40,9 @@ public class QuerqyAggregationBuilder extends AbstractAggregationBuilder<QuerqyA
         super(name);
     }
 
-    public QuerqyAggregationBuilder(QuerqyProcessor querqyProcessor) {
-        super(NAME);
-        setQuerqyProcessor(querqyProcessor);
-    }
-
     protected QuerqyAggregationBuilder(QuerqyAggregationBuilder clone, Builder factoriesBuilder, Map<String, Object> metadata) {
         super(clone, factoriesBuilder, metadata);
         this.params = clone.params;
-    }
-
-    public QuerqyAggregationBuilder(StreamInput in) throws IOException {
-        super(in);
-        if (in.readBoolean()) {
-            params = in.readMap();
-        }
     }
 
     @Override
@@ -76,17 +53,11 @@ public class QuerqyAggregationBuilder extends AbstractAggregationBuilder<QuerqyA
     /**
      * Read from a stream.
      */
-    public QuerqyAggregationBuilder(StreamInput in, QuerqyProcessor querqyProcessor) throws IOException {
+    public QuerqyAggregationBuilder(StreamInput in) throws IOException {
         super(in);
         if (in.readBoolean()) {
             params = in.readMap();
         }
-        setQuerqyProcessor(querqyProcessor);
-    }
-
-    public QuerqyAggregationBuilder setQuerqyProcessor(final QuerqyProcessor querqyProcessor) {
-        this.querqyProcessor = Objects.requireNonNull(querqyProcessor);
-        return this;
     }
 
     /**
@@ -117,7 +88,7 @@ public class QuerqyAggregationBuilder extends AbstractAggregationBuilder<QuerqyA
     @Override
     protected AggregatorFactory doBuild(AggregationContext context, AggregatorFactory parent, Builder subFactoriesBuilder)
         throws IOException {
-        return new QuerqyAggregatorFactory(name, context, parent, subFactoriesBuilder, metadata, querqyProcessor);
+        return new QuerqyAggregatorFactory(name, context, parent, subFactoriesBuilder, metadata);
     }
 
     @Override
@@ -140,14 +111,13 @@ public class QuerqyAggregationBuilder extends AbstractAggregationBuilder<QuerqyA
         }
     }
 
-    public static QuerqyAggregationBuilder fromXContent(final XContentParser parser, final QuerqyProcessor querqyProcessor) {
+    public static QuerqyAggregationBuilder fromXContent(final XContentParser parser) {
         final QuerqyAggregationBuilder builder;
         try {
             builder = PARSER.apply(parser, null);
         } catch (final IllegalArgumentException e) {
             throw new ParsingException(parser.getTokenLocation(), e.getMessage(), e);
         }
-        builder.setQuerqyProcessor(querqyProcessor);
         return builder;
     }
 

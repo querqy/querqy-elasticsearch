@@ -1,33 +1,28 @@
 package querqy.elasticsearch.aggregation;
 
+import org.apache.lucene.search.Query;
 import org.elasticsearch.search.aggregations.AggregationExecutionException;
 import org.elasticsearch.search.aggregations.Aggregator;
 import org.elasticsearch.search.aggregations.AggregatorFactories;
 import org.elasticsearch.search.aggregations.AggregatorFactory;
 import org.elasticsearch.search.aggregations.CardinalityUpperBound;
 import org.elasticsearch.search.aggregations.support.AggregationContext;
-import querqy.elasticsearch.QuerqyProcessor;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class QuerqyAggregatorFactory extends AggregatorFactory {
-
-    final private QuerqyProcessor querqyProcessor;
 
     public QuerqyAggregatorFactory(
         String name,
         AggregationContext context,
         AggregatorFactory parent,
         AggregatorFactories.Builder subFactories,
-        Map<String, Object> metadata,
-        QuerqyProcessor querqyProcessor
+        Map<String, Object> metadata
     ) throws IOException {
         super(name, context, parent, subFactories, metadata);
-        this.querqyProcessor = Objects.requireNonNull(querqyProcessor);
     }
 
     @Override
@@ -46,13 +41,11 @@ public class QuerqyAggregatorFactory extends AggregatorFactory {
         if (cardinality != CardinalityUpperBound.ONE) {
             throw new AggregationExecutionException("Aggregation [" + name() + "] must have cardinality 1 but was [" + cardinality + "]");
         }
-        Map<String, Object> info = querqyProcessor.getQuerqyInfoForQuery(context.subSearchContext().query());
-        if (info != null && !info.isEmpty()) {
-            if (metadata == null) {
-                metadata = new HashMap<>();
-            }
-            metadata.putAll(info);
-        }
-        return new QuerqyAggregator(name, context, metadata);
+        Query query = context.subSearchContext() == null ? null : context.subSearchContext().query();
+        List<Object> decorations =
+                query instanceof DecoratedQuery ?
+                        ((DecoratedQuery) query).getDecorations() :
+                        Collections.emptyList();
+        return new QuerqyAggregator(name, context, metadata, decorations);
     }
 }

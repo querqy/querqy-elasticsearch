@@ -74,24 +74,22 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
                                         "\"test-query\": \"a k\"" +
                                         "}}"
                                 ),
-                                XContentType.JSON), querqyProcessor
+                                XContentType.JSON)
                 );
 
         SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
         searchRequestBuilder.addAggregation(querqyAggregationBuilder);
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
-//        System.out.println(response);
         assertEquals(2L, response.getHits().getTotalHits().value);
-        assertEquals("{\"querqy\":{\"value\":[{\"decorations\":[\"REDIRECT /faq/a\"]}]}}", response.getAggregations().getAsMap().get(QuerqyAggregationBuilder.NAME).toString());
+        assertEquals("{\"decorations\":{\"value\":[\"REDIRECT /faq/a\"]}}", response.getAggregations().getAsMap().get(QuerqyAggregationBuilder.NAME).toString());
 
 
         querqyQuery.setMatchingQuery(new MatchingQuery("x z"));
         searchRequestBuilder.setQuery(querqyQuery);
         response = client().search(searchRequestBuilder.request()).get();
-//        System.out.println(response);
         assertEquals(0L, response.getHits().getTotalHits().value);
-        assertEquals("{\"querqy\":{\"value\":[{}]}}", response.getAggregations().getAsMap().get(QuerqyAggregationBuilder.NAME).toString());
+        assertEquals("{\"decorations\":{\"value\":[]}}", response.getAggregations().getAsMap().get(QuerqyAggregationBuilder.NAME).toString());
     }
 
     @Test
