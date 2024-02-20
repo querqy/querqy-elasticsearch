@@ -9,14 +9,15 @@ import org.elasticsearch.search.aggregations.metrics.MetricsAggregator;
 import org.elasticsearch.search.aggregations.support.AggregationContext;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 
-public final class QuerqyAggregator extends MetricsAggregator {
+public final class QuerqyDecorationAggregator extends MetricsAggregator {
 
-    final List<Object> decorations;
+    final Set<Object> decorations;
 
-    public QuerqyAggregator(String name, AggregationContext context, Map<String, Object> metadata, List<Object> decorations)
+    public QuerqyDecorationAggregator(String name, AggregationContext context, Map<String, Object> metadata, Set<Object> decorations)
         throws IOException {
         super(name, context, null, metadata);
         this.decorations = decorations;
@@ -36,9 +37,9 @@ public final class QuerqyAggregator extends MetricsAggregator {
     @Override
     public InternalAggregation buildAggregation(long l) {
         StreamOutput.checkWriteable(decorations);
-        return new InternalQuerqy(
+        return new InternalDecorationAggregation(
                 name,
-                decorations,
+                new ArrayList<>(decorations),
                 metadata()
         );
     }

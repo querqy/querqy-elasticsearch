@@ -26,8 +26,8 @@ import org.elasticsearch.script.ScriptService;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.watcher.ResourceWatcherService;
 import org.elasticsearch.xcontent.NamedXContentRegistry;
-import querqy.elasticsearch.aggregation.InternalQuerqy;
-import querqy.elasticsearch.aggregation.QuerqyAggregationBuilder;
+import querqy.elasticsearch.aggregation.InternalDecorationAggregation;
+import querqy.elasticsearch.aggregation.QuerqyDecorationAggregationBuilder;
 import querqy.elasticsearch.infologging.Log4jSink;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.rewriterstore.DeleteRewriterAction;
@@ -131,10 +131,10 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
         List<AggregationSpec> r = new ArrayList<>();
         r.add(
                 new AggregationSpec(
-                        QuerqyAggregationBuilder.NAME,
-                        QuerqyAggregationBuilder::new,
-                        QuerqyAggregationBuilder.PARSER
-                ).addResultReader(InternalQuerqy::new)
+                        QuerqyDecorationAggregationBuilder.NAME,
+                        QuerqyDecorationAggregationBuilder::new,
+                        QuerqyDecorationAggregationBuilder.PARSER
+                ).addResultReader(InternalDecorationAggregation::new)
         );
         return r;
     }

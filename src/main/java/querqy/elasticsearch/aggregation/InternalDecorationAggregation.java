@@ -16,16 +16,16 @@ import java.util.Objects;
 
 import static java.util.Collections.singletonList;
 
-public class InternalQuerqy extends InternalAggregation implements ScriptedMetric {
+public class InternalDecorationAggregation extends InternalAggregation implements ScriptedMetric {
 
     private final List<Object> aggregations;
 
-    InternalQuerqy(String name, List<Object> aggregations, Map<String, Object> metadata) {
+    InternalDecorationAggregation(String name, List<Object> aggregations, Map<String, Object> metadata) {
         super(name, metadata);
         this.aggregations = aggregations;
     }
 
-    public InternalQuerqy(StreamInput in) throws IOException {
+    public InternalDecorationAggregation(StreamInput in) throws IOException {
         super(in);
         if (in.getVersion().before(Version.V_7_8_0)) {
             aggregations = singletonList(in.readGenericValue());
@@ -55,7 +55,7 @@ public class InternalQuerqy extends InternalAggregation implements ScriptedMetri
 
     @Override
     public String getWriteableName() {
-        return QuerqyAggregationBuilder.NAME;
+        return QuerqyDecorationAggregationBuilder.NAME;
     }
 
     @Override
@@ -74,10 +74,10 @@ public class InternalQuerqy extends InternalAggregation implements ScriptedMetri
     public InternalAggregation reduce(List<InternalAggregation> aggregations, ReduceContext reduceContext) {
         List<Object> aggregationObjects = new ArrayList<>();
         for (InternalAggregation aggregation : aggregations) {
-            InternalQuerqy mapReduceAggregation = (InternalQuerqy) aggregation;
+            InternalDecorationAggregation mapReduceAggregation = (InternalDecorationAggregation) aggregation;
             aggregationObjects.addAll(mapReduceAggregation.aggregations);
         }
-        InternalQuerqy firstAggregation = ((InternalQuerqy) aggregations.get(0));
+        InternalDecorationAggregation firstAggregation = ((InternalDecorationAggregation) aggregations.get(0));
         List<Object> aggregation;
         if (reduceContext.isFinalReduce()) {
             aggregation = Collections.singletonList(aggregationObjects);
@@ -86,7 +86,7 @@ public class InternalQuerqy extends InternalAggregation implements ScriptedMetri
             // until we hit the final reduce phase.
             aggregation = aggregationObjects;
         }
-        return new InternalQuerqy(firstAggregation.getName(), aggregation, getMetadata());
+        return new InternalDecorationAggregation(firstAggregation.getName(), aggregation, getMetadata());
     }
 
     @Override
@@ -116,7 +116,7 @@ public class InternalQuerqy extends InternalAggregation implements ScriptedMetri
         if (obj == null || getClass() != obj.getClass()) return false;
         if (super.equals(obj) == false) return false;
 
-        InternalQuerqy other = (InternalQuerqy) obj;
+        InternalDecorationAggregation other = (InternalDecorationAggregation) obj;
         return Objects.equals(aggregations, other.aggregations);
     }
 

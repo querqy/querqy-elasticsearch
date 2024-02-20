@@ -10,13 +10,13 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-public class ParsedQuerqy extends ParsedAggregation implements Querqy {
+public class ParsedDecorationAggregation extends ParsedAggregation implements DecorationAggregation {
 
     private List<Object> aggregation;
 
     @Override
     public String getType() {
-        return QuerqyAggregationBuilder.NAME;
+        return QuerqyDecorationAggregationBuilder.NAME;
     }
 
     @Override
@@ -30,17 +30,17 @@ public class ParsedQuerqy extends ParsedAggregation implements Querqy {
         return builder.field(CommonFields.VALUE.getPreferredName(), aggregation());
     }
 
-    private static final ObjectParser<ParsedQuerqy, Void> PARSER = new ObjectParser<>(
-            ParsedQuerqy.class.getSimpleName(),
+    private static final ObjectParser<ParsedDecorationAggregation, Void> PARSER = new ObjectParser<>(
+            ParsedDecorationAggregation.class.getSimpleName(),
             true,
-            ParsedQuerqy::new
+            ParsedDecorationAggregation::new
     );
 
     static {
         declareAggregationFields(PARSER);
         PARSER.declareField(
                 (agg, value) -> agg.aggregation = Collections.singletonList(value),
-                ParsedQuerqy::parseValue,
+                ParsedDecorationAggregation::parseValue,
                 CommonFields.VALUE,
                 ObjectParser.ValueType.VALUE_OBJECT_ARRAY
         );
@@ -71,8 +71,8 @@ public class ParsedQuerqy extends ParsedAggregation implements Querqy {
         return value;
     }
 
-    public static ParsedQuerqy fromXContent(XContentParser parser, final String name) {
-        ParsedQuerqy aggregation = PARSER.apply(parser, null);
+    public static ParsedDecorationAggregation fromXContent(XContentParser parser, final String name) {
+        ParsedDecorationAggregation aggregation = PARSER.apply(parser, null);
         aggregation.setName(name);
         return aggregation;
     }

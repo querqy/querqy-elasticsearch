@@ -18,7 +18,6 @@ import querqy.lucene.QueryParsingController;
 import querqy.rewrite.RewriteChain;
 import querqy.rewrite.commonrules.model.DecorateInstruction;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -106,7 +105,7 @@ public class QuerqyProcessor {
         final Set<Object> decorations = (Set<Object>) requestAdapter.getContext().get(DecorateInstruction.DECORATION_CONTEXT_KEY);
         final Query query =
                 decorations != null && !decorations.isEmpty() ?
-                        DecoratedQuery.from(builder.build(), new ArrayList<>(decorations)) :
+                        DecoratedQuery.from(builder.build(), decorations) :
                         builder.build();
         if (infoLogging != null) {
             infoLogging.endOfRequest(requestAdapter);

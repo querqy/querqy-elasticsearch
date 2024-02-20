@@ -11,7 +11,7 @@ import org.elasticsearch.test.ESSingleNodeTestCase;
 import org.elasticsearch.xcontent.XContentType;
 import org.junit.After;
 import org.junit.Test;
-import querqy.elasticsearch.aggregation.QuerqyAggregationBuilder;
+import querqy.elasticsearch.aggregation.QuerqyDecorationAggregationBuilder;
 import querqy.elasticsearch.query.MatchingQuery;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.query.Rewriter;
@@ -64,8 +64,8 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         querqyQuery.setQueryFieldsAndBoostings(Arrays.asList("field1", "field2"));
         querqyQuery.setMinimumShouldMatch("1");
 
-        QuerqyAggregationBuilder querqyAggregationBuilder =
-                QuerqyAggregationBuilder.fromXContent(
+        QuerqyDecorationAggregationBuilder querqyDecorationAggregationBuilder =
+                QuerqyDecorationAggregationBuilder.fromXContent(
                         XContentHelper.createParser(
                                 null,
                                 null,
@@ -79,17 +79,17 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
         SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
-        searchRequestBuilder.addAggregation(querqyAggregationBuilder);
+        searchRequestBuilder.addAggregation(querqyDecorationAggregationBuilder);
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
-        assertEquals("{\"decorations\":{\"value\":[\"REDIRECT /faq/a\"]}}", response.getAggregations().getAsMap().get(QuerqyAggregationBuilder.NAME).toString());
+        assertEquals("{\"decorations\":{\"value\":[\"REDIRECT /faq/a\"]}}", response.getAggregations().getAsMap().get(QuerqyDecorationAggregationBuilder.NAME).toString());
 
 
         querqyQuery.setMatchingQuery(new MatchingQuery("x z"));
         searchRequestBuilder.setQuery(querqyQuery);
         response = client().search(searchRequestBuilder.request()).get();
         assertEquals(0L, response.getHits().getTotalHits().value);
-        assertEquals("{\"decorations\":{\"value\":[]}}", response.getAggregations().getAsMap().get(QuerqyAggregationBuilder.NAME).toString());
+        assertEquals("{\"decorations\":{\"value\":[]}}", response.getAggregations().getAsMap().get(QuerqyDecorationAggregationBuilder.NAME).toString());
     }
 
     @Test
