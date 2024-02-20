@@ -10,12 +10,12 @@ import org.elasticsearch.search.aggregations.support.AggregationContext;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class QuerqyAggregatorFactory extends AggregatorFactory {
+public class QuerqyDecorationAggregatorFactory extends AggregatorFactory {
 
-    public QuerqyAggregatorFactory(
+    public QuerqyDecorationAggregatorFactory(
         String name,
         AggregationContext context,
         AggregatorFactory parent,
@@ -42,10 +42,10 @@ public class QuerqyAggregatorFactory extends AggregatorFactory {
             throw new AggregationExecutionException("Aggregation [" + name() + "] must have cardinality 1 but was [" + cardinality + "]");
         }
         Query query = context.subSearchContext() == null ? null : context.subSearchContext().query();
-        List<Object> decorations =
-                query instanceof DecoratedQuery ?
-                        ((DecoratedQuery) query).getDecorations() :
-                        Collections.emptyList();
-        return new QuerqyAggregator(name, context, metadata, decorations);
+        Set<Object> decorations =
+                (query instanceof DecoratedQuery<?>) ?
+                        ((DecoratedQuery<?>) query).getDecorations() :
+                        Collections.emptySet();
+        return new QuerqyDecorationAggregator(name, context, metadata, decorations);
     }
 }
