@@ -105,7 +105,7 @@ public class QuerqyProcessor {
         final Set<Object> decorations = (Set<Object>) requestAdapter.getContext().get(DecorateInstruction.DECORATION_CONTEXT_KEY);
         final Query query =
                 decorations != null && !decorations.isEmpty() ?
-                        DecoratedQuery.from(builder.build(), decorations) :
+                        new DecoratedQuery<>(builder.build(), decorations) :
                         builder.build();
         if (infoLogging != null) {
             infoLogging.endOfRequest(requestAdapter);

@@ -50,7 +50,6 @@ public class InternalDecorationAggregation extends InternalAggregation implement
         } else {
             out.writeCollection(aggregations, StreamOutput::writeGenericValue);
         }
-
     }
 
     @Override

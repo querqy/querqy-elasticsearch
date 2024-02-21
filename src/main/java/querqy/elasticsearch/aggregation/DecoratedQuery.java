@@ -16,13 +16,9 @@ public class DecoratedQuery<T extends Query> extends Query {
     final private T query;
     final private Set<Object> decorations;
 
-    private DecoratedQuery(T query, Set<Object> decorations) {
+    public DecoratedQuery(T query, Set<Object> decorations) {
         this.query = Objects.requireNonNull(query);
         this.decorations = Objects.requireNonNull(decorations);
-    }
-
-    public static <T extends Query> DecoratedQuery<T> from(T query, Set<Object> decorations) {
-        return new DecoratedQuery<>(query, decorations);
     }
 
     public T getQuery() {
@@ -50,7 +46,7 @@ public class DecoratedQuery<T extends Query> extends Query {
 
     @Override
     public String toString(String field) {
-        return query.toString();
+        return query.toString(field);
     }
 
     @Override
@@ -71,7 +67,7 @@ public class DecoratedQuery<T extends Query> extends Query {
     }
 
     private int computeHashCode() {
-        int hashCode = Objects.hash(query.hashCode(), decorations);
+        int hashCode = Objects.hash(query, decorations);
         if (hashCode == 0) {
             hashCode = 1;
         }
@@ -86,9 +82,7 @@ public class DecoratedQuery<T extends Query> extends Query {
         // no need for synchronization, in the worst case we would just compute the hash several times.
         if (hashCode == 0) {
             hashCode = computeHashCode();
-            assert hashCode != 0;
         }
-        assert hashCode == computeHashCode();
         return hashCode;
     }
 

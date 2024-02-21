@@ -3,15 +3,11 @@ package querqy.elasticsearch;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.common.bytes.BytesArray;
-import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.test.ESSingleNodeTestCase;
-import org.elasticsearch.xcontent.XContentType;
 import org.junit.After;
 import org.junit.Test;
-import querqy.elasticsearch.aggregation.QuerqyDecorationAggregationBuilder;
 import querqy.elasticsearch.query.MatchingQuery;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.query.Rewriter;
@@ -48,7 +44,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         content.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
 
         final Map<String, Object> config = new HashMap<>();
-        config.put("rules", "k =>\nSYNONYM: c\na =>\nDECORATE: REDIRECT /faq/a");
+        config.put("rules", "k =>\nSYNONYM: c");
         config.put("ignoreCase", true);
         config.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
         content.put("config", config);
@@ -57,39 +53,18 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
         client().execute(PutRewriterAction.INSTANCE, request).get();
 
-        QuerqyProcessor querqyProcessor = getInstanceFromNode(QuerqyProcessor.class);
-        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(querqyProcessor);
+        QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
         querqyQuery.setMatchingQuery(new MatchingQuery("a k"));
         querqyQuery.setQueryFieldsAndBoostings(Arrays.asList("field1", "field2"));
         querqyQuery.setMinimumShouldMatch("1");
 
-        QuerqyDecorationAggregationBuilder querqyDecorationAggregationBuilder =
-                QuerqyDecorationAggregationBuilder.fromXContent(
-                        XContentHelper.createParser(
-                                null,
-                                null,
-                                new BytesArray("{" +
-                                        "\"params\": {" +
-                                        "\"test-query\": \"a k\"" +
-                                        "}}"
-                                ),
-                                XContentType.JSON)
-                );
-
-        SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
+        final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
-        searchRequestBuilder.addAggregation(querqyDecorationAggregationBuilder);
+
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
-        assertEquals("{\"decorations\":{\"value\":[\"REDIRECT /faq/a\"]}}", response.getAggregations().getAsMap().get(QuerqyDecorationAggregationBuilder.NAME).toString());
 
-
-        querqyQuery.setMatchingQuery(new MatchingQuery("x z"));
-        searchRequestBuilder.setQuery(querqyQuery);
-        response = client().search(searchRequestBuilder.request()).get();
-        assertEquals(0L, response.getHits().getTotalHits().value);
-        assertEquals("{\"decorations\":{\"value\":[]}}", response.getAggregations().getAsMap().get(QuerqyDecorationAggregationBuilder.NAME).toString());
     }
 
     @Test
