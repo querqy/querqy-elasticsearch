@@ -81,6 +81,13 @@ public class QuerqyDecorationAggregationIntegrationTest extends ESSingleNodeTest
         assertEquals(0L, response.getHits().getTotalHits().value);
         assertEquals("{\"decorations\":{\"value\":[\"REDIRECT /faq/y\"]}}", response.getAggregations().getAsMap().get(QuerqyDecorationAggregationBuilder.NAME).toString());
 
+        // with hits, without decorations
+        querqyQuery.setMatchingQuery(new MatchingQuery("k x"));
+        searchRequestBuilder.setQuery(querqyQuery);
+        response = client().search(searchRequestBuilder.request()).get();
+        assertEquals(2L, response.getHits().getTotalHits().value);
+        assertEquals("{\"decorations\":{\"value\":[]}}", response.getAggregations().getAsMap().get(QuerqyDecorationAggregationBuilder.NAME).toString());
+
     }
 
     @After
