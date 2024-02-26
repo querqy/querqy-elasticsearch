@@ -1,5 +1,7 @@
 package querqy.elasticsearch.aggregation;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
@@ -22,6 +24,8 @@ import java.util.Map;
 
 public class QuerqyDecorationAggregationIntegrationTest extends ESSingleNodeTestCase {
 
+    private final static Logger LOGGER = LogManager.getLogger(QuerqyDecorationAggregationIntegrationTest.class);
+
     private final String INDEX_NAME = "test_index";
 
     @Override
@@ -37,7 +41,7 @@ public class QuerqyDecorationAggregationIntegrationTest extends ESSingleNodeTest
         content.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
 
         final Map<String, Object> config = new HashMap<>();
-        config.put("rules", "k =>\nSYNONYM: c\na =>\nDECORATE: REDIRECT /faq/a");
+        config.put("rules", "k =>\nSYNONYM: c\na =>\nDECORATE: REDIRECT /faq/a\ny =>\nDECORATE: REDIRECT /faq/y");
         config.put("ignoreCase", true);
         config.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
         content.put("config", config);
@@ -61,13 +65,22 @@ public class QuerqyDecorationAggregationIntegrationTest extends ESSingleNodeTest
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
         assertEquals("{\"decorations\":{\"value\":[\"REDIRECT /faq/a\"]}}", response.getAggregations().getAsMap().get(QuerqyDecorationAggregationBuilder.NAME).toString());
+        LOGGER.info("Response:\n{}", response);
 
-        // without decorations
+        // without hits, without decorations
         querqyQuery.setMatchingQuery(new MatchingQuery("x z"));
         searchRequestBuilder.setQuery(querqyQuery);
         response = client().search(searchRequestBuilder.request()).get();
         assertEquals(0L, response.getHits().getTotalHits().value);
         assertEquals("{\"decorations\":{\"value\":[]}}", response.getAggregations().getAsMap().get(QuerqyDecorationAggregationBuilder.NAME).toString());
+
+        // without hits, with decorations
+        querqyQuery.setMatchingQuery(new MatchingQuery("x y"));
+        searchRequestBuilder.setQuery(querqyQuery);
+        response = client().search(searchRequestBuilder.request()).get();
+        assertEquals(0L, response.getHits().getTotalHits().value);
+        assertEquals("{\"decorations\":{\"value\":[\"REDIRECT /faq/y\"]}}", response.getAggregations().getAsMap().get(QuerqyDecorationAggregationBuilder.NAME).toString());
+
     }
 
     @After
