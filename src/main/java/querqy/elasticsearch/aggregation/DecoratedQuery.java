@@ -3,7 +3,6 @@ package querqy.elasticsearch.aggregation;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.QueryVisitor;
 import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.Weight;
 
@@ -37,11 +36,6 @@ public class DecoratedQuery<T extends Query> extends Query {
     @Override
     public Query rewrite(IndexReader reader) throws IOException {
         return query.rewrite(reader);
-    }
-
-    @Override
-    public void visit(QueryVisitor visitor) {
-        query.visit(visitor);
     }
 
     @Override
