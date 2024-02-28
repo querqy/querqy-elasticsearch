@@ -44,15 +44,15 @@ public class DecoratedQuery<T extends Query> extends Query {
     }
 
     @Override
-    public boolean equals(Object object) {
+    public boolean equals(final Object object) {
         if (!sameClassAs(object)) return false;
-        DecoratedQuery<?> other = castObject(object);
+        final DecoratedQuery<?> other = castObject(object);
         return isEqualQueriesAndDecorations(other);
     }
 
-    private boolean isEqualQueriesAndDecorations(DecoratedQuery<?> other) {
-        Query otherQuery = other.getQuery();
-        Set<Object> otherDecorations = other.getDecorations();
+    private boolean isEqualQueriesAndDecorations(final DecoratedQuery<?> other) {
+        final Query otherQuery = other.getQuery();
+        final Set<Object> otherDecorations = other.getDecorations();
         return getQuery().equals(otherQuery) && getDecorations().equals(otherDecorations);
     }
 
