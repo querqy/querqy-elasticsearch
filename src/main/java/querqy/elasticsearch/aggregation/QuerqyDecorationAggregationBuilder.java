@@ -25,16 +25,16 @@ public class QuerqyDecorationAggregationBuilder extends AbstractAggregationBuild
         super(NAME);
     }
 
-    public QuerqyDecorationAggregationBuilder(StreamInput in) throws IOException {
+    public QuerqyDecorationAggregationBuilder(final StreamInput in) throws IOException {
         super(in);
     }
 
-    protected QuerqyDecorationAggregationBuilder(QuerqyDecorationAggregationBuilder clone, Builder factoriesBuilder, Map<String, Object> metadata) {
+    protected QuerqyDecorationAggregationBuilder(final QuerqyDecorationAggregationBuilder clone, final Builder factoriesBuilder, final Map<String, Object> metadata) {
         super(clone, factoriesBuilder, metadata);
     }
 
     @Override
-    protected AggregationBuilder shallowCopy(Builder factoriesBuilder, Map<String, Object> metadata) {
+    protected AggregationBuilder shallowCopy(final Builder factoriesBuilder, final Map<String, Object> metadata) {
         return new QuerqyDecorationAggregationBuilder(this, factoriesBuilder, metadata);
     }
 
@@ -44,18 +44,18 @@ public class QuerqyDecorationAggregationBuilder extends AbstractAggregationBuild
     }
 
     @Override
-    protected AggregatorFactory doBuild(AggregationContext context, AggregatorFactory parent, Builder subFactoriesBuilder)
+    protected AggregatorFactory doBuild(final AggregationContext context, final AggregatorFactory parent, final Builder subFactoriesBuilder)
         throws IOException {
         return new QuerqyDecorationAggregatorFactory(name, context, parent, subFactoriesBuilder, metadata);
     }
 
     @Override
-    protected XContentBuilder internalXContent(XContentBuilder builder, Params params) throws IOException {
+    protected XContentBuilder internalXContent(final XContentBuilder builder, final Params params) {
         return builder;
     }
 
     @Override
-    protected void doWriteTo(StreamOutput out) throws IOException {
+    protected void doWriteTo(final StreamOutput out) {
         // no state to write out
     }
 
@@ -70,7 +70,7 @@ public class QuerqyDecorationAggregationBuilder extends AbstractAggregationBuild
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         return super.equals(obj);

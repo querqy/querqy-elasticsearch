@@ -15,7 +15,7 @@ public class DecoratedQuery<T extends Query> extends Query {
     final private T query;
     final private Set<Object> decorations;
 
-    public DecoratedQuery(T query, Set<Object> decorations) {
+    public DecoratedQuery(final T query, final Set<Object> decorations) {
         this.query = Objects.requireNonNull(query);
         this.decorations = Objects.requireNonNull(decorations);
     }
@@ -29,17 +29,17 @@ public class DecoratedQuery<T extends Query> extends Query {
     }
 
     @Override
-    public Weight createWeight(IndexSearcher searcher, ScoreMode scoreMode, float boost) throws IOException {
+    public Weight createWeight(final IndexSearcher searcher, final ScoreMode scoreMode, final float boost) throws IOException {
         return query.createWeight(searcher, scoreMode, boost);
     }
 
     @Override
-    public Query rewrite(IndexReader reader) throws IOException {
+    public Query rewrite(final IndexReader reader) throws IOException {
         return query.rewrite(reader);
     }
 
     @Override
-    public String toString(String field) {
+    public String toString(final String field) {
         return query.toString(field);
     }
 
@@ -56,7 +56,7 @@ public class DecoratedQuery<T extends Query> extends Query {
         return getQuery().equals(otherQuery) && getDecorations().equals(otherDecorations);
     }
 
-    private DecoratedQuery<?> castObject(Object object) {
+    private DecoratedQuery<?> castObject(final Object object) {
         return getClass().cast(object);
     }
 

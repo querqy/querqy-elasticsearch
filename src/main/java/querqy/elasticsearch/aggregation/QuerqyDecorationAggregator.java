@@ -17,7 +17,7 @@ public final class QuerqyDecorationAggregator extends MetricsAggregator {
 
     final Set<Object> decorations;
 
-    public QuerqyDecorationAggregator(String name, AggregationContext context, Map<String, Object> metadata, Set<Object> decorations)
+    public QuerqyDecorationAggregator(final String name, final AggregationContext context, final Map<String, Object> metadata, final Set<Object> decorations)
         throws IOException {
         super(name, context, null, metadata);
         this.decorations = decorations;
@@ -29,13 +29,13 @@ public final class QuerqyDecorationAggregator extends MetricsAggregator {
     }
 
     @Override
-    protected LeafBucketCollector getLeafCollector(LeafReaderContext ctx, LeafBucketCollector sub) throws IOException {
+    protected LeafBucketCollector getLeafCollector(final LeafReaderContext ctx, final LeafBucketCollector sub) {
         // No sub-aggregations
         return LeafBucketCollector.NO_OP_COLLECTOR;
     }
 
     @Override
-    public InternalAggregation buildAggregation(long l) {
+    public InternalAggregation buildAggregation(final long l) {
         StreamOutput.checkWriteable(decorations);
         return new InternalDecorationAggregation(
                 name,

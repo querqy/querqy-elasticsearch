@@ -20,12 +20,12 @@ public class InternalDecorationAggregation extends InternalAggregation implement
 
     private final List<Object> aggregations;
 
-    InternalDecorationAggregation(String name, List<Object> aggregations, Map<String, Object> metadata) {
+    InternalDecorationAggregation(final String name, final List<Object> aggregations, final Map<String, Object> metadata) {
         super(name, metadata);
         this.aggregations = aggregations;
     }
 
-    public InternalDecorationAggregation(StreamInput in) throws IOException {
+    public InternalDecorationAggregation(final StreamInput in) throws IOException {
         super(in);
         if (in.getVersion().before(Version.V_7_8_0)) {
             aggregations = singletonList(in.readGenericValue());
@@ -35,7 +35,7 @@ public class InternalDecorationAggregation extends InternalAggregation implement
     }
 
     @Override
-    protected void doWriteTo(StreamOutput out) throws IOException {
+    protected void doWriteTo(final StreamOutput out) throws IOException {
         if (out.getVersion().before(Version.V_7_8_0)) {
             if (aggregations.size() > 1) {
                 /*
@@ -70,14 +70,14 @@ public class InternalDecorationAggregation extends InternalAggregation implement
     }
 
     @Override
-    public InternalAggregation reduce(List<InternalAggregation> aggregations, ReduceContext reduceContext) {
-        List<Object> aggregationObjects = new ArrayList<>();
-        for (InternalAggregation aggregation : aggregations) {
-            InternalDecorationAggregation mapReduceAggregation = (InternalDecorationAggregation) aggregation;
+    public InternalAggregation reduce(final List<InternalAggregation> aggregations, final ReduceContext reduceContext) {
+        final List<Object> aggregationObjects = new ArrayList<>();
+        for (final InternalAggregation aggregation : aggregations) {
+            final InternalDecorationAggregation mapReduceAggregation = (InternalDecorationAggregation) aggregation;
             aggregationObjects.addAll(mapReduceAggregation.aggregations);
         }
-        InternalDecorationAggregation firstAggregation = ((InternalDecorationAggregation) aggregations.get(0));
-        List<Object> aggregation;
+        final InternalDecorationAggregation firstAggregation = ((InternalDecorationAggregation) aggregations.get(0));
+        final List<Object> aggregation;
         if (reduceContext.isFinalReduce()) {
             aggregation = Collections.singletonList(aggregationObjects);
         } else {
@@ -94,7 +94,7 @@ public class InternalDecorationAggregation extends InternalAggregation implement
     }
 
     @Override
-    public Object getProperty(List<String> path) {
+    public Object getProperty(final List<String> path) {
         if (path.isEmpty()) {
             return this;
         } else if (path.size() == 1 && "value".equals(path.get(0))) {
@@ -105,17 +105,17 @@ public class InternalDecorationAggregation extends InternalAggregation implement
     }
 
     @Override
-    public XContentBuilder doXContentBody(XContentBuilder builder, Params params) throws IOException {
+    public XContentBuilder doXContentBody(final XContentBuilder builder, final Params params) throws IOException {
         return builder.field(CommonFields.VALUE.getPreferredName(), aggregation());
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        if (super.equals(obj) == false) return false;
+        if (!super.equals(obj)) return false;
 
-        InternalDecorationAggregation other = (InternalDecorationAggregation) obj;
+        final InternalDecorationAggregation other = (InternalDecorationAggregation) obj;
         return Objects.equals(aggregations, other.aggregations);
     }
 

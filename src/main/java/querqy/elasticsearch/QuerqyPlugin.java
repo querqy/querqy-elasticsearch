@@ -114,8 +114,8 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
                                                final NamedXContentRegistry xContentRegistry,
                                                final Environment environment, final NodeEnvironment nodeEnvironment,
                                                final NamedWriteableRegistry namedWriteableRegistry,
-                                               IndexNameExpressionResolver indexNameExpressionResolver,
-                                               Supplier<RepositoriesService> repositoriesServiceSupplier) {
+                                               final IndexNameExpressionResolver indexNameExpressionResolver,
+                                               final Supplier<RepositoriesService> repositoriesServiceSupplier) {
         return Arrays.asList(rewriterShardContexts, querqyProcessor);
     }
 
@@ -128,7 +128,7 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
 
     @Override
     public List<AggregationSpec> getAggregations() {
-        List<AggregationSpec> r = new ArrayList<>();
+        final List<AggregationSpec> r = new ArrayList<>();
         r.add(
                 new AggregationSpec(
                         QuerqyDecorationAggregationBuilder.NAME,

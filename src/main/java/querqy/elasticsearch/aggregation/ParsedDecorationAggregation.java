@@ -26,7 +26,7 @@ public class ParsedDecorationAggregation extends ParsedAggregation implements De
     }
 
     @Override
-    public XContentBuilder doXContentBody(XContentBuilder builder, Params params) throws IOException {
+    public XContentBuilder doXContentBody(final XContentBuilder builder, final Params params) throws IOException {
         return builder.field(CommonFields.VALUE.getPreferredName(), aggregation());
     }
 
@@ -46,33 +46,33 @@ public class ParsedDecorationAggregation extends ParsedAggregation implements De
         );
     }
 
-    private static Object parseValue(XContentParser parser) throws IOException {
-        XContentParser.Token token = parser.currentToken();
+    private static Object parseValue(final XContentParser parser) throws IOException {
+        final XContentParser.Token token = parser.currentToken();
         Object value = null;
-        if (token == XContentParser.Token.VALUE_NULL) {
-            value = null;
-        } else if (token.isValue()) {
-            if (token == XContentParser.Token.VALUE_STRING) {
-                // binary values will be parsed back and returned as base64 strings when reading from json and yaml
-                value = parser.text();
-            } else if (token == XContentParser.Token.VALUE_NUMBER) {
-                value = parser.numberValue();
-            } else if (token == XContentParser.Token.VALUE_BOOLEAN) {
-                value = parser.booleanValue();
-            } else if (token == XContentParser.Token.VALUE_EMBEDDED_OBJECT) {
-                // binary values will be parsed back and returned as BytesArray when reading from cbor and smile
-                value = new BytesArray(parser.binaryValue());
+        if (token != XContentParser.Token.VALUE_NULL) {
+            if (token.isValue()) {
+                if (token == XContentParser.Token.VALUE_STRING) {
+                    // binary values will be parsed back and returned as base64 strings when reading from json and yaml
+                    value = parser.text();
+                } else if (token == XContentParser.Token.VALUE_NUMBER) {
+                    value = parser.numberValue();
+                } else if (token == XContentParser.Token.VALUE_BOOLEAN) {
+                    value = parser.booleanValue();
+                } else if (token == XContentParser.Token.VALUE_EMBEDDED_OBJECT) {
+                    // binary values will be parsed back and returned as BytesArray when reading from cbor and smile
+                    value = new BytesArray(parser.binaryValue());
+                }
+            } else if (token == XContentParser.Token.START_OBJECT) {
+                value = parser.map();
+            } else if (token == XContentParser.Token.START_ARRAY) {
+                value = parser.list();
             }
-        } else if (token == XContentParser.Token.START_OBJECT) {
-            value = parser.map();
-        } else if (token == XContentParser.Token.START_ARRAY) {
-            value = parser.list();
         }
         return value;
     }
 
-    public static ParsedDecorationAggregation fromXContent(XContentParser parser, final String name) {
-        ParsedDecorationAggregation aggregation = PARSER.apply(parser, null);
+    public static ParsedDecorationAggregation fromXContent(final XContentParser parser, final String name) {
+        final ParsedDecorationAggregation aggregation = PARSER.apply(parser, null);
         aggregation.setName(name);
         return aggregation;
     }
