@@ -27,29 +27,12 @@ public class InternalDecorationAggregation extends InternalAggregation implement
 
     public InternalDecorationAggregation(final StreamInput in) throws IOException {
         super(in);
-        if (in.getVersion().before(Version.V_7_8_0)) {
-            aggregations = singletonList(in.readGenericValue());
-        } else {
-            aggregations = in.readList(StreamInput::readGenericValue);
-        }
+        aggregations = in.readList(StreamInput::readGenericValue);
     }
 
     @Override
     protected void doWriteTo(final StreamOutput out) throws IOException {
-        if (out.getVersion().before(Version.V_7_8_0)) {
-            if (aggregations.size() > 1) {
-                /*
-                 * If aggregations has more than one entry we're trying to
-                 * serialize an unreduced aggregation. This *should* only
-                 * happen when we're returning a scripted_metric over cross
-                 * cluster search.
-                 */
-                throw new IllegalArgumentException("querqy doesn't support cross cluster search until 7.8.0");
-            }
-            out.writeGenericValue(aggregations.get(0));
-        } else {
-            out.writeCollection(aggregations, StreamOutput::writeGenericValue);
-        }
+        out.writeCollection(aggregations, StreamOutput::writeGenericValue);
     }
 
     @Override
