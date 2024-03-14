@@ -58,7 +58,7 @@
 
         <querqy.lucene.version>5.5.lucene900.1</querqy.lucene.version>
 
-        <elasticsearch.version>8.9.2</elasticsearch.version>
+        <elasticsearch.version>8.10.3</elasticsearch.version>
         <jacoco.version>0.8.10</jacoco.version>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
