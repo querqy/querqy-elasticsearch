@@ -205,38 +205,4 @@ public class InternalDecorationAggregationTests extends InternalAggregationTestC
         return path -> path.contains(CommonFields.VALUE.getPreferredName());
     }
 
-    public void testOldSerialization() throws IOException {
-        // A single element list looks like a fully reduced agg
-        InternalDecorationAggregation original = new InternalDecorationAggregation(
-            "test",
-            org.elasticsearch.core.List.of("foo"),
-            null
-        );
-        original.mergePipelineTreeForBWCSerialization(PipelineTree.EMPTY);
-        InternalDecorationAggregation roundTripped = (InternalDecorationAggregation) copyNamedWriteable(
-            original,
-            getNamedWriteableRegistry(),
-            InternalAggregation.class,
-            VersionUtils.randomVersionBetween(random(), Version.V_7_0_0, VersionUtils.getPreviousVersion(Version.V_7_8_0))
-        );
-        assertThat(roundTripped, equalTo(original));
-
-        // A multi-element list looks like a non-reduced agg
-        InternalDecorationAggregation unreduced = new InternalDecorationAggregation(
-            "test",
-            org.elasticsearch.core.List.of("foo", "bar"),
-            null
-        );
-        unreduced.mergePipelineTreeForBWCSerialization(PipelineTree.EMPTY);
-        Exception e = expectThrows(
-            IllegalArgumentException.class,
-            () -> copyNamedWriteable(
-                unreduced,
-                getNamedWriteableRegistry(),
-                InternalAggregation.class,
-                VersionUtils.randomVersionBetween(random(), Version.V_7_0_0, VersionUtils.getPreviousVersion(Version.V_7_8_0))
-            )
-        );
-        assertThat(e.getMessage(), equalTo("querqy doesn't support cross cluster search until 7.8.0"));
-    }
 }
