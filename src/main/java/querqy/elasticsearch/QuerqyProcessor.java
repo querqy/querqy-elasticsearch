@@ -4,6 +4,7 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.elasticsearch.index.query.SearchExecutionContext;
+import querqy.elasticsearch.aggregation.DecoratedQuery;
 import querqy.elasticsearch.infologging.LogPayloadType;
 import querqy.elasticsearch.infologging.SingleSinkInfoLogging;
 import querqy.elasticsearch.query.InfoLoggingSpec;
@@ -15,6 +16,7 @@ import querqy.lucene.LuceneQueries;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.QueryParsingController;
 import querqy.rewrite.RewriteChain;
+import querqy.rewrite.commonrules.model.DecorateInstruction;
 
 import java.util.Collections;
 import java.util.List;
@@ -75,10 +77,6 @@ public class QuerqyProcessor {
         final QueryParsingController controller = new QueryParsingController(requestAdapter);
         final LuceneQueries queries = controller.process();
 
-
-//        // TODO: make decos part of the general Querqy object model
-//        final Set<Object> decorations = (Set<Object>) requestAdapter.getContext().get(DecorateInstruction.CONTEXT_KEY);
-
         if ((queries.querqyBoostQueries == null || queries.querqyBoostQueries.isEmpty())
                 && (queries.filterQueries == null || queries.filterQueries.isEmpty())
                 && queries.mainQuery instanceof BooleanQuery) {
@@ -104,14 +102,18 @@ public class QuerqyProcessor {
 
         appendFilterQueries(queries, builder);
 
-        final BooleanQuery query = builder.build();
+        final Set<Object> decorations = (Set<Object>) requestAdapter.getContext().get(DecorateInstruction.DECORATION_CONTEXT_KEY);
+        final Query query =
+                decorations != null && !decorations.isEmpty() ?
+                        new DecoratedQuery<>(builder.build(), decorations) :
+                        builder.build();
         if (infoLogging != null) {
             infoLogging.endOfRequest(requestAdapter);
         }
+
         return query;
 
     }
-
 
     void appendFilterQueries(final LuceneQueries queries, final BooleanQuery.Builder builder) {
 

@@ -1,15 +1,5 @@
 package querqy.elasticsearch;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
@@ -26,6 +16,16 @@ import querqy.elasticsearch.rewriterstore.DeleteRewriterRequest;
 import querqy.elasticsearch.rewriterstore.PutRewriterAction;
 import querqy.elasticsearch.rewriterstore.PutRewriterRequest;
 import querqy.elasticsearch.rewriterstore.PutRewriterResponse;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
