@@ -3,7 +3,7 @@
 
     <groupId>org.querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>1.8.es853.0-SNAPSHOT</version>
+    <version>1.8.es892.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -40,9 +40,9 @@
     <properties>
 
         <maven-assembly-plugin.version>3.1.1</maven-assembly-plugin.version>
-        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-jar-plugin.version>3.1.2</maven-jar-plugin.version>
-        <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+        <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
@@ -57,7 +57,8 @@
         <json-path.version>2.7.0</json-path.version>
 
         <querqy.lucene.version>5.5.lucene900.1</querqy.lucene.version>
-        <elasticsearch.version>8.5.3</elasticsearch.version>
+
+        <elasticsearch.version>8.9.2</elasticsearch.version>
         <jacoco.version>0.8.10</jacoco.version>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
@@ -132,6 +133,7 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
                         <descriptor>assembly.xml</descriptor>
                     </descriptors>
