@@ -34,7 +34,7 @@ public class NodesReloadRewriterResponse extends BaseNodesResponse<NodesReloadRe
 
     @Override
     protected List<NodeResponse> readNodesFrom(final StreamInput in) throws IOException {
-        return in.readList(NodesReloadRewriterResponse.NodeResponse::readNodeResponse);
+        return in.readCollectionAsList(NodesReloadRewriterResponse.NodeResponse::readNodeResponse);
     }
 
     @Override

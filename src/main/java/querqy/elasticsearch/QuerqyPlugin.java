@@ -17,7 +17,8 @@ import org.elasticsearch.common.settings.IndexScopedSettings;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.SettingsFilter;
-import org.elasticsearch.tracing.Tracer;
+import org.elasticsearch.indices.IndicesService;
+import org.elasticsearch.telemetry.TelemetryProvider;
 import org.elasticsearch.xcontent.NamedXContentRegistry;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.env.NodeEnvironment;
@@ -115,7 +116,9 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
                                                final NamedWriteableRegistry namedWriteableRegistry,
                                                final IndexNameExpressionResolver indexNameExpressionResolver,
                                                final Supplier<RepositoriesService> repositoriesServiceSupplier,
-                                               final Tracer tracer, final AllocationService allocationService) {
+                                               final TelemetryProvider telemetryProvider,
+                                               final AllocationService allocationService,
+                                               final IndicesService indicesService) {
         return Arrays.asList(rewriterShardContexts, querqyProcessor);
     }
 

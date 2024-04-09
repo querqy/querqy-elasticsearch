@@ -31,7 +31,7 @@ public class NodesClearRewriterCacheResponse extends BaseNodesResponse<NodesClea
 
     @Override
     protected List<NodeResponse> readNodesFrom(final StreamInput in) throws IOException {
-        return in.readList(NodesClearRewriterCacheResponse.NodeResponse::readNodeResponse);
+        return in.readCollectionAsList(NodesClearRewriterCacheResponse.NodeResponse::readNodeResponse);
     }
 
     @Override

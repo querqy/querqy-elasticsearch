@@ -23,7 +23,6 @@ public class TransportNodesClearRewriterCacheAction extends TransportNodesAction
 
     protected RewriterShardContexts rewriterShardContexts;
 
-
     @Inject
     public TransportNodesClearRewriterCacheAction(final ThreadPool threadPool, final ClusterService clusterService,
                                               final TransportService transportService,
@@ -32,10 +31,10 @@ public class TransportNodesClearRewriterCacheAction extends TransportNodesAction
                                               final Client client,
                                               final RewriterShardContexts rewriterShardContexts) {
 
-        super(NodesClearRewriterCacheAction.NAME, threadPool, clusterService, transportService, actionFilters,
-                NodesClearRewriterCacheRequest::new, NodesClearRewriterCacheRequest.NodeRequest::new,
-                ThreadPool.Names.MANAGEMENT, NodesClearRewriterCacheResponse.NodeResponse.class);
-        this.rewriterShardContexts = rewriterShardContexts;
+            super(NodesClearRewriterCacheAction.NAME, threadPool, clusterService, transportService, actionFilters,
+                    NodesClearRewriterCacheRequest::new, NodesClearRewriterCacheRequest.NodeRequest::new,
+                    threadPool.executor(ThreadPool.Names.MANAGEMENT));
+            this.rewriterShardContexts = rewriterShardContexts;
     }
 
 

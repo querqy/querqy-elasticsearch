@@ -6,6 +6,7 @@ import static querqy.elasticsearch.query.RequestUtils.paramToQueryFieldsAndBoost
 
 import org.apache.lucene.search.Query;
 import org.elasticsearch.TransportVersion;
+import org.elasticsearch.TransportVersions;
 import org.elasticsearch.xcontent.ParseField;
 import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.io.stream.StreamInput;
@@ -94,7 +95,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         boostingQueries = in.readOptionalWriteable(BoostingQueries::new);
         generated = in.readOptionalWriteable(Generated::new);
 
-        queryFields = in.readStringList();
+        queryFields = in.readStringCollectionAsImmutableList();
         setQueryFieldsAndBoostings(queryFields);
         minimumShouldMatch = in.readOptionalString();
         tieBreaker = in.readOptionalFloat();
@@ -246,7 +247,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
 
     @Override
     public TransportVersion getMinimalSupportedVersion() {
-        return TransportVersion.V_7_13_0; // We added infoLogging at 7 12 1
+        return TransportVersions.V_7_13_0; // We added infoLogging at 7 12 1
     }
 
     public void setQuerqyProcessor(final QuerqyProcessor querqyProcessor) {

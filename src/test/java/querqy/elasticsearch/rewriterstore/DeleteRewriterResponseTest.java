@@ -11,6 +11,7 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.cluster.node.VersionInformation;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.xcontent.XContentFactory;
@@ -49,9 +50,9 @@ public class DeleteRewriterResponseTest {
     public void testStreamSerialization() throws IOException {
 
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+                Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
         final DiscoveryNode node2 = new DiscoveryNode("name2", "d2", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+                Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
 
         final DeleteResponse deleteResponse1 = new DeleteResponse(new ShardId("idx1", "shard1", 1), "id1",
                 11, 2L, 8L, true);
@@ -87,9 +88,9 @@ public class DeleteRewriterResponseTest {
     public void testToJson() throws IOException {
 
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+                Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
         final DiscoveryNode node2 = new DiscoveryNode("name2", "d2", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+                Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
 
         final DeleteResponse deleteResponse = new DeleteResponse(new ShardId("idx1", "shard1", 1), "id1", 11,
                 2L, 8L, true);

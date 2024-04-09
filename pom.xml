@@ -3,7 +3,7 @@
 
     <groupId>org.querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>1.8.es892.0-SNAPSHOT</version>
+    <version>1.8.es8114.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -48,7 +48,7 @@
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>16</java.version>
+        <java.version>17</java.version>
         <junit.version>4.12</junit.version>
         <hamcrest.version>2.1</hamcrest.version>
         <mockito.version>2.27.0</mockito.version>
@@ -56,12 +56,12 @@
         <jts.version>1.19.0</jts.version>
         <json-path.version>2.7.0</json-path.version>
 
-        <querqy.lucene.version>5.5.lucene900.1</querqy.lucene.version>
+        <querqy.lucene.version>5.7.lucene942.0</querqy.lucene.version>
 
-        <elasticsearch.version>8.9.2</elasticsearch.version>
+        <elasticsearch.version>8.11.4</elasticsearch.version>
         <jacoco.version>0.8.10</jacoco.version>
-        <maven.compiler.source>16</maven.compiler.source>
-        <maven.compiler.target>16</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
 
     </properties>
 

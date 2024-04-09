@@ -8,15 +8,13 @@ import static querqy.elasticsearch.rewriterstore.PutRewriterAction.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.*;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
 import org.elasticsearch.action.index.IndexAction;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.HandledTransportAction;
 import org.elasticsearch.action.support.WriteRequest;
@@ -26,6 +24,7 @@ import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.tasks.Task;
@@ -50,7 +49,8 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
     public TransportPutRewriterAction(final TransportService transportService, final ActionFilters actionFilters,
                                       final ClusterService clusterService, final Client client, final Settings settings)
     {
-        super(NAME, false, transportService, actionFilters, PutRewriterRequest::new);
+        super(NAME, false, transportService, actionFilters, PutRewriterRequest::new,
+                clusterService.threadPool().executor(ThreadPool.Names.MANAGEMENT));
         this.clusterService = clusterService;
         this.client = client;
         this.settings = settings;
@@ -193,15 +193,15 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
                 .request();
     }
 
-
     protected void saveRewriter(final Task task, final PutRewriterRequest request,
                                 final ActionListener<PutRewriterResponse> listener) throws IOException {
-        final IndexRequest indexRequest = buildIndexRequest(task, request);
+        final ActionRequest indexRequest = buildIndexRequest(task, request);
+
         client.execute(IndexAction.INSTANCE, indexRequest,
 
-                new ActionListener<IndexResponse>() {
+                new ActionListener<>() {
                     @Override
-                    public void onResponse(final IndexResponse indexResponse) {
+                    public void onResponse(final DocWriteResponse indexResponse) {
                         LOGGER.info("Saved rewriter {}", request.getRewriterId());
                         client.execute(NodesReloadRewriterAction.INSTANCE,
                                 new NodesReloadRewriterRequest(request.getRewriterId()),
@@ -221,9 +221,9 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
         ;
     }
 
-    private IndexRequest buildIndexRequest(final Task parentTask, final PutRewriterRequest request) throws IOException {
+    private ActionRequest buildIndexRequest(final Task parentTask, final PutRewriterRequest request) throws IOException {
 
-        final IndexRequest indexRequest = client.prepareIndex(QUERQY_INDEX_NAME)
+        final ActionRequest indexRequest = client.prepareIndex(QUERQY_INDEX_NAME)
                 .setId(request.getRewriterId())
                 .setCreate(false)
                 .setSource(RewriterConfigMapping.toLuceneSource(request.getContent()))

@@ -10,20 +10,31 @@ import querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory;
 import querqy.rewrite.commonrules.model.BoostInstruction;
 import querqy.rewrite.commonrules.select.ExpressionCriteriaSelectionStrategyFactory;
 import querqy.rewrite.commonrules.select.SelectionStrategyFactory;
+import querqy.rewrite.lookup.preprocessing.LookupPreprocessorType;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
 
-    private static final SelectionStrategyFactory DEFAULT_SELECTION_STRATEGY_FACTORY =
+    public static final String CONF_IGNORE_CASE = "ignoreCase";
+    public static final String CONF_ALLOW_BOOLEAN_INPUT = "allowBooleanInput";
+//    public static final String CONF_BOOST_METHOD = "boostMethod";
+    public static final String CONF_RHS_QUERY_PARSER = "querqyParser";
+    public static final String CONF_RULES = "rules";
+//    public static final String CONF_RULE_SELECTION_STRATEGIES = "ruleSelectionStrategies";
+    public static final String CONF_LOOKUP_PREPROCESSOR = "lookupPreprocessor";
+
+    static final QuerqyParserFactory DEFAULT_RHS_QUERY_PARSER = new WhiteSpaceQuerqyParserFactory();
+    static final SelectionStrategyFactory DEFAULT_SELECTION_STRATEGY_FACTORY =
             new ExpressionCriteriaSelectionStrategyFactory();
 
-
-    private final static QuerqyParserFactory DEFAULT_RHS_QUERY_PARSER = new WhiteSpaceQuerqyParserFactory();
+    static final LookupPreprocessorType DEFAULT_LOOKUP_PREPROCESSOR_TYPE = LookupPreprocessorType.LOWERCASE;
+//    public static final String CONF_BUILD_TERM_CACHE = "buildTermCache";
 
     private querqy.rewrite.commonrules.SimpleCommonRulesRewriterFactory delegate;
 
@@ -33,21 +44,27 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
 
     @Override
     public void configure(final Map<String, Object> config) {
-        final boolean ignoreCase = ConfigUtils.getArg(config, "ignoreCase", true);
-        final boolean allowBooleanInput = ConfigUtils.getArg(config, "allowBooleanInput", false);
+        final boolean ignoreCase = ConfigUtils.getArg(config, CONF_IGNORE_CASE, true);
+        final boolean allowBooleanInput = ConfigUtils.getArg(config, CONF_ALLOW_BOOLEAN_INPUT, false);
 
         final QuerqyParserFactory querqyParser = ConfigUtils
-                .getInstanceFromArg(config, "querqyParser", DEFAULT_RHS_QUERY_PARSER);
+                .getInstanceFromArg(config, CONF_RHS_QUERY_PARSER, DEFAULT_RHS_QUERY_PARSER);
 
-        final String rules = ConfigUtils.getStringArg(config, "rules", "");
+        final String rules = ConfigUtils.getStringArg(config, CONF_RULES, "");
 
         // TODO: we might want to configure named selection strategies in the future
         final Map<String, SelectionStrategyFactory> selectionStrategyFactories = Collections.emptyMap();
 
+        final Optional<String> lookupPreprocessorTypeName = ConfigUtils.getStringArg(config, CONF_LOOKUP_PREPROCESSOR);
+        final LookupPreprocessorType lookupPreprocessorType = lookupPreprocessorTypeName
+                .map(LookupPreprocessorType::fromString)
+                .orElse(DEFAULT_LOOKUP_PREPROCESSOR_TYPE);
+
         try {
             delegate = new querqy.rewrite.commonrules.SimpleCommonRulesRewriterFactory(rewriterId,
                     new StringReader(rules), allowBooleanInput, BoostInstruction.BoostMethod.ADDITIVE,
-                    querqyParser, ignoreCase, selectionStrategyFactories, DEFAULT_SELECTION_STRATEGY_FACTORY, false);
+                    querqyParser, selectionStrategyFactories, DEFAULT_SELECTION_STRATEGY_FACTORY, false,
+                    lookupPreprocessorType);
         } catch (final IOException e) {
             throw new ElasticsearchException(e);
         }
@@ -71,10 +88,17 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
 
         final boolean ignoreCase = ConfigUtils.getArg(config, "ignoreCase", true);
         final boolean allowBooleanInput = ConfigUtils.getArg(config, "allowBooleanInput", false);
+
+        final Optional<String> lookupPreprocessorTypeName = ConfigUtils.getStringArg(config, CONF_LOOKUP_PREPROCESSOR);
+        final LookupPreprocessorType lookupPreprocessorType = lookupPreprocessorTypeName
+                .map(LookupPreprocessorType::fromString)
+                .orElse(DEFAULT_LOOKUP_PREPROCESSOR_TYPE);
+
         try {
             new querqy.rewrite.commonrules.SimpleCommonRulesRewriterFactory(rewriterId,
                     new StringReader(rules), allowBooleanInput, BoostInstruction.BoostMethod.ADDITIVE,
-                    querqyParser, ignoreCase, Collections.emptyMap(), DEFAULT_SELECTION_STRATEGY_FACTORY, false);
+                    querqyParser, Collections.emptyMap(), DEFAULT_SELECTION_STRATEGY_FACTORY, false,
+                    lookupPreprocessorType);
         } catch (final IOException e) {
             return Collections.singletonList("Cannot create rewriter: " + e.getMessage());
         }

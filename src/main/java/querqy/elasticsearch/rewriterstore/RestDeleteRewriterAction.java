@@ -5,7 +5,7 @@ import org.elasticsearch.client.internal.ElasticsearchClient;
 import org.elasticsearch.client.internal.node.NodeClient;
 import org.elasticsearch.rest.BaseRestHandler;
 import org.elasticsearch.rest.RestRequest;
-import org.elasticsearch.rest.action.RestStatusToXContentListener;
+import org.elasticsearch.rest.action.RestToXContentListener;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +31,7 @@ public class RestDeleteRewriterAction extends BaseRestHandler {
         final RestDeleteRewriterAction.DeleteRewriterRequestBuilder builder = createRequestBuilder(request, client);
 
         return (channel) -> builder.execute(
-                new RestStatusToXContentListener<>(channel));
+                new RestToXContentListener<DeleteRewriterResponse>(channel));
     }
 
 
