@@ -7,11 +7,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.elasticsearch.Version;
+import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.cluster.node.VersionInformation;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.xcontent.XContentFactory;
@@ -53,9 +54,9 @@ public class PutRewriterResponseTest {
                 true);
 
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+                Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
         final DiscoveryNode node2 = new DiscoveryNode("name2", "d2", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+                Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
 
         final NodesReloadRewriterResponse reloadRewriterResponse = new NodesReloadRewriterResponse(
                 new ClusterName("cluster27"), Arrays.asList(new NodesReloadRewriterResponse.NodeResponse(node1, null),
@@ -92,9 +93,9 @@ public class PutRewriterResponseTest {
         indexResponse.setShardInfo(new ReplicationResponse.ShardInfo(4, 4));
 
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+                Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
         final DiscoveryNode node2 = new DiscoveryNode("name2", "d2", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+                Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
 
         final NodesReloadRewriterResponse reloadRewriterResponse = new NodesReloadRewriterResponse(
                 new ClusterName("cluster27"), Arrays.asList(new NodesReloadRewriterResponse.NodeResponse(node1, null),
@@ -111,8 +112,8 @@ public class PutRewriterResponseTest {
 
         assertEquals(response1.status(), response2.status());
 
-        final IndexResponse indexResponse1 = response1.getIndexResponse();
-        final IndexResponse indexResponse2 = response2.getIndexResponse();
+        final DocWriteResponse indexResponse1 = response1.getIndexResponse();
+        final DocWriteResponse indexResponse2 = response2.getIndexResponse();
         assertEquals(indexResponse1.getShardId(), indexResponse2.getShardId());
         assertEquals(indexResponse1.getSeqNo(), indexResponse2.getSeqNo());
 

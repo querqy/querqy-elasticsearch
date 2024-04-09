@@ -1,21 +1,22 @@
 package querqy.elasticsearch.rewriterstore;
 
 import org.elasticsearch.action.ActionResponse;
+import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.xcontent.StatusToXContentObject;
+import org.elasticsearch.xcontent.ToXContentObject;
 import org.elasticsearch.xcontent.XContentBuilder;
 import org.elasticsearch.rest.RestStatus;
 
 import java.io.IOException;
 
-public class PutRewriterResponse extends ActionResponse implements StatusToXContentObject  {
+public class PutRewriterResponse extends ActionResponse implements ToXContentObject {
 
-    private IndexResponse indexResponse;
+    private DocWriteResponse indexResponse;
     private NodesReloadRewriterResponse reloadResponse;
 
-    public PutRewriterResponse(final IndexResponse indexResponse, final NodesReloadRewriterResponse reloadResponse) {
+    public PutRewriterResponse(final DocWriteResponse indexResponse, final NodesReloadRewriterResponse reloadResponse) {
         this.indexResponse = indexResponse;
         this.reloadResponse = reloadResponse;
     }
@@ -32,7 +33,6 @@ public class PutRewriterResponse extends ActionResponse implements StatusToXCont
         reloadResponse.writeTo(out);
     }
 
-    @Override
     public RestStatus status() {
         return indexResponse.status();
     }
@@ -47,7 +47,7 @@ public class PutRewriterResponse extends ActionResponse implements StatusToXCont
         return builder;
     }
 
-    public IndexResponse getIndexResponse() {
+    public DocWriteResponse getIndexResponse() {
         return indexResponse;
     }
 

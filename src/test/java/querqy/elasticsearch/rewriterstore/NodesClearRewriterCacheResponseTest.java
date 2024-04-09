@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.cluster.node.VersionInformation;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.xcontent.XContentFactory;
@@ -27,9 +28,9 @@ public class NodesClearRewriterCacheResponseTest {
     public void testJsonSerialization() throws Exception {
 
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+                Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
         final DiscoveryNode node2 = new DiscoveryNode("name2", "d2", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+                Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
 
 
         final NodesClearRewriterCacheResponse response = new NodesClearRewriterCacheResponse
@@ -51,9 +52,9 @@ public class NodesClearRewriterCacheResponseTest {
     @Test
     public void testStreamSerialization() throws IOException {
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+                Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
         final DiscoveryNode node2 = new DiscoveryNode("name2", "d2", new TransportAddress(META_ADDRESS, 0),
-                Collections.emptyMap(), Collections.emptySet(), Version.CURRENT);
+                Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
 
 
         final NodesClearRewriterCacheResponse response1 = new NodesClearRewriterCacheResponse(

@@ -4,13 +4,13 @@ import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.xcontent.StatusToXContentObject;
+import org.elasticsearch.xcontent.ToXContentObject;
 import org.elasticsearch.xcontent.XContentBuilder;
 import org.elasticsearch.rest.RestStatus;
 
 import java.io.IOException;
 
-public class DeleteRewriterResponse extends ActionResponse implements StatusToXContentObject {
+public class DeleteRewriterResponse extends ActionResponse implements ToXContentObject {
 
     private DeleteResponse deleteResponse;
     private NodesClearRewriterCacheResponse clearRewriterCacheResponse;
@@ -34,7 +34,6 @@ public class DeleteRewriterResponse extends ActionResponse implements StatusToXC
         clearRewriterCacheResponse.writeTo(out);
     }
 
-    @Override
     public RestStatus status() {
         return deleteResponse.status();
     }

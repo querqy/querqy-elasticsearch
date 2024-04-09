@@ -7,7 +7,7 @@ import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.rest.BaseRestHandler;
 import org.elasticsearch.rest.RestRequest;
-import org.elasticsearch.rest.action.RestStatusToXContentListener;
+import org.elasticsearch.rest.action.RestToXContentListener;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,9 +33,7 @@ public class RestPutRewriterAction extends BaseRestHandler {
         final PutRewriterRequestBuilder requestBuilder = createRequestBuilder(request, client);
 
         return (channel) -> requestBuilder.execute(
-                new RestStatusToXContentListener<>(channel, (r) -> r.getIndexResponse().getLocation(null)));
-
-
+                new RestToXContentListener<PutRewriterResponse>(channel));
     }
 
     PutRewriterRequestBuilder createRequestBuilder(final RestRequest request, final NodeClient client) {

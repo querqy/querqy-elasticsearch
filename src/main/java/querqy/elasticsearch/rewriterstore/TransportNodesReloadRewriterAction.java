@@ -34,7 +34,7 @@ public class TransportNodesReloadRewriterAction extends TransportNodesAction<Nod
 
         super(NodesReloadRewriterAction.NAME, threadPool, clusterService, transportService, actionFilters,
                 NodesReloadRewriterRequest::new, NodesReloadRewriterRequest.NodeRequest::new,
-                ThreadPool.Names.MANAGEMENT, NodesReloadRewriterResponse.NodeResponse.class);
+                threadPool.executor(ThreadPool.Names.MANAGEMENT));
         this.rewriterShardContexts = rewriterShardContexts;
         this.client = client;
         this.indexServices = indexServices;

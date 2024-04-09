@@ -6,6 +6,7 @@ import org.elasticsearch.Version;
 import org.elasticsearch.action.FailedNodeException;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.cluster.node.VersionInformation;
 import org.elasticsearch.common.io.stream.ByteBufferStreamInput;
 import org.elasticsearch.common.io.stream.DataOutputStreamOutput;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -37,12 +38,12 @@ public class NodesReloadRewriterResponseTest {
                                     new DiscoveryNode("n1", "n1",
                                             new TransportAddress(TransportAddress.META_ADDRESS, 9234),
                                             Collections.emptyMap(), Collections.emptySet(),
-                                            Version.CURRENT), npe),
+                                            VersionInformation.CURRENT), npe),
                                 new NodesReloadRewriterResponse.NodeResponse(
                                         new DiscoveryNode("n2", "n2",
                                                 new TransportAddress(TransportAddress.META_ADDRESS, 9235),
                                                 Collections.emptyMap(), Collections.emptySet(),
-                                                Version.CURRENT), null)
+                                                VersionInformation.CURRENT), null)
 
                         ), Collections.singletonList(new FailedNodeException("n3", "node 3 down",
                 new SocketException())));

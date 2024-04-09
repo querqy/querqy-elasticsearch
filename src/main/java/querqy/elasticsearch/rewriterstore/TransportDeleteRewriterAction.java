@@ -12,6 +12,7 @@ import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.tasks.Task;
+import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 
 public class TransportDeleteRewriterAction  extends HandledTransportAction<DeleteRewriterRequest, DeleteRewriterResponse> {
@@ -22,7 +23,8 @@ public class TransportDeleteRewriterAction  extends HandledTransportAction<Delet
     @Inject
     public TransportDeleteRewriterAction(final TransportService transportService, final ActionFilters actionFilters,
                                       final ClusterService clusterService, final Client client) {
-        super(DeleteRewriterAction.NAME, false, transportService, actionFilters, DeleteRewriterRequest::new);
+        super(DeleteRewriterAction.NAME, false, transportService, actionFilters, DeleteRewriterRequest::new,
+                clusterService.threadPool().executor(ThreadPool.Names.MANAGEMENT));
         this.clusterService = clusterService;
         this.client = client;
     }
