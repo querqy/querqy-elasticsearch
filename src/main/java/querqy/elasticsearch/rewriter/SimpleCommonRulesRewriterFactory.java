@@ -23,10 +23,8 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
 
     public static final String CONF_IGNORE_CASE = "ignoreCase";
     public static final String CONF_ALLOW_BOOLEAN_INPUT = "allowBooleanInput";
-//    public static final String CONF_BOOST_METHOD = "boostMethod";
     public static final String CONF_RHS_QUERY_PARSER = "querqyParser";
     public static final String CONF_RULES = "rules";
-//    public static final String CONF_RULE_SELECTION_STRATEGIES = "ruleSelectionStrategies";
     public static final String CONF_LOOKUP_PREPROCESSOR = "lookupPreprocessor";
 
     static final QuerqyParserFactory DEFAULT_RHS_QUERY_PARSER = new WhiteSpaceQuerqyParserFactory();
@@ -34,7 +32,6 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
             new ExpressionCriteriaSelectionStrategyFactory();
 
     static final LookupPreprocessorType DEFAULT_LOOKUP_PREPROCESSOR_TYPE = LookupPreprocessorType.LOWERCASE;
-//    public static final String CONF_BUILD_TERM_CACHE = "buildTermCache";
 
     private querqy.rewrite.commonrules.SimpleCommonRulesRewriterFactory delegate;
 
