@@ -3,6 +3,7 @@ package querqy.elasticsearch;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.index.query.SearchExecutionContext;
 import querqy.elasticsearch.infologging.LogPayloadType;
 import querqy.elasticsearch.infologging.SingleSinkInfoLogging;
@@ -16,8 +17,11 @@ import querqy.lucene.rewrite.infologging.InfoLogging;
 import querqy.lucene.rewrite.infologging.Sink;
 import querqy.rewrite.RewriteChain;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -73,7 +77,21 @@ public class QuerqyProcessor {
                 new DismaxSearchEngineRequestAdapter(queryBuilder, rewriteChain, context, infoLogging);
 
         final QueryParsingController controller = new QueryParsingController(requestAdapter);
-        final LuceneQueries queries = controller.process();
+
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            sm.checkPermission(new SpecialPermission());
+        }
+
+        final LuceneQueries queries = AccessController.doPrivileged(
+                (PrivilegedAction<LuceneQueries>) () -> {
+
+                    try {
+                        return controller.process();
+                    } catch (final Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
 
 //        // TODO: make decos part of the general Querqy object model
