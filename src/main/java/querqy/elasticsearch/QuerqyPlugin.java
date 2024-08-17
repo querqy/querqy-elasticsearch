@@ -17,6 +17,7 @@ import org.elasticsearch.common.settings.IndexScopedSettings;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.SettingsFilter;
+import org.elasticsearch.features.NodeFeature;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.telemetry.TelemetryProvider;
 import org.elasticsearch.xcontent.NamedXContentRegistry;
@@ -51,6 +52,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.function.Predicate;
 
 public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
 
@@ -81,18 +83,21 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
                         (in) -> new QuerqyQueryBuilder(in, querqyProcessor),
                         (parser) -> QuerqyQueryBuilder.fromXContent(parser, querqyProcessor)));
     }
-
+    
     @Override
-    public List<RestHandler> getRestHandlers(final Settings settings, final RestController restController,
-                                             final ClusterSettings clusterSettings,
-                                             final IndexScopedSettings indexScopedSettings,
-                                             final SettingsFilter settingsFilter,
-                                             final IndexNameExpressionResolver indexNameExpressionResolver,
-                                             final Supplier<DiscoveryNodes> nodesInCluster) {
-
-        return Arrays.asList(new RestPutRewriterAction(), new RestDeleteRewriterAction());
-
-    }
+    public List<RestHandler> getRestHandlers(
+    	    final Settings settings,
+    	    final NamedWriteableRegistry namedWriteableRegistry, // This parameter was missing
+    	    final RestController restController,
+    	    final ClusterSettings clusterSettings,
+    	    final IndexScopedSettings indexScopedSettings,
+    	    final SettingsFilter settingsFilter,
+    	    final IndexNameExpressionResolver indexNameExpressionResolver,
+    	    final Supplier<DiscoveryNodes> nodesInCluster,
+    	    final Predicate<NodeFeature> clusterSupportsFeature  // This parameter was missing
+    	) {
+	    return Arrays.asList(new RestPutRewriterAction(), new RestDeleteRewriterAction());
+	}
 
     @Override
     public List<ActionHandler<? extends ActionRequest, ? extends ActionResponse>> getActions() {
@@ -107,21 +112,10 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
     }
 
     @Override
-    public Collection<Object> createComponents(final Client client, final ClusterService clusterService,
-                                               final ThreadPool threadPool,
-                                               final ResourceWatcherService resourceWatcherService,
-                                               final ScriptService scriptService,
-                                               final NamedXContentRegistry xContentRegistry,
-                                               final Environment environment, final NodeEnvironment nodeEnvironment,
-                                               final NamedWriteableRegistry namedWriteableRegistry,
-                                               final IndexNameExpressionResolver indexNameExpressionResolver,
-                                               final Supplier<RepositoriesService> repositoriesServiceSupplier,
-                                               final TelemetryProvider telemetryProvider,
-                                               final AllocationService allocationService,
-                                               final IndicesService indicesService) {
+    public Collection<Object> createComponents(PluginServices services) {
         return Arrays.asList(rewriterShardContexts, querqyProcessor);
     }
-
+    
     @Override
     public List<Setting<?>> getSettings() {
         return Collections.singletonList(Setting.intSetting(SETTINGS_QUERQY_INDEX_NUM_REPLICAS, 1, 0,

@@ -11,7 +11,7 @@ public class DeleteRewriterAction extends ActionType<DeleteRewriterResponse> {
      * @param name The name of the action, must be unique across actions.
      */
     protected DeleteRewriterAction(final String name) {
-        super(name, DeleteRewriterResponse::new);
+        super(name);
     }
 
 }

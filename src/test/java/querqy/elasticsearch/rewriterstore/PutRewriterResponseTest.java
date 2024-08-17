@@ -90,7 +90,7 @@ public class PutRewriterResponseTest {
         final IndexResponse indexResponse = new IndexResponse(new ShardId("idx1", "shard1", 1), "id1", 11, 2L, 8L,
                 true);
 
-        indexResponse.setShardInfo(new ReplicationResponse.ShardInfo(4, 4));
+        indexResponse.setShardInfo(ReplicationResponse.ShardInfo.of(4, 4));
 
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
                 Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);

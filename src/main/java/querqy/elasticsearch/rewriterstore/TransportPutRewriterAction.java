@@ -14,7 +14,7 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
-import org.elasticsearch.action.index.IndexAction;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.HandledTransportAction;
 import org.elasticsearch.action.support.WriteRequest;
@@ -195,11 +195,9 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
     protected void saveRewriter(final Task task, final PutRewriterRequest request,
                                 final ActionListener<PutRewriterResponse> listener) throws IOException {
-        final ActionRequest indexRequest = buildIndexRequest(task, request);
+    	final IndexRequest indexRequest = buildIndexRequest(task, request);
 
-        client.execute(IndexAction.INSTANCE, indexRequest,
-
-                new ActionListener<>() {
+        client.index(indexRequest, new ActionListener<>() {
                     @Override
                     public void onResponse(final DocWriteResponse indexResponse) {
                         LOGGER.info("Saved rewriter {}", request.getRewriterId());
@@ -221,15 +219,15 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
         ;
     }
 
-    private ActionRequest buildIndexRequest(final Task parentTask, final PutRewriterRequest request) throws IOException {
+    private IndexRequest buildIndexRequest(final Task parentTask, final PutRewriterRequest request) throws IOException {
+        IndexRequest indexRequest = new IndexRequest(QUERQY_INDEX_NAME)
+                .id(request.getRewriterId())
+                .create(false)
+                .source(RewriterConfigMapping.toLuceneSource(request.getContent()), XContentType.JSON);
 
-        final ActionRequest indexRequest = client.prepareIndex(QUERQY_INDEX_NAME)
-                .setId(request.getRewriterId())
-                .setCreate(false)
-                .setSource(RewriterConfigMapping.toLuceneSource(request.getContent()))
-                .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
-                .request();
+        indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
         indexRequest.setParentTask(clusterService.localNode().getId(), parentTask.getId());
+
         return indexRequest;
     }
 
