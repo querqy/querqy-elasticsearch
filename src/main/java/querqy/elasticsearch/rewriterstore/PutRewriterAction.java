@@ -11,7 +11,7 @@ public class PutRewriterAction extends ActionType<PutRewriterResponse> {
      * @param name The name of the action, must be unique across actions.
      */
     protected PutRewriterAction(final String name) {
-        super(name, PutRewriterResponse::new);
+        super(name);
     }
 
 

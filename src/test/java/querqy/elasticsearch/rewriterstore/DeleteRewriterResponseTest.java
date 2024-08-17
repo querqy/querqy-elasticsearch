@@ -56,7 +56,7 @@ public class DeleteRewriterResponseTest {
 
         final DeleteResponse deleteResponse1 = new DeleteResponse(new ShardId("idx1", "shard1", 1), "id1",
                 11, 2L, 8L, true);
-        deleteResponse1.setShardInfo(new ReplicationResponse.ShardInfo(2, 1));
+        deleteResponse1.setShardInfo(ReplicationResponse.ShardInfo.of(2, 1));
 
         final NodesClearRewriterCacheResponse clearRewriterCacheResponse1 = new NodesClearRewriterCacheResponse
                 (new ClusterName("cluster27"),

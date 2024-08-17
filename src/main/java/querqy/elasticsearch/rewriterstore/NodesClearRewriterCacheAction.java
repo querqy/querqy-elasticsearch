@@ -12,7 +12,7 @@ public class NodesClearRewriterCacheAction extends ActionType<NodesClearRewriter
 
 
     protected NodesClearRewriterCacheAction(final String name) {
-        super(name, NodesClearRewriterCacheResponse::new);
+        super(name);
     }
 
 }
