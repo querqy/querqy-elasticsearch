@@ -13,8 +13,8 @@ import java.io.IOException;
 
 public class PutRewriterResponse extends ActionResponse implements ToXContentObject {
 
-    private DocWriteResponse indexResponse;
-    private NodesReloadRewriterResponse reloadResponse;
+    private final DocWriteResponse indexResponse;
+    private final NodesReloadRewriterResponse reloadResponse;
 
     public PutRewriterResponse(final DocWriteResponse indexResponse, final NodesReloadRewriterResponse reloadResponse) {
         this.indexResponse = indexResponse;

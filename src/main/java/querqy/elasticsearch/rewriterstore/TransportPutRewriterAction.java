@@ -14,7 +14,10 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
-import org.elasticsearch.action.index.IndexAction;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.bulk.TransportBulkAction;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.HandledTransportAction;
 import org.elasticsearch.action.support.WriteRequest;
@@ -32,6 +35,7 @@ import org.elasticsearch.transport.TransportService;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
@@ -43,17 +47,24 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
     private final Client client;
     private final ClusterService clusterService;
     private final Settings settings;
+    private final TransportBulkAction transportBulkAction;
     private boolean mappingsVersionChecked = false;
 
     @Inject
-    public TransportPutRewriterAction(final TransportService transportService, final ActionFilters actionFilters,
-                                      final ClusterService clusterService, final Client client, final Settings settings)
+    public TransportPutRewriterAction(
+            final ActionFilters actionFilters,
+            final Client client,
+            final ClusterService clusterService,
+            final Settings settings,
+            final TransportService transportService,
+            final TransportBulkAction transportBulkAction
+    )
     {
-        super(NAME, false, transportService, actionFilters, PutRewriterRequest::new,
-                clusterService.threadPool().executor(ThreadPool.Names.MANAGEMENT));
+        super(NAME, false, transportService, actionFilters, PutRewriterRequest::new, clusterService.threadPool().executor(ThreadPool.Names.MANAGEMENT));
         this.clusterService = clusterService;
         this.client = client;
         this.settings = settings;
+        this.transportBulkAction = transportBulkAction;
     }
 
     @Override
@@ -195,54 +206,48 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
     protected void saveRewriter(final Task task, final PutRewriterRequest request,
                                 final ActionListener<PutRewriterResponse> listener) throws IOException {
-        final ActionRequest indexRequest = buildIndexRequest(task, request);
 
-        client.execute(IndexAction.INSTANCE, indexRequest,
+        final BulkRequest bulkRequest = this.buildBulkRequest(task, request);
 
-                new ActionListener<>() {
-                    @Override
-                    public void onResponse(final DocWriteResponse indexResponse) {
-                        LOGGER.info("Saved rewriter {}", request.getRewriterId());
-                        client.execute(NodesReloadRewriterAction.INSTANCE,
-                                new NodesReloadRewriterRequest(request.getRewriterId()),
-                                wrap(
-                                        (reloadResponse) -> listener
-                                                .onResponse(new PutRewriterResponse(indexResponse, reloadResponse)),
-                                        listener::onFailure
-                                ));
-                    }
+        this.transportBulkAction.execute(task, bulkRequest, new ActionListener<>() {
+            @Override
+            public void onResponse(BulkResponse bulkItemResponses) {
+                LOGGER.info("Saved rewriter {}", request.getRewriterId());
+                client.execute(NodesReloadRewriterAction.INSTANCE,
+                        new NodesReloadRewriterRequest(request.getRewriterId()),
+                        wrap(
+                                (reloadResponse) -> listener
+                                        .onResponse(new PutRewriterResponse(Arrays.stream(bulkItemResponses.getItems()).findFirst().get().getResponse(), reloadResponse)),
+                                listener::onFailure
+                        ));
+            }
 
-                    @Override
-                    public void onFailure(final Exception e) {
-                        LOGGER.error("Could not save rewriter " + request.getRewriterId(), e);
-                        listener.onFailure(e);
-                    }
-                })
-        ;
+            @Override
+            public void onFailure(Exception e) {
+                LOGGER.error("Could not save rewriter " + request.getRewriterId(), e);
+                listener.onFailure(e);
+            }
+        });
     }
 
-    private ActionRequest buildIndexRequest(final Task parentTask, final PutRewriterRequest request) throws IOException {
+    private BulkRequest buildBulkRequest(final Task parentTask, final PutRewriterRequest request) throws IOException {
 
-        final ActionRequest indexRequest = client.prepareIndex(QUERQY_INDEX_NAME)
+        final IndexRequest indexRequest = client.prepareIndex(QUERQY_INDEX_NAME)
                 .setId(request.getRewriterId())
                 .setCreate(false)
                 .setSource(RewriterConfigMapping.toLuceneSource(request.getContent()))
-                .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .request();
+
         indexRequest.setParentTask(clusterService.localNode().getId(), parentTask.getId());
-        return indexRequest;
+
+        return new BulkRequest()
+                .add(indexRequest)
+                .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
     }
-
-
-
-
 
     private static String readUtf8Resource(final String name) {
         final Scanner scanner = new Scanner(TransportPutRewriterAction.class.getClassLoader().getResourceAsStream(name),
                 Charset.forName("utf-8").name()).useDelimiter("\\A");
         return scanner.hasNext() ? scanner.next() : "";
     }
-
-
-
 }

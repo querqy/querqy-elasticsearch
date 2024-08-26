@@ -25,16 +25,14 @@ public class TransportNodesReloadRewriterAction extends TransportNodesAction<Nod
     protected IndicesService indexServices;
 
     @Inject
-    public TransportNodesReloadRewriterAction(final ThreadPool threadPool, final ClusterService clusterService,
+    public TransportNodesReloadRewriterAction(final ThreadPool threadPool,
+                                              final ClusterService clusterService,
                                               final TransportService transportService,
                                               final ActionFilters actionFilters,
                                               final IndicesService indexServices,
                                               final Client client,
                                               final RewriterShardContexts rewriterShardContexts) {
-
-        super(NodesReloadRewriterAction.NAME, threadPool, clusterService, transportService, actionFilters,
-                NodesReloadRewriterRequest::new, NodesReloadRewriterRequest.NodeRequest::new,
-                threadPool.executor(ThreadPool.Names.MANAGEMENT));
+        super(NodesReloadRewriterAction.NAME, clusterService, transportService, actionFilters, NodesReloadRewriterRequest.NodeRequest::new, threadPool.executor(ThreadPool.Names.MANAGEMENT));
         this.rewriterShardContexts = rewriterShardContexts;
         this.client = client;
         this.indexServices = indexServices;

@@ -81,7 +81,6 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
         super();
     }
 
-
     public QuerqyQueryBuilder(final QuerqyProcessor querqyProcessor) {
         super();
         this.querqyProcessor = querqyProcessor;
