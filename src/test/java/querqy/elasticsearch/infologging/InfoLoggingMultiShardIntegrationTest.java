@@ -144,16 +144,15 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
         querqyQuery.setMinimumShouldMatch("1");
         querqyQuery.setInfoLoggingSpec(new InfoLoggingSpec(LogPayloadType.DETAIL, "query-detail"));
 
-
-
         int attempts = 10;
-
         while (attempts > 0) {
             APPENDER.clear();
             final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
             searchRequestBuilder.setQuery(querqyQuery);
             SearchResponse response = searchRequestBuilder.execute().get();
-            if (response.getHits().getTotalHits().value == 2L) {
+            final long totalHitsValue = response.getHits().getTotalHits().value;
+            response.decRef();
+            if (totalHitsValue == 2L) {
                 break;
             }
             attempts--;
@@ -169,7 +168,7 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
         final List<LogEvent> events = APPENDER.getEvents();
         assertNotNull(events);
         // max 1 event per shard
-        assertTrue((2 >= events.size()) && (!events.isEmpty()));
+        assertTrue(2 >= events.size() && !events.isEmpty());
         LogEvent event = events.get(0);
         assertEquals("{\"id\":\"query-detail\",\"msg\":{\"common_rules\":[[{\"message\":\"msg1\",\"match\":" +
                         "{\"term\":\"k\",\"type\":\"exact\"},\"instructions\":[{\"type\":\"synonym\"," +
@@ -179,5 +178,4 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
         assertEquals(Log4jSink.MARKER_QUERQY_REWRITER_DETAIL, event.getMarker());
 
     }
-
 }

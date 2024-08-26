@@ -9,6 +9,7 @@ import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.test.ESSingleNodeTestCase;
+import org.junit.After;
 import querqy.elasticsearch.QuerqyPlugin;
 import querqy.elasticsearch.QuerqyProcessor;
 import querqy.elasticsearch.rewriterstore.PutRewriterAction;
@@ -21,6 +22,16 @@ import java.util.Map;
 public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
     private final String INDEX_NAME = "test_index";
+
+    private SearchResponse response = null;
+
+    @After
+    public void cleanUpResource() {
+        if(this.response != null) {
+            this.response.decRef();
+        }
+        this.response = null;
+    }
 
     @Override
     protected Collection<Class<? extends Plugin>> getPlugins() {
@@ -53,13 +64,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
-
     }
 
     public void testThatUpBoostWithPurelyNegativeMultiTokenQueryIsApplied() throws Exception {
@@ -88,13 +98,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
-
     }
 
     public void testThatBoostWithPurelyPositiveSingleTokenQueryIsApplied() throws Exception {
@@ -123,13 +132,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
-
     }
 
     public void testThatBoostWithPurelyPositiveMultiTokenQueryIsApplied() throws Exception {
@@ -158,13 +166,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
-
     }
 
     public void testThatDownWithPurelyPositiveMultiTokenQueryIsApplied() throws Exception {
@@ -193,15 +200,13 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
-
     }
-
 
     public void testThatBoostWithPosNegQueryIsApplied() throws Exception {
 
@@ -229,13 +234,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
-
     }
 
     public void testThatBoostWithNegMultiRuleIsApplied() throws Exception {
@@ -264,13 +268,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
-
     }
 
     public void testThatPurelyNegativeSingleTokenFilterIsApplied() throws Exception {
@@ -299,13 +302,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(1L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
-
     }
 
     public void testThatPurelyNegativeMultiTokenFilterIsApplied() throws Exception {
@@ -334,13 +336,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(1L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("1", first.getSourceAsMap().get("id"));
-
     }
 
     public void testThatBoostUpIsAppliedForRawQuery() throws Exception {
@@ -369,13 +370,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
-
     }
 
     public void testThatBoostDownIsAppliedForRawQuery() throws Exception {
@@ -404,13 +404,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
-
     }
 
     public void testThatFilterIsAppliedForRawQuery() throws Exception {
@@ -439,13 +438,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(1L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
-
     }
 
 
@@ -464,13 +462,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("3", first.getSourceAsMap().get("id"));
-
     }
 
     public void testFullPhraseBoostMatching() throws Exception {
@@ -488,13 +485,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("4", first.getSourceAsMap().get("id"));
-
     }
 
 
@@ -513,13 +509,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("4", first.getSourceAsMap().get("id"));
-
     }
 
     public void testBigramMatching() throws Exception {
@@ -537,13 +532,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("4", first.getSourceAsMap().get("id"));
-
     }
 
     public void testBigramMatchingWithSlop() throws Exception {
@@ -562,13 +556,12 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery).setExplain(true);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
         assertEquals(2L, hits.getTotalHits().value);
 
         final SearchHit first = hits.getAt(0);
         assertEquals("4", first.getSourceAsMap().get("id"));
-
     }
 
 

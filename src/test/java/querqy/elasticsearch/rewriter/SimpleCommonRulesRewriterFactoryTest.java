@@ -3,8 +3,8 @@ package querqy.elasticsearch.rewriter;
 import static java.util.Collections.singletonList;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHits;
+
 import querqy.elasticsearch.QuerqyProcessor;
 import querqy.elasticsearch.query.MatchingQuery;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
@@ -17,8 +17,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegrationTest {
-
-
     public void testBooleanInput() throws ExecutionException, InterruptedException {
         indexDocs(
                 doc("id", "1", "field1", "a"),
@@ -46,11 +44,13 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
         SearchRequestBuilder searchRequestBuilder = client().prepareSearch(getIndexName());
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         SearchHits hits = response.getHits();
 
         assertEquals(2L, hits.getTotalHits().value);
         assertEquals("2", hits.getHits()[0].getSourceAsMap().get("id"));
+
+        response.decRef();
 
         querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -66,7 +66,6 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
 
         assertEquals(2L, hits.getTotalHits().value);
         assertEquals("1", hits.getHits()[0].getSourceAsMap().get("id"));
-
     }
 
     public void testRuleSelectionCriteria() throws ExecutionException, InterruptedException {
@@ -105,8 +104,10 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
         SearchRequestBuilder searchRequestBuilder = client().prepareSearch(getIndexName());
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         SearchHits hits = response.getHits();
+
+        response.decRef();
 
         assertEquals(2L, hits.getTotalHits().value);
 
@@ -126,9 +127,5 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
         hits = response.getHits();
 
         assertEquals(1L, hits.getTotalHits().value);
-
-
-
     }
-
 }

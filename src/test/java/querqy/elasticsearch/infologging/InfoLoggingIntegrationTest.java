@@ -40,6 +40,8 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
     private final String INDEX_NAME = "test_index";
     private static ListAppender APPENDER;
 
+    private SearchResponse response = null;
+
     @Override
     protected Collection<Class<? extends Plugin>> getPlugins() {
         return Collections.singleton(QuerqyPlugin.class);
@@ -69,6 +71,14 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final Configuration config = ctx.getConfiguration();
         config.removeLogger(Log4jSink.class.getName());
         ctx.updateLoggers();
+    }
+
+    @After
+    public void cleanUpResource() {
+        if(this.response != null) {
+            this.response.decRef();
+        }
+        this.response = null;
     }
 
     @After
@@ -117,7 +127,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
 
         final List<LogEvent> events = APPENDER.getEvents();
@@ -164,7 +174,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
 
         final List<LogEvent> events = APPENDER.getEvents();
@@ -255,7 +265,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
 
         final List<LogEvent> events = APPENDER.getEvents();
@@ -317,7 +327,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
 
         assertEquals(2L, response.getHits().getTotalHits().value);
 
@@ -364,7 +374,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
 
         final List<LogEvent> events = APPENDER.getEvents();
@@ -403,7 +413,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
 
         final List<LogEvent> events = APPENDER.getEvents();
@@ -447,7 +457,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
 
         final List<LogEvent> events = APPENDER.getEvents();
@@ -507,7 +517,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        SearchResponse response = client().search(searchRequestBuilder.request()).get();
+        response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
 
         final List<LogEvent> events = APPENDER.getEvents();

@@ -96,13 +96,11 @@ public class RewriterShardContextsTest extends ESIntegTestCase {
         final DeleteResponse deleteResponse = client().prepareDelete(".querqy", "r2").execute().get();
         assertEquals(DocWriteResponse.Result.DELETED, deleteResponse.getResult());
 
-
         QuerqyQueryBuilder query2 = new QuerqyQueryBuilder();
 
         query2.setMatchingQuery(new MatchingQuery("a"));
         query2.setQueryFieldsAndBoostings(Arrays.asList("field1", "field2"));
         query2.setRewriters(Collections.singletonList(new Rewriter("r2")));
-
 
         // query again - the rewriter should still be cached
         final SearchResponse response3 = queryClient().prepareSearch("idx")
@@ -115,11 +113,11 @@ public class RewriterShardContextsTest extends ESIntegTestCase {
         assertFalse(clearRewriterCacheResponse2.hasFailures());
 
         // now we should crash: rewriters are neither loaded nor will there be a config in the .querqy index
-
         try {
 
             queryClient().prepareSearch("idx").setPreference("_only_nodes:node_s1,node_s2")
                     .setQuery(query).execute().get();
+
             fail("Rewriter must not exist");
 
         } catch (final ExecutionException e) {
@@ -130,9 +128,11 @@ public class RewriterShardContextsTest extends ESIntegTestCase {
             cause2.printStackTrace();
             assertTrue(cause2 instanceof ResourceNotFoundException);
             assertEquals("Rewriter not found: r2", cause2.getMessage());
-
+        } finally {
+            response1.decRef();
+            response2.decRef();
+            response3.decRef();
         }
-
     }
 
     public void index() {

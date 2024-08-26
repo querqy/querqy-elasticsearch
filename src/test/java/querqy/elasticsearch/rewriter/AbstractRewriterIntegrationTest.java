@@ -1,8 +1,10 @@
 package querqy.elasticsearch.rewriter;
 
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESSingleNodeTestCase;
+import org.junit.After;
 import querqy.elasticsearch.QuerqyPlugin;
 
 import java.util.Arrays;
@@ -20,6 +22,8 @@ public abstract class AbstractRewriterIntegrationTest extends ESSingleNodeTestCa
     }
 
     private static final String INDEX_NAME = "test_index";
+
+    protected SearchResponse response = null;
 
     protected static String getIndexName() {
         return INDEX_NAME;
@@ -47,5 +51,13 @@ public abstract class AbstractRewriterIntegrationTest extends ESSingleNodeTestCa
                         .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                         .setSource(doc)
                         .get());
+    }
+
+    @After
+    public void cleanUpResource() {
+        if(this.response != null) {
+            this.response.decRef();
+        }
+        this.response = null;
     }
 }

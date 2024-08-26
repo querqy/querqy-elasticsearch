@@ -44,6 +44,9 @@ public class PutRewriterResponseTest {
         final PutRewriterResponse response = new PutRewriterResponse(indexResponse, reloadRewriterResponse);
         assertSame(status, response.status());
         verify(indexResponse, times(1)).status();
+
+        reloadRewriterResponse.decRef();
+        response.decRef();
     }
 
     @SuppressWarnings("unchecked")
@@ -82,6 +85,9 @@ public class PutRewriterResponseTest {
         assertNotNull(put);
         assertEquals("created", put.get("result"));
 
+        indexResponse.decRef();
+        reloadRewriterResponse.decRef();
+        response.decRef();
     }
 
     @Test
@@ -90,7 +96,7 @@ public class PutRewriterResponseTest {
         final IndexResponse indexResponse = new IndexResponse(new ShardId("idx1", "shard1", 1), "id1", 11, 2L, 8L,
                 true);
 
-        indexResponse.setShardInfo(new ReplicationResponse.ShardInfo(4, 4));
+        indexResponse.setShardInfo(ReplicationResponse.ShardInfo.of(4, 4));
 
         final DiscoveryNode node1 = new DiscoveryNode("name1", "d1", new TransportAddress(META_ADDRESS, 0),
                 Collections.emptyMap(), Collections.emptySet(), VersionInformation.CURRENT);
@@ -120,5 +126,13 @@ public class PutRewriterResponseTest {
         final NodesReloadRewriterResponse reloadResponse1 = response1.getReloadResponse();
         final NodesReloadRewriterResponse reloadResponse2 = response2.getReloadResponse();
         assertEquals(reloadResponse1.getNodes(), reloadResponse2.getNodes());
+
+        indexResponse.decRef();
+        indexResponse1.decRef();
+        reloadRewriterResponse.decRef();
+        reloadResponse1.decRef();
+        reloadResponse2.decRef();
+        response1.decRef();
+        response2.decRef();
     }
 }
