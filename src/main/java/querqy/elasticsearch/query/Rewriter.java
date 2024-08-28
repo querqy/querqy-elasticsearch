@@ -25,7 +25,7 @@ public class Rewriter implements NamedWriteable, ToXContent {
         name = in.readString();
         final boolean hasParams = in.readBoolean();
         if (hasParams) {
-            params = in.readMap(StreamInput::readString, StreamInput::readGenericValue);
+            params = in.readGenericMap();
         }
     }
 

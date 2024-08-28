@@ -106,14 +106,14 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
                 .setSettings("{\"index\" : {\n" +
                 "            \"number_of_shards\" : 2, \n" +
                 "            \"number_of_replicas\" : 1 \n" +
-                "    }}", XContentType.JSON).get();
+                "    }}", XContentType.JSON).get().decRef();
         client().prepareIndex(INDEX_NAME)
                 .setSource("field1", "a b", "field2", "a c")
-                .get();
+                .get().decRef();
         client().prepareIndex(INDEX_NAME)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("field1", "b c")
-                .get();
+                .get().decRef();
     }
 
     @Test
@@ -135,7 +135,7 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder();
         querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
@@ -153,7 +153,9 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
             final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
             searchRequestBuilder.setQuery(querqyQuery);
             SearchResponse response = searchRequestBuilder.execute().get();
-            if (response.getHits().getTotalHits().value == 2L) {
+            final boolean shouldBreak = response.getHits().getTotalHits().value == 2L;
+            response.decRef();
+            if (shouldBreak) {
                 break;
             }
             attempts--;
