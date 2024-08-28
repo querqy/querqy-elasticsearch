@@ -23,8 +23,6 @@ public abstract class AbstractRewriterIntegrationTest extends ESSingleNodeTestCa
 
     private static final String INDEX_NAME = "test_index";
 
-    protected SearchResponse response = null;
-
     protected static String getIndexName() {
         return INDEX_NAME;
     }
@@ -51,13 +49,5 @@ public abstract class AbstractRewriterIntegrationTest extends ESSingleNodeTestCa
                         .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                         .setSource(doc)
                         .get());
-    }
-
-    @After
-    public void cleanUpResource() {
-        if(this.response != null) {
-            this.response.decRef();
-        }
-        this.response = null;
     }
 }

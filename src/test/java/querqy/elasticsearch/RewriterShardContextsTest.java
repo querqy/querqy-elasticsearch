@@ -63,7 +63,8 @@ public class RewriterShardContextsTest extends ESIntegTestCase {
         config1.put("p1", 1L);
         payload1.put("config", config1);
 
-        queryClient().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r2", payload1)).get();
+        queryClient().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r2", payload1)).get()
+                .decRef();
 
         // assure we can use the rewriter in the query
         QuerqyQueryBuilder query = new QuerqyQueryBuilder();
@@ -75,11 +76,13 @@ public class RewriterShardContextsTest extends ESIntegTestCase {
         final SearchResponse response1 = queryClient().prepareSearch("idx").setPreference("_only_nodes:node_s1,node_s2")
                 .setQuery(query).setRequestCache(false).execute().get();
         assertEquals(0, response1.getFailedShards());
+        response1.decRef();
 
         // clear loaded rewriters
         final NodesClearRewriterCacheResponse clearRewriterCacheResponse1 = client()
                 .execute(NodesClearRewriterCacheAction.INSTANCE, new NodesClearRewriterCacheRequest()).get();
         assertFalse(clearRewriterCacheResponse1.hasFailures());
+        clearRewriterCacheResponse1.decRef();
 
         QuerqyQueryBuilder query3 = new QuerqyQueryBuilder();
 
@@ -91,10 +94,13 @@ public class RewriterShardContextsTest extends ESIntegTestCase {
         final SearchResponse response2 = queryClient().prepareSearch("idx").setPreference("_only_nodes:node_s1,node_s2")
                 .setQuery(query3).setRequestCache(false).execute().get();
         assertEquals(0, response2.getFailedShards()); // rewriter probably reloaded
+        response2.decRef();
 
         // delete rewriter config from .query index - this should never be done directly (use a delete rewriter action)
         final DeleteResponse deleteResponse = client().prepareDelete(".querqy", "r2").execute().get();
         assertEquals(DocWriteResponse.Result.DELETED, deleteResponse.getResult());
+
+        deleteResponse.decRef();
 
         QuerqyQueryBuilder query2 = new QuerqyQueryBuilder();
 
@@ -106,17 +112,19 @@ public class RewriterShardContextsTest extends ESIntegTestCase {
         final SearchResponse response3 = queryClient().prepareSearch("idx")
                 .setPreference("_only_nodes:node_s1,node_s2").setQuery(query2).execute().get();
         assertEquals(0, response3.getFailedShards());
+        response3.decRef();
 
         // clear loaded rewriters
         final NodesClearRewriterCacheResponse clearRewriterCacheResponse2 = client().
                 execute(NodesClearRewriterCacheAction.INSTANCE, new NodesClearRewriterCacheRequest()).get();
         assertFalse(clearRewriterCacheResponse2.hasFailures());
+        clearRewriterCacheResponse2.decRef();
 
         // now we should crash: rewriters are neither loaded nor will there be a config in the .querqy index
         try {
 
             queryClient().prepareSearch("idx").setPreference("_only_nodes:node_s1,node_s2")
-                    .setQuery(query).execute().get();
+                    .setQuery(query).execute().get().decRef();
 
             fail("Rewriter must not exist");
 
@@ -128,10 +136,6 @@ public class RewriterShardContextsTest extends ESIntegTestCase {
             cause2.printStackTrace();
             assertTrue(cause2 instanceof ResourceNotFoundException);
             assertEquals("Rewriter not found: r2", cause2.getMessage());
-        } finally {
-            response1.decRef();
-            response2.decRef();
-            response3.decRef();
         }
     }
 
@@ -140,15 +144,15 @@ public class RewriterShardContextsTest extends ESIntegTestCase {
         client().admin().indices().prepareCreate(indexName).setSettings(Settings.builder()
                 .put("index.shard.check_on_startup", false)
                 .put("index.number_of_shards", 2)
-                .put("index.number_of_replicas", 1)).get();
+                .put("index.number_of_replicas", 1)).get().decRef();
         client().prepareIndex(indexName)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("field1", "a b", "field2", "a c")
-                .get();
+                .get().decRef();
         client().prepareIndex(indexName)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("field1", "b c")
-                .get();
+                .get().decRef();
     }
 
     /**

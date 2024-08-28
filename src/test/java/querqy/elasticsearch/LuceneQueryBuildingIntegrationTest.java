@@ -36,7 +36,6 @@ public class LuceneQueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(1L, response.getHits().getTotalHits().value);
-
         response.decRef();
 
         final QuerqyQueryBuilder queryAnalyzerMismatch = new QuerqyQueryBuilder(
@@ -49,7 +48,6 @@ public class LuceneQueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         response = client().search(searchRequestBuilder.request()).get();
         assertEquals(0L, response.getHits().getTotalHits().value);
-
         response.decRef();
     }
 

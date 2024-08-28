@@ -3,6 +3,7 @@ package querqy.elasticsearch.rewriter;
 import static java.util.Collections.singletonList;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHits;
 
 import querqy.elasticsearch.QuerqyProcessor;
@@ -33,7 +34,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -44,7 +45,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
         SearchRequestBuilder searchRequestBuilder = client().prepareSearch(getIndexName());
         searchRequestBuilder.setQuery(querqyQuery);
 
-        response = client().search(searchRequestBuilder.request()).get();
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
         SearchHits hits = response.getHits();
 
         assertEquals(2L, hits.getTotalHits().value);
@@ -66,6 +67,8 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
 
         assertEquals(2L, hits.getTotalHits().value);
         assertEquals("1", hits.getHits()[0].getSourceAsMap().get("id"));
+
+        response.decRef();
     }
 
     public void testRuleSelectionCriteria() throws ExecutionException, InterruptedException {
@@ -84,7 +87,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
 
@@ -104,13 +107,12 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
         SearchRequestBuilder searchRequestBuilder = client().prepareSearch(getIndexName());
         searchRequestBuilder.setQuery(querqyQuery);
 
-        response = client().search(searchRequestBuilder.request()).get();
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
         SearchHits hits = response.getHits();
-
-        response.decRef();
 
         assertEquals(2L, hits.getTotalHits().value);
 
+        response.decRef();
 
         querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         criteria.put("filter", "$[?(@.lang == 'l2')]");
@@ -127,5 +129,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
         hits = response.getHits();
 
         assertEquals(1L, hits.getTotalHits().value);
+
+        response.decRef();
     }
 }

@@ -15,6 +15,7 @@ import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.SettingsFilter;
 import org.elasticsearch.features.NodeFeature;
+
 import org.elasticsearch.index.IndexModule;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.plugins.ActionPlugin;
@@ -67,11 +68,21 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
                         (in) -> new QuerqyQueryBuilder(in, querqyProcessor),
                         (parser) -> QuerqyQueryBuilder.fromXContent(parser, querqyProcessor)));
     }
-
+    
     @Override
-    public Collection<RestHandler> getRestHandlers(Settings settings, NamedWriteableRegistry namedWriteableRegistry, RestController restController, ClusterSettings clusterSettings, IndexScopedSettings indexScopedSettings, SettingsFilter settingsFilter, IndexNameExpressionResolver indexNameExpressionResolver, Supplier<DiscoveryNodes> nodesInCluster, Predicate<NodeFeature> clusterSupportsFeature) {
-        return Arrays.asList(new RestPutRewriterAction(), new RestDeleteRewriterAction());
-    }
+    public List<RestHandler> getRestHandlers(
+    	    final Settings settings,
+    	    final NamedWriteableRegistry namedWriteableRegistry, // This parameter was missing
+    	    final RestController restController,
+    	    final ClusterSettings clusterSettings,
+    	    final IndexScopedSettings indexScopedSettings,
+    	    final SettingsFilter settingsFilter,
+    	    final IndexNameExpressionResolver indexNameExpressionResolver,
+    	    final Supplier<DiscoveryNodes> nodesInCluster,
+    	    final Predicate<NodeFeature> clusterSupportsFeature  // This parameter was missing
+    	) {
+	    return Arrays.asList(new RestPutRewriterAction(), new RestDeleteRewriterAction());
+	}
 
     @Override
     public List<ActionHandler<? extends ActionRequest, ? extends ActionResponse>> getActions() {
@@ -84,10 +95,10 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
     }
 
     @Override
-    public Collection<?> createComponents(PluginServices services) {
+    public Collection<Object> createComponents(PluginServices services) {
         return Arrays.asList(rewriterShardContexts, querqyProcessor);
     }
-
+    
     @Override
     public List<Setting<?>> getSettings() {
         return Collections.singletonList(Setting.intSetting(SETTINGS_QUERQY_INDEX_NUM_REPLICAS, 1, 0,

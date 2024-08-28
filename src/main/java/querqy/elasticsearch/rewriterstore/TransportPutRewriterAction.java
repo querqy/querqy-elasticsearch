@@ -14,9 +14,6 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.bulk.TransportBulkAction;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.HandledTransportAction;
@@ -35,7 +32,6 @@ import org.elasticsearch.transport.TransportService;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
@@ -47,7 +43,6 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
     private final Client client;
     private final ClusterService clusterService;
     private final Settings settings;
-    private final TransportBulkAction transportBulkAction;
     private boolean mappingsVersionChecked = false;
 
     @Inject
@@ -56,15 +51,13 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
             final Client client,
             final ClusterService clusterService,
             final Settings settings,
-            final TransportService transportService,
-            final TransportBulkAction transportBulkAction
+            final TransportService transportService
     )
     {
         super(NAME, false, transportService, actionFilters, PutRewriterRequest::new, clusterService.threadPool().executor(ThreadPool.Names.MANAGEMENT));
         this.clusterService = clusterService;
         this.client = client;
         this.settings = settings;
-        this.transportBulkAction = transportBulkAction;
     }
 
     @Override
@@ -207,20 +200,20 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
     protected void saveRewriter(final Task task, final PutRewriterRequest request,
                                 final ActionListener<PutRewriterResponse> listener) throws IOException {
 
-        final BulkRequest bulkRequest = this.buildBulkRequest(task, request);
+    	final IndexRequest indexRequest = buildIndexRequest(task, request);
 
-        this.transportBulkAction.execute(task, bulkRequest, new ActionListener<>() {
-            @Override
-            public void onResponse(BulkResponse bulkItemResponses) {
-                LOGGER.info("Saved rewriter {}", request.getRewriterId());
-                client.execute(NodesReloadRewriterAction.INSTANCE,
-                        new NodesReloadRewriterRequest(request.getRewriterId()),
-                        wrap(
-                                (reloadResponse) -> listener
-                                        .onResponse(new PutRewriterResponse(Arrays.stream(bulkItemResponses.getItems()).findFirst().get().getResponse(), reloadResponse)),
-                                listener::onFailure
-                        ));
-            }
+        client.index(indexRequest, new ActionListener<>() {
+                    @Override
+                    public void onResponse(final DocWriteResponse indexResponse) {
+                        LOGGER.info("Saved rewriter {}", request.getRewriterId());
+                        client.execute(NodesReloadRewriterAction.INSTANCE,
+                                new NodesReloadRewriterRequest(request.getRewriterId()),
+                                wrap(
+                                        (reloadResponse) -> listener
+                                                .onResponse(new PutRewriterResponse(indexResponse, reloadResponse)),
+                                        listener::onFailure
+                                ));
+                    }
 
             @Override
             public void onFailure(Exception e) {
@@ -230,19 +223,17 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
         });
     }
 
-    private BulkRequest buildBulkRequest(final Task parentTask, final PutRewriterRequest request) throws IOException {
+    private IndexRequest buildIndexRequest(final Task parentTask, final PutRewriterRequest request) throws IOException {
+        IndexRequest indexRequest = new IndexRequest(QUERQY_INDEX_NAME)
+                .id(request.getRewriterId())
+                .create(false)
+                .source(RewriterConfigMapping.toLuceneSource(request.getContent()), XContentType.JSON);
 
-        final IndexRequest indexRequest = client.prepareIndex(QUERQY_INDEX_NAME)
-                .setId(request.getRewriterId())
-                .setCreate(false)
-                .setSource(RewriterConfigMapping.toLuceneSource(request.getContent()))
-                .request();
-
+        indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
         indexRequest.setParentTask(clusterService.localNode().getId(), parentTask.getId());
 
-        return new BulkRequest()
-                .add(indexRequest)
-                .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+        return indexRequest;
+
     }
 
     private static String readUtf8Resource(final String name) {

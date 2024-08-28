@@ -27,6 +27,7 @@ import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.query.Rewriter;
 import querqy.elasticsearch.rewriterstore.PutRewriterAction;
 import querqy.elasticsearch.rewriterstore.PutRewriterRequest;
+import querqy.elasticsearch.rewriterstore.PutRewriterResponse;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,8 +40,6 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
     private final String INDEX_NAME = "test_index";
     private static ListAppender APPENDER;
-
-    private SearchResponse response = null;
 
     @Override
     protected Collection<Class<? extends Plugin>> getPlugins() {
@@ -71,14 +70,6 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final Configuration config = ctx.getConfiguration();
         config.removeLogger(Log4jSink.class.getName());
         ctx.updateLoggers();
-    }
-
-    @After
-    public void cleanUpResource() {
-        if(this.response != null) {
-            this.response.decRef();
-        }
-        this.response = null;
     }
 
     @After
@@ -115,7 +106,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
@@ -127,8 +118,9 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        response = client().search(searchRequestBuilder.request()).get();
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
+        response.decRef();
 
         final List<LogEvent> events = APPENDER.getEvents();
         assertNotNull(events);
@@ -162,7 +154,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
@@ -174,8 +166,9 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        response = client().search(searchRequestBuilder.request()).get();
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
+        response.decRef();
 
         final List<LogEvent> events = APPENDER.getEvents();
         assertNotNull(events);
@@ -210,7 +203,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
         try {
-            client().execute(PutRewriterAction.INSTANCE, request).get();
+            client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
             fail("Invalid sink must not be excepted");
         } catch (final Exception e) {
             assertTrue((e instanceof ActionRequestValidationException)
@@ -237,7 +230,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
         final PutRewriterRequest request1 = new PutRewriterRequest("common_rules1", content1);
 
-        client().execute(PutRewriterAction.INSTANCE, request1).get();
+        client().execute(PutRewriterAction.INSTANCE, request1).get().decRef();
 
         final Map<String, Object> content2 = new HashMap<>();
         content2.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
@@ -253,7 +246,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
         final PutRewriterRequest request2 = new PutRewriterRequest("common_rules2", content2);
 
-        client().execute(PutRewriterAction.INSTANCE, request2).get();
+        client().execute(PutRewriterAction.INSTANCE, request2).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Arrays.asList(new Rewriter("common_rules1"), new Rewriter("common_rules2")));
@@ -265,8 +258,9 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        response = client().search(searchRequestBuilder.request()).get();
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
+        response.decRef();
 
         final List<LogEvent> events = APPENDER.getEvents();
         assertNotNull(events);
@@ -299,7 +293,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
         final PutRewriterRequest request1 = new PutRewriterRequest("replace1", content1);
 
-        client().execute(PutRewriterAction.INSTANCE, request1).get();
+        client().execute(PutRewriterAction.INSTANCE, request1).get().decRef();
 
         final Map<String, Object> content2 = new HashMap<>();
         content2.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
@@ -315,7 +309,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
         final PutRewriterRequest request2 = new PutRewriterRequest("common_rules2", content2);
 
-        client().execute(PutRewriterAction.INSTANCE, request2).get();
+        client().execute(PutRewriterAction.INSTANCE, request2).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Arrays.asList(new Rewriter("replace1"), new Rewriter("common_rules2")));
@@ -327,9 +321,10 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        response = client().search(searchRequestBuilder.request()).get();
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
 
         assertEquals(2L, response.getHits().getTotalHits().value);
+        response.decRef();
 
         final List<LogEvent> events = APPENDER.getEvents();
         assertNotNull(events);
@@ -362,8 +357,9 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         content1.put("config", config1);
 
         final PutRewriterRequest request1 = new PutRewriterRequest("common_rules1", content1);
-
-        assertEquals(201, client().execute(PutRewriterAction.INSTANCE, request1).get().status().getStatus());
+        final PutRewriterResponse putRewriterResponse = client().execute(PutRewriterAction.INSTANCE, request1).get();
+        assertEquals(201, putRewriterResponse.status().getStatus());
+        putRewriterResponse.decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules1")));
@@ -374,8 +370,9 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        response = client().search(searchRequestBuilder.request()).get();
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
+        response.decRef();
 
         final List<LogEvent> events = APPENDER.getEvents();
         assertNotNull(events);
@@ -401,7 +398,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
@@ -413,8 +410,9 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        response = client().search(searchRequestBuilder.request()).get();
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
+        response.decRef();
 
         final List<LogEvent> events = APPENDER.getEvents();
         assertNotNull(events);
@@ -445,7 +443,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
@@ -457,8 +455,9 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        response = client().search(searchRequestBuilder.request()).get();
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
+        response.decRef();
 
         final List<LogEvent> events = APPENDER.getEvents();
         assertNotNull(events);
@@ -489,7 +488,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
         final PutRewriterRequest request1 = new PutRewriterRequest("common_rules1", content1);
 
-        client().execute(PutRewriterAction.INSTANCE, request1).get();
+        client().execute(PutRewriterAction.INSTANCE, request1).get().decRef();
 
         final Map<String, Object> content2 = new HashMap<>();
         content2.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
@@ -505,7 +504,7 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
 
         final PutRewriterRequest request2 = new PutRewriterRequest("common_rules2", content2);
 
-        client().execute(PutRewriterAction.INSTANCE, request2).get();
+        client().execute(PutRewriterAction.INSTANCE, request2).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Arrays.asList(new Rewriter("common_rules1"), new Rewriter("common_rules2")));
@@ -517,8 +516,9 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
         searchRequestBuilder.setQuery(querqyQuery);
 
-        response = client().search(searchRequestBuilder.request()).get();
+        SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
+        response.decRef();
 
         final List<LogEvent> events = APPENDER.getEvents();
         assertNotNull(events);
@@ -536,10 +536,10 @@ public class InfoLoggingIntegrationTest extends ESSingleNodeTestCase  {
         client().admin().indices().prepareCreate(INDEX_NAME).get();
         client().prepareIndex(INDEX_NAME)
                 .setSource("field1", "a b", "field2", "a c")
-                .get();
+                .get().decRef();
         client().prepareIndex(INDEX_NAME)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("field1", "b c")
-                .get();
+                .get().decRef();
     }
 }

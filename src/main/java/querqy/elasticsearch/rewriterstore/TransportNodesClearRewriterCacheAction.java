@@ -30,11 +30,14 @@ public class TransportNodesClearRewriterCacheAction extends TransportNodesAction
                                               final IndicesService indexServices,
                                               final Client client,
                                               final RewriterShardContexts rewriterShardContexts) {
-
-            super(NodesClearRewriterCacheAction.NAME, clusterService, transportService, actionFilters,
-                    NodesClearRewriterCacheRequest.NodeRequest::new,
-                    threadPool.executor(ThreadPool.Names.MANAGEMENT));
-            this.rewriterShardContexts = rewriterShardContexts;
+		super(
+			NodesClearRewriterCacheAction.NAME,
+			clusterService,
+			transportService,
+			actionFilters,
+			NodesClearRewriterCacheRequest.NodeRequest::new,
+			threadPool.executor(ThreadPool.Names.MANAGEMENT));
+		this.rewriterShardContexts = rewriterShardContexts;
     }
 
 

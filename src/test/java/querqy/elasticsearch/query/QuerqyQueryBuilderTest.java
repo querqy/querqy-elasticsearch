@@ -29,6 +29,9 @@ import org.junit.Before;
 import org.junit.Test;
 import querqy.elasticsearch.QuerqyPlugin;
 import querqy.elasticsearch.QuerqyProcessor;
+//import static querqy.elasticsearch.query.AbstractLuceneQueryTest.bq;
+//import static querqy.elasticsearch.query.AbstractLuceneQueryTest.dtq;
+
 import querqy.lucene.rewrite.DependentTermQueryBuilder;
 import querqy.lucene.rewrite.DocumentFrequencyCorrection;
 import querqy.lucene.rewrite.IndependentFieldBoost;
