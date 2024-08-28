@@ -35,7 +35,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -52,6 +52,8 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
         assertEquals(2L, hits.getTotalHits().value);
         assertEquals("2", hits.getHits()[0].getSourceAsMap().get("id"));
 
+        response.decRef();
+
         querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
         querqyQuery.setMatchingQuery(new MatchingQuery("a b"));
@@ -66,6 +68,8 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
 
         assertEquals(2L, hits.getTotalHits().value);
         assertEquals("1", hits.getHits()[0].getSourceAsMap().get("id"));
+
+        response.decRef();
 
     }
 
@@ -85,7 +89,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
 
@@ -110,6 +114,8 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
 
         assertEquals(2L, hits.getTotalHits().value);
 
+        response.decRef();
+
 
         querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         criteria.put("filter", "$[?(@.lang == 'l2')]");
@@ -127,7 +133,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
 
         assertEquals(1L, hits.getTotalHits().value);
 
-
+        response.decRef();
 
     }
 
