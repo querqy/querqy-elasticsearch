@@ -91,4 +91,6 @@ public class QuerqyMappingsUpdate1To3IntegrationTest extends ESSingleNodeTestCas
         assertEquals(false, config_v_003_mapping.get("doc_values"));
 
     }
+
+
 }

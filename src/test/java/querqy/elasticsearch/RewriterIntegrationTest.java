@@ -52,7 +52,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
@@ -65,6 +65,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
+        response.decRef();
 
     }
 
@@ -82,7 +83,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
@@ -97,6 +98,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         final SearchHits hits = response.getHits();
         assertEquals(1L, hits.getTotalHits().value);
         assertEquals("a c", hits.getHits()[0].getSourceAsMap().get("field2"));
+        response.decRef();
     }
 
     @Test
@@ -124,6 +126,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         final PutRewriterResponse response = client().execute(PutRewriterAction.INSTANCE, request).get();
 
         assertEquals(RestStatus.CREATED, response.status());
+        response.decRef();
 
     }
 
@@ -142,7 +145,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
@@ -155,6 +158,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(1L, response.getHits().getTotalHits().value);
+        response.decRef();
 
 
         final Map<String, Object> content2 = new HashMap<>();
@@ -167,7 +171,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         content2.put("config", config2);
 
         final PutRewriterRequest request2 = new PutRewriterRequest("common_rules", content2);
-        client().execute(PutRewriterAction.INSTANCE, request2).get();
+        client().execute(PutRewriterAction.INSTANCE, request2).get().decRef();
 
         QuerqyQueryBuilder querqyQuery2 = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery2.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
@@ -180,6 +184,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response2 = client().search(searchRequestBuilder2.request()).get();
         assertEquals(2L, response2.getHits().getTotalHits().value);
+        response2.decRef();
 
     }
 
@@ -199,7 +204,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
@@ -212,10 +217,10 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(2L, response.getHits().getTotalHits().value);
-
+        response.decRef();
 
         final DeleteRewriterRequest delRequest = new DeleteRewriterRequest("common_rules");
-        client().execute(DeleteRewriterAction.INSTANCE, delRequest).get();
+        client().execute(DeleteRewriterAction.INSTANCE, delRequest).get().decRef();
 
         QuerqyQueryBuilder querqyQuery2 = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery2.setRewriters(Collections.singletonList(new Rewriter("common_rules")));
@@ -227,7 +232,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         searchRequestBuilder2.setQuery(querqyQuery2);
 
         try {
-            client().search(searchRequestBuilder.request()).get();
+            client().search(searchRequestBuilder.request()).get().decRef();
             fail("Could use deleted rewriter in request");
         } catch (final ExecutionException e) {
             assertTrue(e.getMessage().contains("Rewriter not found: common_rules"));
@@ -239,7 +244,7 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
     @After
     public void deleteRewriterIndex() {
-        client().admin().indices().prepareDelete(".querqy").get();
+        client().admin().indices().prepareDelete(".querqy").get().decRef();
     }
 
 

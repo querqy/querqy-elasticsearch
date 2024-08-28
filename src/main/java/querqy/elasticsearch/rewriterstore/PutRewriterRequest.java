@@ -24,7 +24,7 @@ public class PutRewriterRequest extends ActionRequest {
     public PutRewriterRequest(final StreamInput in) throws IOException {
         super(in);
         rewriterId = in.readString();
-        content = in.readMap(StreamInput::readString, StreamInput::readGenericValue);
+        content = in.readGenericMap();
     }
 
     public PutRewriterRequest(final String rewriterId, final Map<String, Object> content) {
