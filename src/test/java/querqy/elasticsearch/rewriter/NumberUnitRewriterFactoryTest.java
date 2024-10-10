@@ -1,11 +1,9 @@
 package querqy.elasticsearch.rewriter;
 
 import org.assertj.core.api.Assertions;
-import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import querqy.elasticsearch.QuerqyProcessor;

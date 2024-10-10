@@ -9,7 +9,6 @@ import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.test.ESSingleNodeTestCase;
-import org.junit.After;
 import querqy.elasticsearch.QuerqyPlugin;
 import querqy.elasticsearch.QuerqyProcessor;
 import querqy.elasticsearch.rewriterstore.PutRewriterAction;

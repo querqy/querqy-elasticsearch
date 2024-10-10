@@ -1,10 +1,8 @@
 package querqy.elasticsearch.rewriter;
 
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESSingleNodeTestCase;
-import org.junit.After;
 import querqy.elasticsearch.QuerqyPlugin;
 
 import java.util.Arrays;
