@@ -6,9 +6,10 @@ import org.elasticsearch.action.support.nodes.TransportNodesAction;
 import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.cluster.service.ClusterService;
-import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.injection.guice.Inject;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.indices.IndicesService;
+import org.elasticsearch.plugins.ActionPlugin;
 import org.elasticsearch.tasks.Task;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
@@ -18,8 +19,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-public class TransportNodesClearRewriterCacheAction extends TransportNodesAction<NodesClearRewriterCacheRequest,
-        NodesClearRewriterCacheResponse, NodesClearRewriterCacheRequest.NodeRequest, NodesClearRewriterCacheResponse.NodeResponse> {
+public class TransportNodesClearRewriterCacheAction extends TransportNodesAction<
+        NodesClearRewriterCacheRequest,
+        NodesClearRewriterCacheResponse,
+        NodesClearRewriterCacheRequest.NodeRequest,
+        NodesClearRewriterCacheResponse.NodeResponse,
+        ActionPlugin.ActionHandler> {
 
     protected RewriterShardContexts rewriterShardContexts;
 
@@ -36,7 +41,9 @@ public class TransportNodesClearRewriterCacheAction extends TransportNodesAction
 			transportService,
 			actionFilters,
 			NodesClearRewriterCacheRequest.NodeRequest::new,
-			threadPool.executor(ThreadPool.Names.MANAGEMENT));
+			threadPool.executor(ThreadPool.Names.MANAGEMENT)
+        );
+
 		this.rewriterShardContexts = rewriterShardContexts;
     }
 
@@ -73,7 +80,5 @@ public class TransportNodesClearRewriterCacheAction extends TransportNodesAction
         }
 
         return new NodesClearRewriterCacheResponse.NodeResponse(clusterService.localNode());
-
-
     }
 }

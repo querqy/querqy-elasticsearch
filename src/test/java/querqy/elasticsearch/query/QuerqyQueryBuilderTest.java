@@ -24,7 +24,6 @@ import org.elasticsearch.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.SearchExecutionContext;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.AbstractQueryTestCase;
-import org.elasticsearch.test.TestGeoShapeFieldMapperPlugin;
 import org.junit.Before;
 import org.junit.Test;
 import querqy.elasticsearch.QuerqyPlugin;
@@ -38,12 +37,7 @@ import querqy.lucene.rewrite.IndependentFieldBoost;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBuilder> {
 
@@ -64,12 +58,11 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
     // geo_shape field type
     @SuppressWarnings("deprecation")
     protected Collection<Class<? extends Plugin>> getPlugins() {
-        return Arrays.asList(TestGeoShapeFieldMapperPlugin.class, QuerqyPlugin.class);
+        return List.of(QuerqyPlugin.class);
     }
 
     @Override
     protected QuerqyQueryBuilder doCreateTestQueryBuilder() {
-
         QuerqyProcessor querqyProcessor = new QuerqyProcessor(null, null) {
             @Override
             public Query parseQuery(QuerqyQueryBuilder queryBuilder, final SearchExecutionContext shardContext) {
