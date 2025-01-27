@@ -54,9 +54,6 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
         searchExecutionContext = mock(SearchExecutionContext.class);
     }
 
-    // we need to add TestGeoShapeFieldMapperPlugin, otherwise AbstractBuilderTestCase fails complaining about missing
-    // geo_shape field type
-    @SuppressWarnings("deprecation")
     protected Collection<Class<? extends Plugin>> getPlugins() {
         return List.of(QuerqyPlugin.class);
     }
