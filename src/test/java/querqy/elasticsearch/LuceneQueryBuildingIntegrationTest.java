@@ -3,14 +3,12 @@ package querqy.elasticsearch;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESSingleNodeTestCase;
 import querqy.elasticsearch.query.MatchingQuery;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Scanner;
@@ -38,6 +36,7 @@ public class LuceneQueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         assertEquals(1L, response.getHits().getTotalHits().value);
+        response.decRef();
 
         final QuerqyQueryBuilder queryAnalyzerMismatch = new QuerqyQueryBuilder(
                 getInstanceFromNode(QuerqyProcessor.class));
@@ -49,7 +48,7 @@ public class LuceneQueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         response = client().search(searchRequestBuilder.request()).get();
         assertEquals(0L, response.getHits().getTotalHits().value);
-
+        response.decRef();
     }
 
     public void index() {

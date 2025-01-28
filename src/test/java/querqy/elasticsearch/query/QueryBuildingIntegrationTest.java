@@ -42,7 +42,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -60,6 +60,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testThatUpBoostWithPurelyNegativeMultiTokenQueryIsApplied() throws Exception {
@@ -77,7 +78,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -95,6 +96,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testThatBoostWithPurelyPositiveSingleTokenQueryIsApplied() throws Exception {
@@ -112,7 +114,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -130,6 +132,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testThatBoostWithPurelyPositiveMultiTokenQueryIsApplied() throws Exception {
@@ -147,7 +150,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -165,6 +168,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testThatDownWithPurelyPositiveMultiTokenQueryIsApplied() throws Exception {
@@ -182,7 +186,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -200,8 +204,8 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
-
 
     public void testThatBoostWithPosNegQueryIsApplied() throws Exception {
 
@@ -218,7 +222,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -236,6 +240,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testThatBoostWithNegMultiRuleIsApplied() throws Exception {
@@ -253,7 +258,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -271,6 +276,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testThatPurelyNegativeSingleTokenFilterIsApplied() throws Exception {
@@ -288,7 +294,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -306,6 +312,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testThatPurelyNegativeMultiTokenFilterIsApplied() throws Exception {
@@ -323,7 +330,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -341,6 +348,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("1", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testThatBoostUpIsAppliedForRawQuery() throws Exception {
@@ -358,7 +366,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -376,6 +384,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testThatBoostDownIsAppliedForRawQuery() throws Exception {
@@ -393,7 +402,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -411,6 +420,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testThatFilterIsAppliedForRawQuery() throws Exception {
@@ -428,7 +438,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         final PutRewriterRequest request = new PutRewriterRequest("common_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("common_rules")));
@@ -446,6 +456,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
 
@@ -471,6 +482,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("3", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testFullPhraseBoostMatching() throws Exception {
@@ -495,6 +507,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("4", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
 
@@ -520,6 +533,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("4", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testBigramMatching() throws Exception {
@@ -544,6 +558,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("4", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
     public void testBigramMatchingWithSlop() throws Exception {
@@ -569,6 +584,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         final SearchHit first = hits.getAt(0);
         assertEquals("4", first.getSourceAsMap().get("id"));
 
+        response.decRef();
     }
 
 
@@ -576,21 +592,21 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
         client().admin().indices().prepareCreate(INDEX_NAME).get();
         client().prepareIndex(INDEX_NAME)
                 .setSource("id", "1", "field1", "aa bb cc dd ee ff gg hh")
-                .get();
+                .get().decRef();
         client().prepareIndex(INDEX_NAME)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("id", "2", "field1", "ii jj cc kk ee ll gg hh")
-                .get();
+                .get().decRef();
 
         client().prepareIndex(INDEX_NAME)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("id", "3", "field2", "aa xx bb yy cc zz dd ee ff gg hh 11")
-                .get();
+                .get().decRef();
 
 
         client().prepareIndex(INDEX_NAME)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
                 .setSource("id", "4", "field2", "aa bb cc dd ee ff gg hh xx yy zz 22")
-                .get();
+                .get().decRef();
     }
 }

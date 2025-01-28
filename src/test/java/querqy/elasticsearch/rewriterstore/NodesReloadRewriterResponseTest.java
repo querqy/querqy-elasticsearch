@@ -19,7 +19,6 @@ import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 
 public class NodesReloadRewriterResponseTest {
 
@@ -56,7 +55,7 @@ public class NodesReloadRewriterResponseTest {
         final NodesReloadRewriterResponse response1 = new NodesReloadRewriterResponse(byteInput);
         assertEquals(response, response1);
 
-
+        response.decRef();
+        response1.decRef();
     }
-
 }

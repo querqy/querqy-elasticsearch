@@ -14,7 +14,7 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
-import org.elasticsearch.action.index.IndexAction;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.HandledTransportAction;
 import org.elasticsearch.action.support.WriteRequest;
@@ -22,7 +22,7 @@ import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.client.internal.IndicesAdminClient;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.cluster.service.ClusterService;
-import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.injection.guice.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.xcontent.XContentType;
@@ -46,11 +46,15 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
     private boolean mappingsVersionChecked = false;
 
     @Inject
-    public TransportPutRewriterAction(final TransportService transportService, final ActionFilters actionFilters,
-                                      final ClusterService clusterService, final Client client, final Settings settings)
+    public TransportPutRewriterAction(
+            final ActionFilters actionFilters,
+            final Client client,
+            final ClusterService clusterService,
+            final Settings settings,
+            final TransportService transportService
+    )
     {
-        super(NAME, false, transportService, actionFilters, PutRewriterRequest::new,
-                clusterService.threadPool().executor(ThreadPool.Names.MANAGEMENT));
+        super(NAME, false, transportService, actionFilters, PutRewriterRequest::new, clusterService.threadPool().executor(ThreadPool.Names.MANAGEMENT));
         this.clusterService = clusterService;
         this.client = client;
         this.settings = settings;
@@ -195,54 +199,46 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
     protected void saveRewriter(final Task task, final PutRewriterRequest request,
                                 final ActionListener<PutRewriterResponse> listener) throws IOException {
-        final ActionRequest indexRequest = buildIndexRequest(task, request);
 
-        client.execute(IndexAction.INSTANCE, indexRequest,
+        final IndexRequest indexRequest = buildIndexRequest(task, request);
 
-                new ActionListener<>() {
-                    @Override
-                    public void onResponse(final DocWriteResponse indexResponse) {
-                        LOGGER.info("Saved rewriter {}", request.getRewriterId());
-                        client.execute(NodesReloadRewriterAction.INSTANCE,
-                                new NodesReloadRewriterRequest(request.getRewriterId()),
-                                wrap(
-                                        (reloadResponse) -> listener
-                                                .onResponse(new PutRewriterResponse(indexResponse, reloadResponse)),
-                                        listener::onFailure
-                                ));
-                    }
+        client.index(indexRequest, new ActionListener<>() {
+            @Override
+            public void onResponse(final DocWriteResponse indexResponse) {
+                LOGGER.info("Saved rewriter {}", request.getRewriterId());
+                client.execute(NodesReloadRewriterAction.INSTANCE,
+                        new NodesReloadRewriterRequest(request.getRewriterId()),
+                        wrap(
+                                (reloadResponse) -> listener
+                                        .onResponse(new PutRewriterResponse(indexResponse, reloadResponse)),
+                                listener::onFailure
+                        ));
+            }
 
-                    @Override
-                    public void onFailure(final Exception e) {
-                        LOGGER.error("Could not save rewriter " + request.getRewriterId(), e);
-                        listener.onFailure(e);
-                    }
-                })
-        ;
+            @Override
+            public void onFailure(Exception e) {
+                LOGGER.error("Could not save rewriter " + request.getRewriterId(), e);
+                listener.onFailure(e);
+            }
+        });
     }
 
-    private ActionRequest buildIndexRequest(final Task parentTask, final PutRewriterRequest request) throws IOException {
+    private IndexRequest buildIndexRequest(final Task parentTask, final PutRewriterRequest request) throws IOException {
+        IndexRequest indexRequest = new IndexRequest(QUERQY_INDEX_NAME)
+                .id(request.getRewriterId())
+                .create(false)
+                .source(RewriterConfigMapping.toLuceneSource(request.getContent()), XContentType.JSON);
 
-        final ActionRequest indexRequest = client.prepareIndex(QUERQY_INDEX_NAME)
-                .setId(request.getRewriterId())
-                .setCreate(false)
-                .setSource(RewriterConfigMapping.toLuceneSource(request.getContent()))
-                .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE)
-                .request();
+        indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
         indexRequest.setParentTask(clusterService.localNode().getId(), parentTask.getId());
+
         return indexRequest;
+
     }
-
-
-
-
 
     private static String readUtf8Resource(final String name) {
         final Scanner scanner = new Scanner(TransportPutRewriterAction.class.getClassLoader().getResourceAsStream(name),
                 Charset.forName("utf-8").name()).useDelimiter("\\A");
         return scanner.hasNext() ? scanner.next() : "";
     }
-
-
-
 }

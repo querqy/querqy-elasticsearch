@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.cluster.routing.ShardRouting;
-import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.injection.guice.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.query.SearchExecutionContext;
 import org.elasticsearch.index.shard.IndexEventListener;
@@ -20,15 +20,13 @@ public class RewriterShardContexts implements IndexEventListener {
 
     private static final Logger LOGGER = LogManager.getLogger(RewriterShardContexts.class);
 
-
     private final Map<ShardId, RewriterShardContext> shardContexts;
-
     private IndicesService indicesService;
-    private Settings settings;
+    private final Settings settings;
 
     public RewriterShardContexts(final Settings settings) {
         this.settings = settings;
-        shardContexts = new ConcurrentHashMap<>();
+        this.shardContexts = new ConcurrentHashMap<>();
     }
 
     public RewriteChainAndLogging getRewriteChain(final List<String> rewriterIds,
@@ -91,5 +89,4 @@ public class RewriterShardContexts implements IndexEventListener {
     public void setIndicesService(final IndicesService indicesService) {
         this.indicesService = indicesService;
     }
-
 }

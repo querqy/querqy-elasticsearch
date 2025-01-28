@@ -16,17 +16,6 @@ public class NodesReloadRewriterRequest extends BaseNodesRequest<NodesReloadRewr
         this.rewriterId = rewriterId;
     }
 
-    public NodesReloadRewriterRequest(final StreamInput in) throws IOException {
-        super(in);
-        rewriterId = in.readString();
-    }
-
-    @Override
-    public void writeTo(final StreamOutput out) throws IOException {
-        super.writeTo(out);
-        out.writeString(rewriterId);
-    }
-
     public NodeRequest newNodeRequest() {
         return new NodeRequest(rewriterId);
     }

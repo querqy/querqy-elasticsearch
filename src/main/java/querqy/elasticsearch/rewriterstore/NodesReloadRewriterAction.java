@@ -9,7 +9,7 @@ public class NodesReloadRewriterAction extends ActionType<NodesReloadRewriterRes
 
 
     protected NodesReloadRewriterAction(final String name) {
-        super(name, NodesReloadRewriterResponse::new);
+        super(name);
     }
 
 }

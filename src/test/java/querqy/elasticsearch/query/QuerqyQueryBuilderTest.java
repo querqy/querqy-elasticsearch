@@ -24,11 +24,13 @@ import org.elasticsearch.xcontent.json.JsonXContent;
 import org.elasticsearch.index.query.SearchExecutionContext;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.AbstractQueryTestCase;
-import org.elasticsearch.test.TestGeoShapeFieldMapperPlugin;
 import org.junit.Before;
 import org.junit.Test;
 import querqy.elasticsearch.QuerqyPlugin;
 import querqy.elasticsearch.QuerqyProcessor;
+//import static querqy.elasticsearch.query.AbstractLuceneQueryTest.bq;
+//import static querqy.elasticsearch.query.AbstractLuceneQueryTest.dtq;
+
 import querqy.lucene.rewrite.DependentTermQueryBuilder;
 import querqy.lucene.rewrite.DocumentFrequencyCorrection;
 import querqy.lucene.rewrite.IndependentFieldBoost;
@@ -39,6 +41,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -57,16 +60,12 @@ public class QuerqyQueryBuilderTest extends AbstractQueryTestCase<QuerqyQueryBui
         searchExecutionContext = mock(SearchExecutionContext.class);
     }
 
-    // we need to add TestGeoShapeFieldMapperPlugin, otherwise AbstractBuilderTestCase fails complaining about missing
-    // geo_shape field type
-    @SuppressWarnings("deprecation")
     protected Collection<Class<? extends Plugin>> getPlugins() {
-        return Arrays.asList(TestGeoShapeFieldMapperPlugin.class, QuerqyPlugin.class);
+        return List.of(QuerqyPlugin.class);
     }
 
     @Override
     protected QuerqyQueryBuilder doCreateTestQueryBuilder() {
-
         QuerqyProcessor querqyProcessor = new QuerqyProcessor(null, null) {
             @Override
             public Query parseQuery(QuerqyQueryBuilder queryBuilder, final SearchExecutionContext shardContext) {

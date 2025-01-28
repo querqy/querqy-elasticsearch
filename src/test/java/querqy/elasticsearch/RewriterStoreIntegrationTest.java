@@ -47,6 +47,8 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
         final NodesInfoResponse response = client().admin().cluster().prepareNodesInfo().setPlugins(true).get();
         final List<NodeInfo> nodes = response.getNodes();
 
+        response.decRef();
+
         assertThat(nodes.size(), greaterThan(0));
 
         for (final NodeInfo nodeInfo : nodes) {

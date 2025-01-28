@@ -6,33 +6,23 @@ import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX
 
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
-import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.node.DiscoveryNodes;
-import org.elasticsearch.cluster.routing.allocation.AllocationService;
-import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
 import org.elasticsearch.common.settings.ClusterSettings;
 import org.elasticsearch.common.settings.IndexScopedSettings;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.SettingsFilter;
-import org.elasticsearch.indices.IndicesService;
-import org.elasticsearch.telemetry.TelemetryProvider;
-import org.elasticsearch.xcontent.NamedXContentRegistry;
-import org.elasticsearch.env.Environment;
-import org.elasticsearch.env.NodeEnvironment;
+import org.elasticsearch.features.NodeFeature;
+
 import org.elasticsearch.index.IndexModule;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.plugins.ActionPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.plugins.SearchPlugin;
-import org.elasticsearch.repositories.RepositoriesService;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestHandler;
-import org.elasticsearch.script.ScriptService;
-import org.elasticsearch.threadpool.ThreadPool;
-import org.elasticsearch.watcher.ResourceWatcherService;
 import querqy.elasticsearch.infologging.Log4jSink;
 import querqy.elasticsearch.query.QuerqyQueryBuilder;
 import querqy.elasticsearch.rewriterstore.DeleteRewriterAction;
@@ -50,13 +40,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
-
-
-    private final QuerqyProcessor querqyProcessor;
     private final RewriterShardContexts rewriterShardContexts;
+    private final QuerqyProcessor querqyProcessor;
 
     public QuerqyPlugin(final Settings settings) {
         rewriterShardContexts = new RewriterShardContexts(settings);
@@ -65,9 +54,7 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
 
     @Override
     public void onIndexModule(final IndexModule indexModule) {
-
         indexModule.addIndexEventListener(rewriterShardContexts);
-
     }
 
     /**
@@ -81,18 +68,21 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
                         (in) -> new QuerqyQueryBuilder(in, querqyProcessor),
                         (parser) -> QuerqyQueryBuilder.fromXContent(parser, querqyProcessor)));
     }
-
+    
     @Override
-    public List<RestHandler> getRestHandlers(final Settings settings, final RestController restController,
-                                             final ClusterSettings clusterSettings,
-                                             final IndexScopedSettings indexScopedSettings,
-                                             final SettingsFilter settingsFilter,
-                                             final IndexNameExpressionResolver indexNameExpressionResolver,
-                                             final Supplier<DiscoveryNodes> nodesInCluster) {
-
-        return Arrays.asList(new RestPutRewriterAction(), new RestDeleteRewriterAction());
-
-    }
+    public List<RestHandler> getRestHandlers(
+    	    final Settings settings,
+    	    final NamedWriteableRegistry namedWriteableRegistry, // This parameter was missing
+    	    final RestController restController,
+    	    final ClusterSettings clusterSettings,
+    	    final IndexScopedSettings indexScopedSettings,
+    	    final SettingsFilter settingsFilter,
+    	    final IndexNameExpressionResolver indexNameExpressionResolver,
+    	    final Supplier<DiscoveryNodes> nodesInCluster,
+    	    final Predicate<NodeFeature> clusterSupportsFeature  // This parameter was missing
+    	) {
+	    return Arrays.asList(new RestPutRewriterAction(), new RestDeleteRewriterAction());
+	}
 
     @Override
     public List<ActionHandler<? extends ActionRequest, ? extends ActionResponse>> getActions() {
@@ -100,28 +90,15 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
                 new ActionHandler<>(PutRewriterAction.INSTANCE, TransportPutRewriterAction.class),
                 new ActionHandler<>(NodesReloadRewriterAction.INSTANCE, TransportNodesReloadRewriterAction.class),
                 new ActionHandler<>(DeleteRewriterAction.INSTANCE, TransportDeleteRewriterAction.class),
-                new ActionHandler<>(NodesClearRewriterCacheAction.INSTANCE, TransportNodesClearRewriterCacheAction
-                        .class)
-
+                new ActionHandler<>(NodesClearRewriterCacheAction.INSTANCE, TransportNodesClearRewriterCacheAction.class)
         ));
     }
 
     @Override
-    public Collection<Object> createComponents(final Client client, final ClusterService clusterService,
-                                               final ThreadPool threadPool,
-                                               final ResourceWatcherService resourceWatcherService,
-                                               final ScriptService scriptService,
-                                               final NamedXContentRegistry xContentRegistry,
-                                               final Environment environment, final NodeEnvironment nodeEnvironment,
-                                               final NamedWriteableRegistry namedWriteableRegistry,
-                                               final IndexNameExpressionResolver indexNameExpressionResolver,
-                                               final Supplier<RepositoriesService> repositoriesServiceSupplier,
-                                               final TelemetryProvider telemetryProvider,
-                                               final AllocationService allocationService,
-                                               final IndicesService indicesService) {
+    public Collection<Object> createComponents(PluginServices services) {
         return Arrays.asList(rewriterShardContexts, querqyProcessor);
     }
-
+    
     @Override
     public List<Setting<?>> getSettings() {
         return Collections.singletonList(Setting.intSetting(SETTINGS_QUERQY_INDEX_NUM_REPLICAS, 1, 0,

@@ -44,6 +44,8 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
 
         SearchHit[] hits = response.getHits().getHits();
         Assertions.assertThat(hits[0].getScore()).isEqualTo(hits[1].getScore());
+
+        response.decRef();
     }
 
     @Test
@@ -51,7 +53,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
         String q = "smartphone 9 zoll 1000gb";
 
         SearchResponse response = req(q, "number-unit-config.json");
-        assertOrderForDocs(response, "12", "13");
+        assertOrderForDocs(response, "12", "13").decRef();
     }
 
     @Test
@@ -59,7 +61,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
         String q = "55unitUnlimited";
 
         SearchResponse response = req(q, "number-unit-config.json");
-        assertContainsAllDocsInAnyOrder(response, "5", "6", "20");
+        assertContainsAllDocsInAnyOrder(response, "5", "6", "20").decRef();
     }
 
     @Test
@@ -67,7 +69,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
         String q = "55 zoll";
 
         SearchResponse response = req(q, "number-unit-config.json");
-        assertSize(response, 4);
+        assertSize(response, 4).decRef();
     }
 
     @Test
@@ -75,7 +77,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
         String q = "tv 200 cm 2 cm";
 
         SearchResponse response = req(q, "number-unit-config.json");
-        assertOrderForDocs(response, "1", "2");
+        assertOrderForDocs(response, "1", "2").decRef();
     }
 
     @Test
@@ -83,7 +85,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
         String q = "notebook 14 zoll 1tb";
 
         SearchResponse response = req(q, "number-unit-config.json");
-        assertOrderForDocs(response, "7", "8", "6", "11", "10");
+        assertOrderForDocs(response, "7", "8", "6", "11", "10").decRef();
     }
 
     @Test
@@ -91,7 +93,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
         String q = "notebook 15 zoll";
 
         SearchResponse response = req(q, "number-unit-config.json");
-        assertOrderForDocs(response, "7", "6", "8", "9");
+        assertOrderForDocs(response, "7", "6", "8", "9").decRef();
     }
 
     @Test
@@ -99,7 +101,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
         String q = "tv 55 zoll";
 
         SearchResponse response = req(q, "number-unit-config.json");
-        assertContainsAllDocsInAnyOrder(response, "1", "2", "3");
+        assertContainsAllDocsInAnyOrder(response, "1", "2", "3").decRef();
     }
 
     @Test
@@ -107,21 +109,20 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
         String q = "tv 200 cm 2 cm";
 
         SearchResponse response = req(q, "number-unit-config.json");
-        assertContainsAllDocsInAnyOrder(response, "1", "2");
+        assertContainsAllDocsInAnyOrder(response, "1", "2").decRef();
     }
 
     @Test
     public void testFilteringForMultipleNumberUnitInputsAcrossUnits() {
         String q;
-        SearchResponse response;
 
         q = "tv 55 zoll 20 mm";
-        response = req(q, "number-unit-config.json");
-        assertContainsAllDocsInAnyOrder(response, "1", "2");
+        SearchResponse response = req(q, "number-unit-config.json");
+        assertContainsAllDocsInAnyOrder(response, "1", "2").decRef();
 
         q = "tv 35 zoll 20 mm";
         response = req(q, "number-unit-config.json");
-        assertContainsAllDocsInAnyOrder(response, "4");
+        assertContainsAllDocsInAnyOrder(response, "4").decRef();
     }
 
     @Test
@@ -129,7 +130,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
         String q = "tv 210 cm";
 
         SearchResponse response = req(q, "number-unit-config.json");
-        assertContainsAllDocsInAnyOrder(response, "1", "2");
+        assertContainsAllDocsInAnyOrder(response, "1", "2").decRef();
     }
 
     @Test
@@ -137,7 +138,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
         String q = "tv 120 cm";
 
         SearchResponse response = req(q, "number-unit-config.json");
-        assertContainsAllDocsInAnyOrder(response, "1", "2", "3", "4");
+        assertContainsAllDocsInAnyOrder(response, "1", "2", "3", "4").decRef();
     }
 
     private SearchResponse req(String q, String configName) {
@@ -154,7 +155,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
 
             final PutRewriterRequest request = new PutRewriterRequest("numberunit_rules", content);
 
-            client().execute(PutRewriterAction.INSTANCE, request).get();
+            client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
             QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
             querqyQuery.setRewriters(singletonList(new Rewriter("numberunit_rules")));
@@ -171,7 +172,6 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
             searchRequestBuilder.setQuery(querqyQuery);
 
             return client().search(searchRequestBuilder.request()).get();
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -201,7 +201,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
         );
     }
 
-    private static void assertOrderForDocs(SearchResponse actual, String... expected) {
+    private static SearchResponse assertOrderForDocs(SearchResponse actual, String... expected) {
         List<String> ids = Arrays.stream(actual.getHits().getHits())
                 .map(hit -> hit.getSourceAsMap().get("identifier"))
                 .map(Object::toString)
@@ -210,9 +210,10 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
         Assertions.assertThat(ids).hasSize(expected.length);
         Assertions.assertThat(ids).containsExactly(expected);
 
+        return actual;
     }
 
-    private static void assertContainsAllDocsInAnyOrder(SearchResponse actual, String... expected) {
+    private static SearchResponse assertContainsAllDocsInAnyOrder(SearchResponse actual, String... expected) {
         List<String> ids = Arrays.stream(actual.getHits().getHits())
                 .map(hit -> hit.getSourceAsMap().get("identifier"))
                 .map(Object::toString)
@@ -220,10 +221,13 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
 
         Assertions.assertThat(ids).hasSize(expected.length);
         Assertions.assertThat(ids).containsExactlyInAnyOrder(expected);
+
+        return actual;
     }
 
-    private static void assertSize(SearchResponse actual, int expected) {
+    private static SearchResponse assertSize(SearchResponse actual, int expected) {
         Assertions.assertThat(actual.getHits().getTotalHits().value).isEqualTo(expected);
+        return actual;
     }
 
     private String getConfigFromFileName(String fileName) throws IOException {
@@ -241,5 +245,4 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
 
         return sb.toString();
     }
-
 }

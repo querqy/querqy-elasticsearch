@@ -21,7 +21,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,8 +29,8 @@ public class QuerqyProcessor {
 
     private static final RewriteChain EMPTY_REWRITE_CHAIN = new RewriteChain(Collections.emptyList());
 
-    private RewriterShardContexts rewriterShardContexts;
-    private Sink infoLoggingSink;
+    private final RewriterShardContexts rewriterShardContexts;
+    private final Sink infoLoggingSink;
 
     public QuerqyProcessor(final RewriterShardContexts rewriterShardContexts, final Sink infoLoggingSink) {
         this.rewriterShardContexts = rewriterShardContexts;

@@ -34,7 +34,7 @@ public class ReplaceRewriterIntegrationTest extends AbstractRewriterIntegrationT
 
         final PutRewriterRequest request = new PutRewriterRequest("replace_rules", content);
 
-        client().execute(PutRewriterAction.INSTANCE, request).get();
+        client().execute(PutRewriterAction.INSTANCE, request).get().decRef();
 
         QuerqyQueryBuilder querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("replace_rules")));
@@ -47,8 +47,8 @@ public class ReplaceRewriterIntegrationTest extends AbstractRewriterIntegrationT
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         SearchHits hits = response.getHits();
-
         assertEquals(2L, hits.getTotalHits().value);
+        response.decRef();
 
         querqyQuery = new QuerqyQueryBuilder(getInstanceFromNode(QuerqyProcessor.class));
         querqyQuery.setRewriters(singletonList(new Rewriter("replace_rules")));
@@ -64,6 +64,6 @@ public class ReplaceRewriterIntegrationTest extends AbstractRewriterIntegrationT
 
         assertEquals(0L, hits.getTotalHits().value);
 
+        response.decRef();
     }
-
 }

@@ -12,11 +12,6 @@ public class NodesClearRewriterCacheRequest extends BaseNodesRequest<NodesClearR
 
     private final String rewriterId;
 
-    public NodesClearRewriterCacheRequest(final StreamInput in) throws IOException {
-        super(in);
-        rewriterId = in.readOptionalString();
-    }
-
     public NodesClearRewriterCacheRequest() {
         super((String[]) null);
         rewriterId = null;
@@ -25,12 +20,6 @@ public class NodesClearRewriterCacheRequest extends BaseNodesRequest<NodesClearR
     public NodesClearRewriterCacheRequest(final String rewriterId, final String... nodesIds) {
         super(nodesIds);
         this.rewriterId = rewriterId;
-    }
-
-    @Override
-    public void writeTo(final StreamOutput out) throws IOException {
-        super.writeTo(out);
-        out.writeOptionalString(rewriterId);
     }
 
     public Optional<String> getRewriterId() {
