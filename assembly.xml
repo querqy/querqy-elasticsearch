@@ -16,11 +16,6 @@
             <outputDirectory></outputDirectory>
             <filtered>true</filtered>
         </file>
-        <file>
-            <source>plugin-security.policy</source>
-            <outputDirectory></outputDirectory>
-            <filtered>true</filtered>
-        </file>
     </files>
     <fileSets>
         <fileSet>
