@@ -105,7 +105,7 @@ public class QuerqyProcessor {
             if (clauses.size() == 1) {
                 final BooleanClause onlyClause = clauses.get(0);
                 if (onlyClause.isScoring()) {
-                    return onlyClause.getQuery();
+                    return onlyClause.query();
                 }
             }
         }
@@ -145,13 +145,13 @@ public class QuerqyProcessor {
 
                     if (clauses.size() < 2 || clauses.size() <= minimumNumberShouldMatch ||
                             clauses.stream().allMatch(booleanClause ->
-                                    BooleanClause.Occur.MUST_NOT.equals(booleanClause.getOccur()))) {
+                                    BooleanClause.Occur.MUST_NOT.equals(booleanClause.occur()))) {
 
                         for (final BooleanClause clause : clauses) {
-                            if (clause.getOccur() == BooleanClause.Occur.MUST_NOT) {
-                                builder.add(clause.getQuery(), BooleanClause.Occur.MUST_NOT);
+                            if (clause.occur() == BooleanClause.Occur.MUST_NOT) {
+                                builder.add(clause.query(), BooleanClause.Occur.MUST_NOT);
                             } else {
-                                builder.add(clause.getQuery(), BooleanClause.Occur.FILTER);
+                                builder.add(clause.query(), BooleanClause.Occur.FILTER);
                             }
                         }
                     } else {

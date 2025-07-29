@@ -3,7 +3,7 @@
 
     <groupId>org.querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>1.8.es8184.0-SNAPSHOT</version>
+    <version>1.8.es904.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -48,18 +48,18 @@
         <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <junit.version>4.12</junit.version>
         <hamcrest.version>2.1</hamcrest.version>
-        <mockito.version>2.27.0</mockito.version>
+        <mockito-junit-jupiter.version>5.2.0</mockito-junit-jupiter.version>
         <spatial4j.version>0.8</spatial4j.version>
         <jts.version>1.19.0</jts.version>
         <json-path.version>2.9.0</json-path.version>
 
-        <querqy.lucene.version>5.7.lucene961.0</querqy.lucene.version>
+        <querqy.lucene.version>5.9.lucene1010.0</querqy.lucene.version>
 
-        <elasticsearch.version>8.18.4</elasticsearch.version>
-        <jacoco.version>0.8.12</jacoco.version>
+        <elasticsearch.version>9.0.4</elasticsearch.version>
+        <jacoco.version>0.8.13</jacoco.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
 
@@ -95,6 +95,18 @@
             <groupId>org.elasticsearch.test</groupId>
             <artifactId>framework</artifactId>
             <version>${elasticsearch.version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mockito</groupId>
+                    <artifactId>mockito-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>${mockito-junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
 

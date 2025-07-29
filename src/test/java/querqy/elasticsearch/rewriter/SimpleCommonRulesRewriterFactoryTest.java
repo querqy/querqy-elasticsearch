@@ -48,7 +48,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         SearchHits hits = response.getHits();
 
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
         assertEquals("2", hits.getHits()[0].getSourceAsMap().get("id"));
 
         response.decRef();
@@ -65,7 +65,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
         response = client().search(searchRequestBuilder.request()).get();
         hits = response.getHits();
 
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
         assertEquals("1", hits.getHits()[0].getSourceAsMap().get("id"));
 
         response.decRef();
@@ -110,7 +110,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         SearchHits hits = response.getHits();
 
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         response.decRef();
 
@@ -128,7 +128,7 @@ public class SimpleCommonRulesRewriterFactoryTest extends AbstractRewriterIntegr
         response = client().search(searchRequestBuilder.request()).get();
         hits = response.getHits();
 
-        assertEquals(1L, hits.getTotalHits().value);
+        assertEquals(1L, hits.getTotalHits().value());
 
         response.decRef();
     }

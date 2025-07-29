@@ -55,7 +55,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
@@ -91,7 +91,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
@@ -127,7 +127,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
@@ -163,7 +163,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
@@ -199,7 +199,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
@@ -235,7 +235,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
@@ -271,7 +271,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
@@ -307,7 +307,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(1L, hits.getTotalHits().value);
+        assertEquals(1L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
@@ -343,7 +343,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(1L, hits.getTotalHits().value);
+        assertEquals(1L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("1", first.getSourceAsMap().get("id"));
@@ -379,7 +379,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
@@ -415,7 +415,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
@@ -451,7 +451,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(1L, hits.getTotalHits().value);
+        assertEquals(1L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("2", first.getSourceAsMap().get("id"));
@@ -477,7 +477,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("3", first.getSourceAsMap().get("id"));
@@ -502,7 +502,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("4", first.getSourceAsMap().get("id"));
@@ -528,7 +528,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("4", first.getSourceAsMap().get("id"));
@@ -553,7 +553,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("4", first.getSourceAsMap().get("id"));
@@ -579,7 +579,7 @@ public class QueryBuildingIntegrationTest extends ESSingleNodeTestCase {
 
         SearchResponse response = client().search(searchRequestBuilder.request()).get();
         final SearchHits hits = response.getHits();
-        assertEquals(2L, hits.getTotalHits().value);
+        assertEquals(2L, hits.getTotalHits().value());
 
         final SearchHit first = hits.getAt(0);
         assertEquals("4", first.getSourceAsMap().get("id"));

@@ -22,6 +22,7 @@ import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.client.internal.IndicesAdminClient;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.cluster.service.ClusterService;
+import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.injection.guice.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.threadpool.ThreadPool;
@@ -35,10 +36,12 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class TransportPutRewriterAction extends HandledTransportAction<PutRewriterRequest, PutRewriterResponse> {
 
     private static final Logger LOGGER = LogManager.getLogger(TransportPutRewriterAction.class);
+    private static final TimeValue TIMEOUT = new TimeValue(30, TimeUnit.SECONDS);
 
     private final Client client;
     private final ClusterService clusterService;
@@ -66,7 +69,7 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
         final IndicesAdminClient indicesClient = client.admin().indices();
 
-        indicesClient.prepareGetMappings(QUERQY_INDEX_NAME).execute(new ActionListener<GetMappingsResponse>() {
+        indicesClient.prepareGetMappings(TIMEOUT, QUERQY_INDEX_NAME).execute(new ActionListener<>() {
 
             @Override
             public void onResponse(final GetMappingsResponse getMappingsResponse) {
