@@ -7,7 +7,7 @@ import org.elasticsearch.transport.TransportRequest;
 
 import java.io.IOException;
 
-public class NodesReloadRewriterRequest extends BaseNodesRequest<NodesReloadRewriterRequest> {
+public class NodesReloadRewriterRequest extends BaseNodesRequest {
 
     private final String rewriterId;
 

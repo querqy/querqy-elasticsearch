@@ -22,8 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexReaderContext;
+import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.spell.WordBreakSpellChecker;
@@ -119,8 +120,8 @@ public class WordBreakCompoundRewriterFactoryTest {
         final MorphologicalWordBreaker wordBreaker = factory.getWordBreaker();
         assertNotNull(wordBreaker);
 
-        final IndexReader indexReader = mock(IndexReader.class);
-        final IndexReaderContext topReaderContext = mock(IndexReaderContext.class);
+        final LeafReader indexReader = mock(LeafReader.class);
+        final LeafReaderContext topReaderContext = mock(LeafReaderContext.class);
 
         when(indexReader.getContext()).thenReturn(topReaderContext);
         when(topReaderContext.reader()).thenReturn(indexReader);
@@ -196,11 +197,12 @@ public class WordBreakCompoundRewriterFactoryTest {
         final MorphologicalWordBreaker wordBreaker = factory.getWordBreaker();
         assertNotNull(wordBreaker);
 
-        final IndexReader indexReader = mock(IndexReader.class);
-        final IndexReaderContext topReaderContext = mock(IndexReaderContext.class);
+        final LeafReader indexReader = mock(LeafReader.class);
+        final LeafReaderContext topReaderContext = mock(LeafReaderContext.class);
 
         when(indexReader.getContext()).thenReturn(topReaderContext);
         when(topReaderContext.reader()).thenReturn(indexReader);
+
         // This is horrible, but there seems to be no way to mock top level IndexReaderContext
         final Field field = IndexReaderContext.class.getDeclaredField("isTopLevel");
         field.setAccessible(true);
@@ -246,8 +248,8 @@ public class WordBreakCompoundRewriterFactoryTest {
         final MorphologicalWordBreaker wordBreaker = factory.getWordBreaker();
         assertNotNull(wordBreaker);
 
-        final IndexReader indexReader = mock(IndexReader.class);
-        final IndexReaderContext topReaderContext = mock(IndexReaderContext.class);
+        final LeafReader indexReader = mock(LeafReader.class);
+        final LeafReaderContext topReaderContext = mock(LeafReaderContext.class);
 
         when(indexReader.getContext()).thenReturn(topReaderContext);
         when(topReaderContext.reader()).thenReturn(indexReader);
@@ -303,14 +305,7 @@ public class WordBreakCompoundRewriterFactoryTest {
         final MorphologicalWordBreaker wordBreaker = factory.getWordBreaker();
         assertNotNull(wordBreaker);
 
-        final IndexReader indexReader = mock(IndexReader.class);
-        final IndexReaderContext topReaderContext = mock(IndexReaderContext.class);
-
-        // This is horrible, but there seems to be no way to mock top level IndexReaderContext
-        final Field field = IndexReaderContext.class.getDeclaredField("isTopLevel");
-        field.setAccessible(true);
-        field.setBoolean(topReaderContext, true);
-        field.setAccessible(false);
+        final LeafReader indexReader = mock(LeafReader.class);
 
         compounder.combine(new querqy.model.Term[] {
                 new querqy.model.Term(null, "ab"), new querqy.model.Term(null, "de")}, indexReader, false);
@@ -325,16 +320,10 @@ public class WordBreakCompoundRewriterFactoryTest {
         final WordBreakCompoundRewriterFactory factory = new WordBreakCompoundRewriterFactory("r1");
         factory.configure(Collections.singletonMap("dictionaryField", "f1"));
         final IndexShard indexShard = mock(IndexShard.class);
-        final IndexReader indexReader = mock(IndexReader.class);
-        final IndexReaderContext topReaderContext = mock(IndexReaderContext.class);
+        final LeafReader indexReader = mock(LeafReader.class);
+        final LeafReaderContext topReaderContext = mock(LeafReaderContext.class);
 
         when(topReaderContext.reader()).thenReturn(indexReader);
-
-        // This is horrible, but there seems to be no way to mock top level IndexReaderContext
-        final Field field = IndexReaderContext.class.getDeclaredField("isTopLevel");
-        field.setAccessible(true);
-        field.setBoolean(topReaderContext, true);
-        field.setAccessible(false);
 
         final SearchExecutionContext searchExecutionContext = mock(SearchExecutionContext.class);
         final IndexSearcher searcher = mock(IndexSearcher.class);

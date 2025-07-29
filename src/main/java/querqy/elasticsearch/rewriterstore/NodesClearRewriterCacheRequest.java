@@ -8,7 +8,7 @@ import org.elasticsearch.transport.TransportRequest;
 import java.io.IOException;
 import java.util.Optional;
 
-public class NodesClearRewriterCacheRequest extends BaseNodesRequest<NodesClearRewriterCacheRequest> {
+public class NodesClearRewriterCacheRequest extends BaseNodesRequest {
 
     private final String rewriterId;
 

@@ -226,7 +226,7 @@ public class NumberUnitRewriterFactoryTest extends AbstractRewriterIntegrationTe
     }
 
     private static SearchResponse assertSize(SearchResponse actual, int expected) {
-        Assertions.assertThat(actual.getHits().getTotalHits().value).isEqualTo(expected);
+        Assertions.assertThat(actual.getHits().getTotalHits().value()).isEqualTo(expected);
         return actual;
     }
 

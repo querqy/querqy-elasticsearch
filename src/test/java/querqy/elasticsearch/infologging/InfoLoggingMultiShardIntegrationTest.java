@@ -150,7 +150,7 @@ public class InfoLoggingMultiShardIntegrationTest extends ESIntegTestCase {
             final SearchRequestBuilder searchRequestBuilder = client().prepareSearch(INDEX_NAME);
             searchRequestBuilder.setQuery(querqyQuery);
             SearchResponse response = searchRequestBuilder.execute().get();
-            final boolean shouldBreak = response.getHits().getTotalHits().value == 2L;
+            final boolean shouldBreak = response.getHits().getTotalHits().value() == 2L;
             response.decRef();
             if (shouldBreak) {
                 break;
