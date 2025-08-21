@@ -6,6 +6,7 @@ import org.elasticsearch.action.admin.cluster.node.info.PluginsAndModules;
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESIntegTestCase;
 import querqy.elasticsearch.rewriterstore.PutRewriterAction;
@@ -105,7 +106,8 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
 
         client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r1", payload1)).get();
 
-        final GetSettingsResponse idxSettings = client().admin().indices().prepareGetSettings(".querqy").get();
+        final GetSettingsResponse idxSettings = client().admin().indices().prepareGetSettings(TimeValue.THIRTY_SECONDS,
+                ".querqy").get();
 
         assertNotNull(idxSettings);
         assertEquals(NUM_DOT_QUERY_REPLICAS,

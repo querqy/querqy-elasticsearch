@@ -22,7 +22,6 @@ public class PutRewriterResponse extends ActionResponse implements ToXContentObj
     }
 
     public PutRewriterResponse(final StreamInput in) throws IOException {
-        super(in);
         indexResponse = new IndexResponse(in);
         reloadResponse = new NodesReloadRewriterResponse(in);
     }

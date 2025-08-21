@@ -246,7 +246,7 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
 
     @Override
     public TransportVersion getMinimalSupportedVersion() {
-        return TransportVersions.V_7_13_0; // We added infoLogging at 7 12 1
+        return TransportVersions.V_8_0_0; // We added infoLogging at 7 12 1, 8.0.0 is the next version up
     }
 
     public void setQuerqyProcessor(final QuerqyProcessor querqyProcessor) {

@@ -4,8 +4,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX_NUM_REPLICAS;
 
-import org.elasticsearch.action.ActionRequest;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.node.DiscoveryNodes;
 import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
@@ -85,13 +83,11 @@ public class QuerqyPlugin extends Plugin implements SearchPlugin, ActionPlugin {
 	}
 
     @Override
-    public List<ActionHandler<? extends ActionRequest, ? extends ActionResponse>> getActions() {
-        return unmodifiableList(asList(
-                new ActionHandler<>(PutRewriterAction.INSTANCE, TransportPutRewriterAction.class),
-                new ActionHandler<>(NodesReloadRewriterAction.INSTANCE, TransportNodesReloadRewriterAction.class),
-                new ActionHandler<>(DeleteRewriterAction.INSTANCE, TransportDeleteRewriterAction.class),
-                new ActionHandler<>(NodesClearRewriterCacheAction.INSTANCE, TransportNodesClearRewriterCacheAction.class)
-        ));
+    public List<ActionHandler> getActions() {
+        return List.of(new ActionHandler(PutRewriterAction.INSTANCE, TransportPutRewriterAction.class),
+                new ActionHandler(NodesReloadRewriterAction.INSTANCE, TransportNodesReloadRewriterAction.class),
+                new ActionHandler(DeleteRewriterAction.INSTANCE, TransportDeleteRewriterAction.class),
+                new ActionHandler(NodesClearRewriterCacheAction.INSTANCE, TransportNodesClearRewriterCacheAction.class));
     }
 
     @Override

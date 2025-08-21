@@ -17,7 +17,6 @@ public class DeleteRewriterResponse extends ActionResponse implements ToXContent
 
 
     public DeleteRewriterResponse(final StreamInput in) throws IOException {
-        super(in);
         deleteResponse = new DeleteResponse(in);
         clearRewriterCacheResponse = new NodesClearRewriterCacheResponse(in);
     }
