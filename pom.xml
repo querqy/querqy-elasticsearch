@@ -52,9 +52,8 @@
         <junit.version>4.12</junit.version>
         <hamcrest.version>2.1</hamcrest.version>
         <mockito-junit-jupiter.version>5.2.0</mockito-junit-jupiter.version>
-        <json-path.version>2.10.0</json-path.version>
 
-        <querqy.lucene.version>5.9.lucene1021.0</querqy.lucene.version>
+        <querqy.lucene.version>5.9.lucene1032.0</querqy.lucene.version>
 
         <elasticsearch.version>9.2.4</elasticsearch.version>
         <jacoco.version>0.8.14</jacoco.version>
@@ -68,18 +67,6 @@
             <groupId>org.querqy</groupId>
             <artifactId>querqy-lucene</artifactId>
             <version>${querqy.lucene.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.jayway.jsonpath</groupId>
-                    <artifactId>json-path</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>com.jayway.jsonpath</groupId>
-            <artifactId>json-path</artifactId>
-            <version>${json-path.version}</version>
         </dependency>
 
         <dependency>
