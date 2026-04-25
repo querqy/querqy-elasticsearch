@@ -1,6 +1,6 @@
 ![Querqy for ES Build](https://github.com/querqy/querqy-elasticsearch/actions/workflows/maven.yml/badge.svg) [ ![Download](https://img.shields.io/maven-central/v/org.querqy/querqy-elasticsearch.svg?label=Querqy%20for%20Elasticsearch) ](https://search.maven.org/search?q=g:%22org.querqy%22%20AND%20a:%22querqy-elasticsearch%22)
 
-Developer channel: Join #querqy-dev on the [E-commerce search Slack space](https://ecom-search.slack.com)
+Developer channel: Join #querqy on the [Search Relevancy Slack space](https://opensourceconnections.com/slack)
 
 
 # Querqy for Elasticsearch
