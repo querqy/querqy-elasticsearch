@@ -1,10 +1,7 @@
 package querqy.elasticsearch;
 
-import org.elasticsearch.SpecialPermission;
 import querqy.trie.TrieMap;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -44,31 +41,29 @@ public interface ConfigUtils {
         return result;
     }
 
-    static <V> V getInstanceFromArg(final Map<String, Object> config, final String name, final V defaultValue) {
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            sm.checkPermission(new SpecialPermission());
+    static <V> V getInstanceFromArg(final Map<String, Object> config, final String name, final V defaultValue,
+                                    final Class<V> expectedType) {
+
+
+        final String classField = (String) config.get(name);
+        if (classField == null) {
+            return defaultValue;
         }
 
+        final String className = classField.trim();
+        if (className.isEmpty()) {
+            return defaultValue;
+        }
 
-        return AccessController.doPrivileged(
-            (PrivilegedAction<V>) () -> {
-                final String classField = (String) config.get(name);
-                if (classField == null) {
-                    return defaultValue;
-                }
-
-                final String className = classField.trim();
-                if (className.isEmpty()) {
-                    return defaultValue;
-                }
-
-                try {
-                    return (V) Class.forName(className).getDeclaredConstructor().newInstance();
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        try {
+            Class<V> clazz = (Class<V>) Class.forName(className);
+            if (!expectedType.isAssignableFrom(clazz)) {
+                throw new IllegalArgumentException(className + " not compatible with " + expectedType.getName());
+            }
+            return clazz.getDeclaredConstructor().newInstance();
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
