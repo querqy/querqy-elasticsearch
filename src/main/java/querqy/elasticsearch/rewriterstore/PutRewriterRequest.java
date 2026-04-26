@@ -1,6 +1,5 @@
 package querqy.elasticsearch.rewriterstore;
 
-import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionRequestValidationException;
 import org.elasticsearch.action.ValidateActions;
@@ -9,8 +8,6 @@ import org.elasticsearch.common.io.stream.StreamOutput;
 import querqy.elasticsearch.ESRewriterFactory;
 
 import java.io.IOException;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -68,28 +65,15 @@ public class PutRewriterRequest extends ActionRequest {
         }
 
 
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            sm.checkPermission(new SpecialPermission());
+        final Map<String, Object> config;
+        final List<String> errors;
+        try {
+            config =(Map<String, Object>) content.getOrDefault("config", Collections.emptyMap());
+            errors = esRewriterFactory.validateConfiguration(config);
+        } catch (final Exception e) {
+            return ValidateActions.addValidationError("Invalid rewriter configuration: " + e.getMessage(),
+                    null);
         }
-
-
-        final List<String> errors =  AccessController.doPrivileged(
-                (PrivilegedAction<List<String> >) () -> {
-
-                    try {
-                        final Map<String, Object> config = (Map<String, Object>) content.getOrDefault("config",
-                                Collections.emptyMap());
-                        return esRewriterFactory.validateConfiguration(config);
-
-                    } catch (final Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-
-
-
-
 
         if (errors != null && !errors.isEmpty()) {
             final ActionRequestValidationException arve = new ActionRequestValidationException();
