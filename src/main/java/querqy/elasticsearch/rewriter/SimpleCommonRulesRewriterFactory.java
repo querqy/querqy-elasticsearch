@@ -45,7 +45,7 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
         final boolean allowBooleanInput = ConfigUtils.getArg(config, CONF_ALLOW_BOOLEAN_INPUT, false);
 
         final QuerqyParserFactory querqyParser = ConfigUtils
-                .getInstanceFromArg(config, CONF_RHS_QUERY_PARSER, DEFAULT_RHS_QUERY_PARSER);
+                .getInstanceFromArg(config, CONF_RHS_QUERY_PARSER, DEFAULT_RHS_QUERY_PARSER, QuerqyParserFactory.class);
 
         final String rules = ConfigUtils.getStringArg(config, CONF_RULES, "");
 
@@ -77,7 +77,8 @@ public class SimpleCommonRulesRewriterFactory extends ESRewriterFactory {
         final QuerqyParserFactory querqyParser;
         try {
             querqyParser = ConfigUtils
-                    .getInstanceFromArg(config, "querqyParser", DEFAULT_RHS_QUERY_PARSER);
+                    .getInstanceFromArg(config, "querqyParser", DEFAULT_RHS_QUERY_PARSER,
+                            QuerqyParserFactory.class);
         } catch (final Exception e) {
             return Collections.singletonList("Invalid attribute 'querqyParser': " + e.getMessage());
         }

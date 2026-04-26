@@ -3,7 +3,6 @@ package querqy.elasticsearch;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
-import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.index.query.SearchExecutionContext;
 import querqy.elasticsearch.infologging.LogPayloadType;
 import querqy.elasticsearch.infologging.SingleSinkInfoLogging;
@@ -17,8 +16,6 @@ import querqy.lucene.rewrite.infologging.InfoLogging;
 import querqy.lucene.rewrite.infologging.Sink;
 import querqy.rewrite.RewriteChain;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -77,21 +74,7 @@ public class QuerqyProcessor {
 
         final QueryParsingController controller = new QueryParsingController(requestAdapter);
 
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            sm.checkPermission(new SpecialPermission());
-        }
-
-        final LuceneQueries queries = AccessController.doPrivileged(
-                (PrivilegedAction<LuceneQueries>) () -> {
-
-                    try {
-                        return controller.process();
-                    } catch (final Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-
+        final LuceneQueries queries = controller.process();
 
 //        // TODO: make decos part of the general Querqy object model
 //        final Set<Object> decorations = (Set<Object>) requestAdapter.getContext().get(DecorateInstruction.CONTEXT_KEY);
@@ -103,7 +86,7 @@ public class QuerqyProcessor {
             // TODO: we should do this when building the query
             final List<BooleanClause> clauses = ((BooleanQuery) queries.mainQuery).clauses();
             if (clauses.size() == 1) {
-                final BooleanClause onlyClause = clauses.get(0);
+                final BooleanClause onlyClause = clauses.getFirst();
                 if (onlyClause.isScoring()) {
                     return onlyClause.query();
                 }
@@ -136,9 +119,7 @@ public class QuerqyProcessor {
 
             for (final Query query : queries.filterQueries) {
 
-                if (query instanceof BooleanQuery) {
-
-                    final BooleanQuery bq = (BooleanQuery) query;
+                if (query instanceof final BooleanQuery bq) {
 
                     final List<BooleanClause> clauses = bq.clauses();
                     final int minimumNumberShouldMatch = bq.getMinimumNumberShouldMatch();
