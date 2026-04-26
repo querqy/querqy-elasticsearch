@@ -40,7 +40,7 @@ public class ReplaceRewriterFactory extends ESRewriterFactory {
         final String inputDelimiter = ConfigUtils.getArg(config, "inputDelimiter", DEFAULT_INPUT_DELIMITER);
 
         final QuerqyParserFactory querqyParser = ConfigUtils.getInstanceFromArg(
-                config, "querqyParser", DEFAULT_RHS_QUERY_PARSER);
+                config, "querqyParser", DEFAULT_RHS_QUERY_PARSER, QuerqyParserFactory.class);
 
         try {
             delegate = new querqy.rewrite.contrib.ReplaceRewriterFactory(rewriterId, rulesReader, ignoreCase,
@@ -68,7 +68,8 @@ public class ReplaceRewriterFactory extends ESRewriterFactory {
 
         final QuerqyParserFactory querqyParser;
         try {
-            querqyParser = ConfigUtils.getInstanceFromArg(config, "querqyParser", DEFAULT_RHS_QUERY_PARSER);
+            querqyParser = ConfigUtils.getInstanceFromArg(config, "querqyParser", DEFAULT_RHS_QUERY_PARSER,
+                    QuerqyParserFactory.class);
         } catch (final Exception e) {
             return Collections.singletonList("Invalid attribute 'querqyParser': " + e.getMessage());
         }

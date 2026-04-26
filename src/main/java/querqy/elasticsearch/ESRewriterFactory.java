@@ -1,15 +1,13 @@
 package querqy.elasticsearch;
 
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.index.shard.IndexShard;
 import querqy.elasticsearch.rewriterstore.LoadRewriterConfig;
 import querqy.rewrite.RewriterFactory;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class ESRewriterFactory {
 
@@ -43,68 +41,69 @@ public abstract class ESRewriterFactory {
                     .getConfigMapping().getRewriterClassNameProperty());
         }
 
-        final Map<String, Object> config = instanceDescription.getConfig();
+        final ESRewriterFactory factory = builder().rewriterId(instanceDescription.getRewriterId())
+                .className(className).loadFactory();
 
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            sm.checkPermission(new SpecialPermission());
-        }
+        factory.configure(instanceDescription.getConfig());
+        return factory;
 
-        return AccessController.doPrivileged(
-                (PrivilegedAction<ESRewriterFactory>) () -> {
-
-                    final ESRewriterFactory factory;
-
-                    try {
-                        factory = (ESRewriterFactory) Class.forName(className).getDeclaredConstructor(String.class)
-                                .newInstance(instanceDescription.getRewriterId());
-
-                    } catch (final Exception e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    factory.configure(config);
-                    return factory;
-
-                });
 
     }
-
 
     public static ESRewriterFactory loadInstance(final String rewriterId, final Map<String, Object> instanceDesc,
                                                  final String argName) {
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            sm.checkPermission(new SpecialPermission());
+
+        final String classField = (String) instanceDesc.get(argName);
+        if (classField == null) {
+            throw new IllegalArgumentException("Property not found: " + argName);
         }
 
+        final String className = classField.trim();
+        if (className.isEmpty()) {
+            throw new IllegalArgumentException("Class name expected in property: " + argName);
+        }
 
-        return AccessController.doPrivileged(
-                (PrivilegedAction<ESRewriterFactory>) () -> {
-                    final String classField = (String) instanceDesc.get(argName);
-                    if (classField == null) {
-                        throw new IllegalArgumentException("Property not found: " + argName);
-                    }
-
-                    final String className = classField.trim();
-                    if (className.isEmpty()) {
-                        throw new IllegalArgumentException("Class name expected in property: " + argName);
-                    }
-
-
-                    try {
-                        return (ESRewriterFactory) Class.forName(className)
-                                .getDeclaredConstructor(String.class).newInstance(rewriterId);
-                    } catch (final Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-
-
-
-
+        return builder()
+                .rewriterId(rewriterId)
+                .className(className)
+                .loadFactory();
 
     }
 
+    public static ESRewriterFactoryBuilder builder() {
+        return new ESRewriterFactoryBuilder();
+    }
+
+    public static class ESRewriterFactoryBuilder {
+        private String rewriterId;
+        private String className;
+
+        private ESRewriterFactoryBuilder() {}
+
+        public ESRewriterFactoryBuilder rewriterId(final String rewriterId) {
+            this.rewriterId = rewriterId;
+            return this;
+        }
+
+        public ESRewriterFactoryBuilder className(final String className) {
+            this.className = className;
+            return this;
+        }
+
+        public ESRewriterFactory loadFactory() {
+            Objects.requireNonNull(rewriterId);
+            Objects.requireNonNull(className);
+            try {
+                Class<?> rewriterClass = Class.forName(className);
+                if (!ESRewriterFactory.class.isAssignableFrom(rewriterClass)) {
+                    throw new IllegalArgumentException("Class must implement " + ESRewriterFactory.class.getName());
+                }
+                return (ESRewriterFactory) rewriterClass.getDeclaredConstructor(String.class).newInstance(rewriterId);
+            } catch (final Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
 
 }
