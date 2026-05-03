@@ -1,6 +1,7 @@
 package querqy.elasticsearch;
 
 import static org.elasticsearch.test.ESIntegTestCase.Scope.SUITE;
+import static querqy.elasticsearch.rewriterstore.Constants.QUERQY_INDEX_NAME;
 import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX_NUM_REPLICAS;
 
 import org.elasticsearch.ResourceNotFoundException;
@@ -97,7 +98,7 @@ public class RewriterShardContextsTest extends ESIntegTestCase {
         response2.decRef();
 
         // delete rewriter config from .query index - this should never be done directly (use a delete rewriter action)
-        final DeleteResponse deleteResponse = client().prepareDelete(".querqy", "r2").execute().get();
+        final DeleteResponse deleteResponse = client().prepareDelete(QUERQY_INDEX_NAME, "r2").execute().get();
         assertEquals(DocWriteResponse.Result.DELETED, deleteResponse.getResult());
 
         deleteResponse.decRef();
@@ -133,7 +134,6 @@ public class RewriterShardContextsTest extends ESIntegTestCase {
             final Throwable cause1 = e.getCause();
             assertTrue(cause1 instanceof SearchPhaseExecutionException);
             final Throwable cause2 = cause1.getCause();
-            cause2.printStackTrace();
             assertTrue(cause2 instanceof ResourceNotFoundException);
             assertEquals("Rewriter not found: r2", cause2.getMessage());
         }
