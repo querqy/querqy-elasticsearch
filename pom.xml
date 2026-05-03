@@ -3,7 +3,7 @@
 
     <groupId>org.querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>1.9.es924.0-SNAPSHOT</version>
+    <version>1.9.es933.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -55,7 +55,7 @@
 
         <querqy.lucene.version>5.9.lucene1032.0</querqy.lucene.version>
 
-        <elasticsearch.version>9.2.4</elasticsearch.version>
+        <elasticsearch.version>9.3.3</elasticsearch.version>
         <jacoco.version>0.8.14</jacoco.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>

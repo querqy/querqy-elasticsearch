@@ -4,11 +4,20 @@ import static org.elasticsearch.action.ActionListener.wrap;
 import static querqy.elasticsearch.rewriterstore.Constants.DEFAULT_QUERQY_INDEX_NUM_REPLICAS;
 import static querqy.elasticsearch.rewriterstore.Constants.QUERQY_INDEX_NAME;
 import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX_NUM_REPLICAS;
-import static querqy.elasticsearch.rewriterstore.PutRewriterAction.*;
+import static querqy.elasticsearch.rewriterstore.PutRewriterAction.NAME;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.action.*;
+
+import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -18,6 +27,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.HandledTransportAction;
 import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.client.internal.IndicesAdminClient;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
@@ -30,13 +40,6 @@ import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.tasks.Task;
 import org.elasticsearch.transport.TransportService;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 public class TransportPutRewriterAction extends HandledTransportAction<PutRewriterRequest, PutRewriterResponse> {
 
@@ -55,8 +58,7 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
             final ClusterService clusterService,
             final Settings settings,
             final TransportService transportService
-    )
-    {
+    ) {
         super(NAME, false, transportService, actionFilters, PutRewriterRequest::new, clusterService.threadPool().executor(ThreadPool.Names.MANAGEMENT));
         this.clusterService = clusterService;
         this.client = client;
@@ -82,28 +84,44 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
                             .getSourceAsMap().get("properties");
                     if (!properties.containsKey("info_logging")) {
                         try {
-                            update1To3(indicesClient);
-                            mappingsVersionChecked = true;
+                            update1To3(indicesClient, () -> {
+                                try {
+                                    saveRewriter(task, request, listener);
+                                } catch (final Exception e) {
+                                    listener.onFailure(e);
+                                }
+                            }, listener);
+
                         } catch (final Exception e) {
                             listener.onFailure(e);
-                            return;
                         }
 
                     } else if (!properties.containsKey(RewriterConfigMapping.CURRENT.getConfigStringProperty())) {
                         try {
-                            update2To3(indicesClient);
-                            mappingsVersionChecked = true;
+                            update2To3(indicesClient, () -> {
+                                try {
+                                    saveRewriter(task, request, listener);
+                                } catch (final Exception e) {
+                                    listener.onFailure(e);
+                                }
+                            }, listener);
                         } catch (final Exception e) {
                             listener.onFailure(e);
-                            return;
                         }
 
+                    } else {
+                        try {
+                            saveRewriter(task, request, listener);
+                        } catch (final IOException e) {
+                            listener.onFailure(e);
+                        }
                     }
-                }
-                try {
-                    saveRewriter(task, request, listener);
-                } catch (final IOException e) {
-                    listener.onFailure(e);
+                } else {
+                    try {
+                        saveRewriter(task, request, listener);
+                    } catch (final IOException e) {
+                        listener.onFailure(e);
+                    }
                 }
 
             }
@@ -113,7 +131,7 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
                 if ((e instanceof IndexNotFoundException) || (e.getCause() instanceof IndexNotFoundException)) {
 
                     indicesClient.create(buildCreateQuerqyIndexRequest(indicesClient),
-                            new ActionListener<CreateIndexResponse>() {
+                            new ActionListener<>() {
 
                                 @Override
                                 public void onResponse(final CreateIndexResponse createIndexResponse) {
@@ -140,54 +158,84 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
     }
 
-    protected void update1To3(final IndicesAdminClient indicesClient ) throws ExecutionException,
+    protected void update1To3(final IndicesAdminClient indicesClient, final Runnable next,
+                              final ActionListener<PutRewriterResponse> listener) throws ExecutionException,
             InterruptedException {
         final PutMappingRequest request = new PutMappingRequest(QUERQY_INDEX_NAME).source(
-                "{\n" +
-                        "    \"properties\": {\n" +
-                        "      \"info_logging\": {\n" +
-                        "        \"properties\": {\n" +
-                        "          \"sinks\": {\"type\" : \"keyword\" }\n" +
-                        "        }\n" +
-                        "      },\n" +
-                        "      \"config_v_003\": {\n" +
-                        "        \"type\" : \"keyword\",\n" +
-                        "        \"doc_values\": false,\n" +
-                        "        \"index\": false\n" +
-                        "      }" +
-                        "    }\n" +
-                        "}", XContentType.JSON
+                """
+                        {
+                            "properties": {
+                              "info_logging": {
+                                "properties": {
+                                  "sinks": {"type" : "keyword" }
+                                }
+                              },
+                              "config_v_003": {
+                                "type" : "keyword",
+                                "doc_values": false,
+                                "index": false
+                              }
+                            }
+                        }""", XContentType.JSON
         );
 
-        if (!indicesClient.putMapping(request).get().isAcknowledged()) {
-            throw new IllegalStateException("Adding info_logging to mappings not " +
-                    "acknowledged");
-        }
+        indicesClient.putMapping(request, new ActionListener<>() {
+            @Override
+            public void onResponse(final AcknowledgedResponse acknowledgedResponse) {
+                if (!acknowledgedResponse.isAcknowledged()) {
+                    LOGGER.info("Mapping update for info_logging property and config_v_003 to index {} not " +
+                            "(fully) acknowledged", QUERQY_INDEX_NAME);
+                    listener.onFailure(new IllegalStateException("Adding info_logging to mappings not acknowledged"));
+                } else {
+                    LOGGER.info("Added info_logging property and config_v_003 to index {}", QUERQY_INDEX_NAME);
+                    mappingsVersionChecked = true;
+                    next.run();
+                }
+            }
 
-        LOGGER.info("Added info_logging property and config_v_003 to index {}", QUERQY_INDEX_NAME);
+            @Override
+            public void onFailure(final Exception e) {
+                listener.onFailure(e);
+            }
+        });
 
     }
 
-    protected void update2To3(final IndicesAdminClient indicesClient ) throws ExecutionException,
+    protected void update2To3(final IndicesAdminClient indicesClient, final Runnable next,
+                              final ActionListener<PutRewriterResponse> listener) throws ExecutionException,
             InterruptedException {
         final PutMappingRequest request = new PutMappingRequest(QUERQY_INDEX_NAME).source(
-                "{\n" +
-                        "    \"properties\": {\n" +
-                        "      \"config_v_003\": {\n" +
-                        "        \"type\" : \"keyword\",\n" +
-                        "        \"doc_values\": false,\n" +
-                        "        \"index\": false\n" +
-                        "      }" +
-                        "    }\n" +
-                        "}", XContentType.JSON
+                """
+                        {
+                            "properties": {
+                              "config_v_003": {
+                                "type" : "keyword",
+                                "doc_values": false,
+                                "index": false
+                              }
+                            }
+                        }""", XContentType.JSON
         );
 
-        if (!indicesClient.putMapping(request).get().isAcknowledged()) {
-            throw new IllegalStateException("Adding config_v_003 to mappings not " +
-                    "acknowledged");
-        }
+        indicesClient.putMapping(request, new ActionListener<>() {
+            @Override
+            public void onResponse(final AcknowledgedResponse acknowledgedResponse) {
+                if (!acknowledgedResponse.isAcknowledged()) {
 
-        LOGGER.info("Added config_v_003 property to index {}", QUERQY_INDEX_NAME);
+                    LOGGER.info("Adding config_v_003 to mappings not (fully) acknowledged");
+                    listener.onFailure(new IllegalStateException("Adding info_logging to mappings not acknowledged"));
+                } else {
+                    LOGGER.info("Added config_v_003 property to index {}", QUERQY_INDEX_NAME);
+                    mappingsVersionChecked = true;
+                    next.run();
+                }
+            }
+
+            @Override
+            public void onFailure(final Exception e) {
+                listener.onFailure(e);
+            }
+        });
 
     }
 
