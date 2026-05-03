@@ -31,7 +31,7 @@ import org.elasticsearch.tasks.Task;
 import org.elasticsearch.transport.TransportService;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
@@ -108,32 +108,39 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
             @Override
             public void onFailure(final Exception e) {
                 if ((e instanceof IndexNotFoundException) || (e.getCause() instanceof IndexNotFoundException)) {
-
-                    indicesClient.create(buildCreateQuerqyIndexRequest(indicesClient),
-                            new ActionListener<CreateIndexResponse>() {
-
-                                @Override
-                                public void onResponse(final CreateIndexResponse createIndexResponse) {
-                                    LOGGER.info("Created index {}", QUERQY_INDEX_NAME);
-                                    mappingsVersionChecked = true;
-                                    try {
-                                        saveRewriter(task, request, listener);
-                                    } catch (final IOException e) {
-                                        listener.onFailure(e);
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(final Exception e) {
-                                    listener.onFailure(e);
-                                }
-                            });
-
+                    createIndex(task, request, listener, indicesClient);
                 } else {
                     listener.onFailure(e);
                 }
             }
         });
+
+    }
+
+    private void createIndex(final Task task, final PutRewriterRequest request,
+                             final ActionListener<PutRewriterResponse> listener, final IndicesAdminClient indicesClient) {
+
+        indicesClient.create(buildCreateQuerqyIndexRequest(indicesClient),
+
+                new ActionListener<>() {
+                    @Override
+                    public void onResponse(final CreateIndexResponse createIndexResponse) {
+                        LOGGER.info("Created index {}", QUERQY_INDEX_NAME);
+                        mappingsVersionChecked = true;
+
+                        try {
+                            saveRewriter(task, request, listener);
+                        } catch (final IOException e) {
+                            listener.onFailure(e);
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(final Exception e) {
+                        listener.onFailure(e);
+                    }
+                });
 
     }
 
@@ -189,10 +196,9 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
     }
 
     protected CreateIndexRequest buildCreateQuerqyIndexRequest(final IndicesAdminClient indicesClient) {
-
         final CreateIndexRequestBuilder createIndexRequestBuilder = indicesClient.prepareCreate(QUERQY_INDEX_NAME);
         final int numReplicas = settings.getAsInt(SETTINGS_QUERQY_INDEX_NUM_REPLICAS, DEFAULT_QUERQY_INDEX_NUM_REPLICAS);
-        return  createIndexRequestBuilder.setMapping(readUtf8Resource("querqy-mapping.json"))
+        return createIndexRequestBuilder.setMapping(readUtf8Resource("querqy-mapping.json"))
                 .setSettings(Settings.builder().put("number_of_replicas", numReplicas))
                 .request();
     }
@@ -238,7 +244,7 @@ public class TransportPutRewriterAction extends HandledTransportAction<PutRewrit
 
     private static String readUtf8Resource(final String name) {
         final Scanner scanner = new Scanner(TransportPutRewriterAction.class.getClassLoader().getResourceAsStream(name),
-                Charset.forName("utf-8").name()).useDelimiter("\\A");
+                StandardCharsets.UTF_8).useDelimiter("\\A");
         return scanner.hasNext() ? scanner.next() : "";
     }
 }
