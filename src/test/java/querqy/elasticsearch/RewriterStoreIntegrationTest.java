@@ -83,17 +83,17 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
         payload2.put("config", config2);
 
         client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r2", payload2)).actionGet();
-//
-//        final Map<String, Object> payload3 = new HashMap<>();
-//        payload3.put("class", DummyESRewriterFactory.class.getName());
-//        final Map<String, Object> config3 = new HashMap<>();
-//        final Map<String, Object> p1 = new HashMap<>();
-//        p1.put("p1", "c3p1");
-//
-//        config3.put("p1", p1); // p1 as object
-//        payload3.put("config", config3);
-//
-//        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r3", payload3)).actionGet();
+
+        final Map<String, Object> payload3 = new HashMap<>();
+        payload3.put("class", DummyESRewriterFactory.class.getName());
+        final Map<String, Object> config3 = new HashMap<>();
+        final Map<String, Object> p1 = new HashMap<>();
+        p1.put("p1", "c3p1");
+
+        config3.put("p1", p1); // p1 as object
+        payload3.put("config", config3);
+
+        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r3", payload3)).actionGet();
 
     }
 
