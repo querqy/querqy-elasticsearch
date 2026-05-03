@@ -63,7 +63,7 @@ public class QuerqyMappingsUpdate1To3IntegrationTest extends ESSingleNodeTestCas
                 .setMapping(v1Mapping)
                 .setSettings(Settings.builder().put("number_of_replicas", 2))
                 .request();
-        indicesClient.create(createIndexRequest).get();
+        indicesClient.create(createIndexRequest).actionGet();
 
         final Map<String, Object> content = new HashMap<>();
         content.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
@@ -74,11 +74,13 @@ public class QuerqyMappingsUpdate1To3IntegrationTest extends ESSingleNodeTestCas
         config.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
         content.put("config", config);
 
-        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("common_rules", content)).get();
+        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("common_rules", content))
+                .actionGet();
 
         final GetMappingsRequest getMappingsRequest = new GetMappingsRequest(new TimeValue(10, TimeUnit.SECONDS))
                 .indices(".querqy");
-        final Map<String, MappingMetadata> mappings = indicesClient.getMappings(getMappingsRequest).get().getMappings();
+        final Map<String, MappingMetadata> mappings = indicesClient.getMappings(getMappingsRequest).actionGet()
+                .getMappings();
         final Map<String, Object> properties = (Map<String, Object>) mappings.get(QUERQY_INDEX_NAME)
                 .getSourceAsMap().get("properties");
         assertNotNull(properties);

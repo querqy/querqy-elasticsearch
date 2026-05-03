@@ -6,7 +6,6 @@ import static querqy.elasticsearch.query.RequestUtils.paramToQueryFieldsAndBoost
 
 import org.apache.lucene.search.Query;
 import org.elasticsearch.TransportVersion;
-import org.elasticsearch.TransportVersions;
 import org.elasticsearch.xcontent.ParseField;
 import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.io.stream.StreamInput;
@@ -246,7 +245,9 @@ public class QuerqyQueryBuilder extends AbstractQueryBuilder<QuerqyQueryBuilder>
 
     @Override
     public TransportVersion getMinimalSupportedVersion() {
-        return TransportVersions.V_8_0_0; // We added infoLogging at 7 12 1, 8.0.0 is the next version up
+        // We added infoLogging at 7 12 1, 8.0.0 is the next version up
+        // minimumCompatible found in ES 9.3.3 is 8.0.x .
+        return TransportVersion.minimumCompatible();
     }
 
     public void setQuerqyProcessor(final QuerqyProcessor querqyProcessor) {

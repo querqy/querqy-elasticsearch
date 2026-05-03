@@ -21,6 +21,7 @@ import java.util.Random;
 
 import static org.elasticsearch.test.ESIntegTestCase.Scope.SUITE;
 import static org.hamcrest.Matchers.greaterThan;
+import static querqy.elasticsearch.rewriterstore.Constants.QUERQY_INDEX_NAME;
 import static querqy.elasticsearch.rewriterstore.Constants.SETTINGS_QUERQY_INDEX_NUM_REPLICAS;
 
 @ESIntegTestCase.ClusterScope(scope = SUITE, numClientNodes = 1, minNumDataNodes = 4, maxNumDataNodes = 6,
@@ -64,7 +65,7 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
     }
 
 
-    public void testThatRewriterConfigCanUseDifferentTypeForSamePropertyName() throws Exception {
+    public void testThatRewriterConfigCanUseDifferentTypeForSamePropertyName() {
 
         final Map<String, Object> payload1 = new HashMap<>();
         payload1.put("class", DummyESRewriterFactory.class.getName());
@@ -72,7 +73,7 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
         config1.put("p1", 1L); // p1 as long
         payload1.put("config", config1);
 
-        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r1", payload1)).get();
+        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r1", payload1)).actionGet();
 
 
         final Map<String, Object> payload2 = new HashMap<>();
@@ -81,8 +82,7 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
         config2.put("p1", false); // p1 as boolean
         payload2.put("config", config2);
 
-        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r2", payload2)).get();
-
+        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r2", payload2)).actionGet();
 
         final Map<String, Object> payload3 = new HashMap<>();
         payload3.put("class", DummyESRewriterFactory.class.getName());
@@ -93,27 +93,27 @@ public class RewriterStoreIntegrationTest extends ESIntegTestCase {
         config3.put("p1", p1); // p1 as object
         payload3.put("config", config3);
 
-        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r3", payload3)).get();
+        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r3", payload3)).actionGet();
 
     }
 
-    public void testThatReplicaSettingForDotQuerqyIndexIsApplied() throws Exception {
+    public void testThatReplicaSettingForDotQuerqyIndexIsApplied() {
         final Map<String, Object> payload1 = new HashMap<>();
         payload1.put("class", DummyESRewriterFactory.class.getName());
         final Map<String, Object> config1 = new HashMap<>();
         config1.put("p1", 1L);
         payload1.put("config", config1);
 
-        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r1", payload1)).get();
+        client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("r1", payload1)).actionGet();
 
-        final GetSettingsResponse idxSettings = client().admin().indices().prepareGetSettings(TimeValue.THIRTY_SECONDS,
-                ".querqy").get();
-
+        final GetSettingsResponse idxSettings = client().admin().indices()
+                .prepareGetSettings(TimeValue.timeValueSeconds(10L), QUERQY_INDEX_NAME).execute().actionGet();
         assertNotNull(idxSettings);
-        assertEquals(NUM_DOT_QUERY_REPLICAS,
-                Integer.parseInt(idxSettings.getIndexToSettings().get(".querqy").get("index.number_of_replicas")));
-    }
+        assertEquals(NUM_DOT_QUERY_REPLICAS, Integer.parseInt(idxSettings.getIndexToSettings().get(QUERQY_INDEX_NAME)
+                                        .get("index.number_of_replicas")));
 
+
+    }
 
     public void index() {
         final String indexName = "idx";
