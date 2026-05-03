@@ -1,4 +1,4 @@
-package querqy.elasticsearch;
+package querqy.elasticsearch.rewriterstore;
 
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static querqy.elasticsearch.rewriterstore.Constants.QUERQY_INDEX_NAME;
@@ -14,8 +14,7 @@ import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESSingleNodeTestCase;
 import org.junit.After;
 import org.junit.Test;
-import querqy.elasticsearch.rewriterstore.PutRewriterAction;
-import querqy.elasticsearch.rewriterstore.PutRewriterRequest;
+import querqy.elasticsearch.QuerqyPlugin;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,7 +32,7 @@ public class QuerqyMappingsUpdate1To3IntegrationTest extends ESSingleNodeTestCas
     @After
     public void deleteRewriterIndex() {
         try {
-            client().admin().indices().prepareDelete(".querqy").get();
+            client().admin().indices().prepareDelete(QUERQY_INDEX_NAME).get();
         } catch (final IndexNotFoundException e) {
             // Ignore
         }
@@ -42,17 +41,18 @@ public class QuerqyMappingsUpdate1To3IntegrationTest extends ESSingleNodeTestCas
     @Test
     public void testUpdate1To3() throws Exception {
 
-        final String v1Mapping = "{\n" +
-                "    \"properties\": {\n" +
-                "      \"class\": {\"type\": \"keyword\"},\n" +
-                "      \"type\": {\"type\": \"keyword\"},\n" +
-                "      \"config\": {\n" +
-                "        \"type\" : \"keyword\",\n" +
-                "        \"index\": false\n" +
-                "      }\n" +
-                "\n" +
-                "    }\n" +
-                "}";
+        final String v1Mapping = """
+                {
+                    "properties": {
+                      "class": {"type": "keyword"},
+                      "type": {"type": "keyword"},
+                      "config": {
+                        "type" : "keyword",
+                        "index": false
+                      }
+                
+                    }
+                }""";
 
         final IndicesAdminClient indicesClient = client().admin().indices();
 
@@ -74,7 +74,7 @@ public class QuerqyMappingsUpdate1To3IntegrationTest extends ESSingleNodeTestCas
 
         client().execute(PutRewriterAction.INSTANCE, new PutRewriterRequest("common_rules", content)).get();
 
-        final GetMappingsRequest getMappingsRequest = new GetMappingsRequest().indices(".querqy");
+        final GetMappingsRequest getMappingsRequest = new GetMappingsRequest().indices(QUERQY_INDEX_NAME);
         final Map<String, MappingMetadata> mappings = indicesClient.getMappings(getMappingsRequest).get().getMappings();
         final Map<String, Object> properties = (Map<String, Object>) mappings.get(QUERQY_INDEX_NAME)
                 .getSourceAsMap().get("properties");

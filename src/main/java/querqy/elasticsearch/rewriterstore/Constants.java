@@ -3,7 +3,7 @@ package querqy.elasticsearch.rewriterstore;
 public interface Constants {
 
     // TODO: configurable?
-    String QUERQY_INDEX_NAME = ".querqy";
+    String QUERQY_INDEX_NAME = "querqy_store";
 
     String SETTINGS_QUERQY_INDEX_NUM_REPLICAS = "querqy.store.replicas";
 
