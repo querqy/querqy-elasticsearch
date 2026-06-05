@@ -2,6 +2,8 @@
 
 Developer channel: Join #querqy on the [Search Relevancy Slack space](https://opensourceconnections.com/slack)
 
+:warning: **IMPORTANT: Starting from Querqy for Elasticsearch 9.3.3 the name of the index in which Querqy stores rewriter configurations has changed** from `.querqy` to `querqy_store`. This should usually only matter to you if you are installing Elasticsearch and Querqy over older versions. You will either have to send all rewriter configurations to Elasticsearch/Querqy again or alternatively copy or clone the `.querqy` index before updating your Elasticsearch (see `src/main/resources/querqy-mapping.json` for the index mapping; make sure you have one or more replicas defined).
+
 
 # Querqy for Elasticsearch
 
