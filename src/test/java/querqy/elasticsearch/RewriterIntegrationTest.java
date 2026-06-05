@@ -29,6 +29,8 @@ import querqy.elasticsearch.rewriterstore.PutRewriterAction;
 import querqy.elasticsearch.rewriterstore.PutRewriterRequest;
 import querqy.elasticsearch.rewriterstore.PutRewriterResponse;
 
+import static querqy.elasticsearch.rewriterstore.Constants.QUERQY_INDEX_NAME;
+
 public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
     private final String INDEX_NAME = "test_index";
@@ -71,7 +73,9 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         content.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
 
         final Map<String, Object> config = new HashMap<>();
-        config.put("rules", "a =>\nFILTER: * {\"term\":{\"field2\":\"c\" }}");
+        config.put("rules", """
+                a =>
+                FILTER: * {"term":{"field2":"c" }}""");
         config.put("ignoreCase", true);
         config.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
         content.put("config", config);
@@ -178,7 +182,9 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
         content.put("class", querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory.class.getName());
 
         final Map<String, Object> config = new HashMap<>();
-        config.put("rules", "k =>\nSYNONYM: c");
+        config.put("rules", """
+                k =>
+                SYNONYM: c""");
         config.put("ignoreCase", true);
         config.put("querqyParser", querqy.rewrite.commonrules.WhiteSpaceQuerqyParserFactory.class.getName());
         content.put("config", config);
@@ -222,7 +228,8 @@ public class RewriterIntegrationTest extends ESSingleNodeTestCase {
 
     @After
     public void deleteRewriterIndex() {
-        client().admin().indices().prepareDelete(".querqy").get().decRef();
+        client().admin().indices().prepareDelete(QUERQY_INDEX_NAME).get()
+                .decRef();
     }
 
     @Before

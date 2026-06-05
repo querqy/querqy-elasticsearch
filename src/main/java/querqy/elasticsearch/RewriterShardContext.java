@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import static querqy.elasticsearch.rewriterstore.Constants.QUERQY_INDEX_NAME;
+
 public class RewriterShardContext {
 
 
@@ -100,7 +102,7 @@ public class RewriterShardContext {
             final GetResponse response;
 
             try {
-                response = client.prepareGet(".querqy", rewriterId).execute().get();
+                response = client.prepareGet(QUERQY_INDEX_NAME, rewriterId).execute().get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new ElasticsearchException("Could not load rewriter " + rewriterId, e);
             }
