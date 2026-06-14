@@ -1,0 +1,5 @@
+querqy.elasticsearch.rewriter.SimpleCommonRulesRewriterFactory
+querqy.elasticsearch.rewriter.RegexReplaceRewriterFactory
+querqy.elasticsearch.rewriter.ReplaceRewriterFactory
+querqy.elasticsearch.rewriter.NumberUnitRewriterFactory
+querqy.elasticsearch.rewriter.WordBreakCompoundRewriterFactory
