@@ -2,13 +2,53 @@ package querqy.elasticsearch;
 
 import querqy.trie.TrieMap;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public interface ConfigUtils {
 
+    Map<Class<?>, Set<String>> ALLOWED_INSTANCES_CACHE = new ConcurrentHashMap<>();
+
+    static <V> Set<String> loadAllowedInstances(final Class<V> type) {
+        return ALLOWED_INSTANCES_CACHE.computeIfAbsent(type, typeClass -> {
+            final String spiFile = "META-INF/services/" + typeClass.getName();
+            final ClassLoader cl = ConfigUtils.class.getClassLoader();
+            final Set<String> allowed = new HashSet<>();
+            try {
+                final Enumeration<URL> resources = cl.getResources(spiFile);
+                while (resources.hasMoreElements()) {
+                    try (BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(resources.nextElement().openStream(), StandardCharsets.UTF_8))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            final int commentIdx = line.indexOf('#');
+                            if (commentIdx >= 0) {
+                                line = line.substring(0, commentIdx);
+                            }
+                            line = line.trim();
+                            if (!line.isEmpty()) {
+                                Class.forName(line, false, cl).asSubclass(typeClass);
+                                allowed.add(line);
+                            }
+                        }
+                    }
+                }
+            } catch (final Exception e) {
+                throw new RuntimeException("Failed to load service providers for " + typeClass.getName(), e);
+            }
+            return Collections.unmodifiableSet(allowed);
+        });
+    }
 
     static String getStringArg(final Map<String, Object> config, final String name, final String defaultValue) {
         final String value = (String) config.get(name);
@@ -41,9 +81,9 @@ public interface ConfigUtils {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     static <V> V getInstanceFromArg(final Map<String, Object> config, final String name, final V defaultValue,
-                                    final Class<V> expectedType) {
-
+                                    final Class<V> allowedType) {
 
         final String classField = (String) config.get(name);
         if (classField == null) {
@@ -55,12 +95,14 @@ public interface ConfigUtils {
             return defaultValue;
         }
 
+        if (!loadAllowedInstances(allowedType).contains(className)) {
+            throw new IllegalArgumentException(
+                    "Class is not a registered " + allowedType.getSimpleName() +
+                    " service provider: " + className);
+        }
+
         try {
-            Class<V> clazz = (Class<V>) Class.forName(className);
-            if (!expectedType.isAssignableFrom(clazz)) {
-                throw new IllegalArgumentException(className + " not compatible with " + expectedType.getName());
-            }
-            return clazz.getDeclaredConstructor().newInstance();
+            return (V) Class.forName(className).getDeclaredConstructor().newInstance();
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }

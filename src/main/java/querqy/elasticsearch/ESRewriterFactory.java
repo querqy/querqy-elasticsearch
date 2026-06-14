@@ -5,11 +5,57 @@ import org.elasticsearch.index.shard.IndexShard;
 import querqy.elasticsearch.rewriterstore.LoadRewriterConfig;
 import querqy.rewrite.RewriterFactory;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public abstract class ESRewriterFactory {
+
+    private static final Set<String> ALLOWED_CLASSES = loadAllowedClasses();
+
+    private static Set<String> loadAllowedClasses() {
+        final String spiFile = "META-INF/services/" + ESRewriterFactory.class.getName();
+        final ClassLoader cl = ESRewriterFactory.class.getClassLoader();
+        final Set<String> allowed = new HashSet<>();
+        try {
+            final Enumeration<URL> resources = cl.getResources(spiFile);
+            while (resources.hasMoreElements()) {
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(resources.nextElement().openStream(), StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        final int commentIdx = line.indexOf('#');
+                        if (commentIdx >= 0) {
+                            line = line.substring(0, commentIdx);
+                        }
+                        line = line.trim();
+                        if (!line.isEmpty()) {
+                            Class.forName(line, false, cl).asSubclass(ESRewriterFactory.class);
+                            allowed.add(line);
+                        }
+                    }
+                }
+            }
+        } catch (final Exception e) {
+            throw new RuntimeException("Failed to load ESRewriterFactory service providers", e);
+        }
+        return Collections.unmodifiableSet(allowed);
+    }
+
+    private static void checkClassAllowed(final String className) {
+        if (!ALLOWED_CLASSES.contains(className)) {
+            throw new IllegalArgumentException(
+                    "Class is not a registered ESRewriterFactory service provider: " + className);
+        }
+    }
 
     protected final String rewriterId;
 
@@ -41,6 +87,8 @@ public abstract class ESRewriterFactory {
                     .getConfigMapping().getRewriterClassNameProperty());
         }
 
+        checkClassAllowed(className);
+
         final ESRewriterFactory factory = builder().rewriterId(instanceDescription.getRewriterId())
                 .className(className).loadFactory();
 
@@ -62,6 +110,8 @@ public abstract class ESRewriterFactory {
         if (className.isEmpty()) {
             throw new IllegalArgumentException("Class name expected in property: " + argName);
         }
+
+        checkClassAllowed(className);
 
         return builder()
                 .rewriterId(rewriterId)
