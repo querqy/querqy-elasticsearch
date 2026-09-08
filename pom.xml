@@ -20,7 +20,7 @@
 
     <groupId>org.querqy</groupId>
     <artifactId>querqy-elasticsearch</artifactId>
-    <version>1.8.es8184.0-SNAPSHOT</version>
+    <version>1.8.es81921.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <prerequisites>
@@ -74,9 +74,10 @@
         <jts.version>1.19.0</jts.version>
         <json-path.version>2.9.0</json-path.version>
 
-        <querqy.lucene.version>5.7.lucene961.0</querqy.lucene.version>
+        <querqy.lucene.version>5.9.lucene980.0</querqy.lucene.version>
+        <querqy.core.version>4.0.0</querqy.core.version>
 
-        <elasticsearch.version>8.18.4</elasticsearch.version>
+        <elasticsearch.version>8.19.21</elasticsearch.version>
         <jacoco.version>0.8.12</jacoco.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -94,6 +95,20 @@
                     <artifactId>json-path</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <!--
+            RegexReplaceRewriterFactory needs a newer querqy-core than the one pulled in
+            transitively via querqy-lucene ${querqy.lucene.version}. 4.0.0 is the newest
+            querqy-core release that still has querqy.rewrite.replace.RegexReplaceRewriterFactory
+            at this package (it moved to querqy.rewriter.regexreplace in 4.1.0) and still has
+            querqy.rewrite.commonrules.model.PositionSequence (removed in 4.1.0), which
+            querqy-lucene's WordBreakCompoundRewriter depends on.
+        -->
+        <dependency>
+            <groupId>org.querqy</groupId>
+            <artifactId>querqy-core</artifactId>
+            <version>${querqy.core.version}</version>
         </dependency>
 
         <dependency>
