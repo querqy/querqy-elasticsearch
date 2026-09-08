@@ -66,7 +66,7 @@ public class RegexReplaceRewriterIntegrationTest extends AbstractRewriterIntegra
         final SearchResponse response = client().search(searchRequestBuilder.request()).get();
         SearchHits hits = response.getHits();
 
-        assertEquals(1L, hits.getTotalHits().value());
+        assertEquals(1L, hits.getTotalHits().value);
         assertEquals("1", hits.getAt(0).getSourceAsMap().get("id"));
         response.decRef();
 
